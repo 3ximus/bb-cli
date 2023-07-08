@@ -5,7 +5,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// authCmd represents the auth command
 var AuthCmd = &cobra.Command{
 	Use:   "auth",
 	Short: "Authentication settings and configuration",
@@ -17,6 +16,7 @@ var AuthCmd = &cobra.Command{
 
 func init() {
 	AuthCmd.AddCommand(tokenCmd)
+	AuthCmd.AddCommand(StatusCmd)
 
 	// Here you will define your flags and configuration settings.
 
