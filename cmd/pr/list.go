@@ -16,9 +16,9 @@ var ListCmd = &cobra.Command{
 		prs := api.GetPr(viper.GetString("repository"), []string{"OPEN"})
 		prsdata := make([][]string, len(prs))
 		for i, pr := range prs {
-			prsdata[i] = []string{fmt.Sprint(pr.ID), pr.Title, pr.State, fmt.Sprint(pr.CommentCount)}
+			prsdata[i] = []string{fmt.Sprint(pr.ID), pr.Title, pr.Source.Branch.Name + " → " + pr.Destination.Branch.Name, pr.State, pr.Author.DisplayName, fmt.Sprint(pr.CommentCount), fmt.Sprint(pr.UpdatedOn)}
 		}
-		util.Table([]string{"ID", "Title", "State", "CommentCount"}, prsdata)
+		util.Table([]string{"ID", "Title", "Branch", "State", "Author", "Comments", "UpdatedOn"}, prsdata)
 	},
 }
 

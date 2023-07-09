@@ -13,6 +13,7 @@ func Table(header []string, data [][]string) {
 	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
 	table.SetCenterSeparator("")
 	table.SetColumnSeparator("")
+	table.SetColWidth(40)
 	table.SetRowSeparator("\033[1;30m─\033[m")
 	// table.SetNoWhiteSpace(true)
 	// table.SetTablePadding("\t")
