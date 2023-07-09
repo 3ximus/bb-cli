@@ -12,14 +12,14 @@ import (
 	"time"
 )
 
-func get(content string, spinner *spinner.Spinner) []byte {
+func get(endpoint string, spinner *spinner.Spinner) []byte {
 	token := viper.GetString("token")
 	username := viper.GetString("username")
 	api_endpoint := viper.GetString("api")
+	url := fmt.Sprintf("%s/%s", api_endpoint, endpoint)
 
 	client := &http.Client{}
 
-	url := fmt.Sprintf("%s/%s", api_endpoint, content)
 	req, err := http.NewRequest("GET", url, nil)
 	cobra.CheckErr(err)
 	req.SetBasicAuth(username, token)
@@ -41,7 +41,7 @@ func get(content string, spinner *spinner.Spinner) []byte {
 }
 
 // api get request wrapper with a loading spinner
-func api_get(content string) []byte {
+func api_get(endpoint string) []byte {
 	s := spinner.New(
 		spinner.CharSets[14],
 		100*time.Millisecond,
@@ -50,7 +50,7 @@ func api_get(content string) []byte {
 		spinner.WithColor("fgHiBlue"),
 	)
 	s.Start()
-	response := get("user", s)
+	response := get(endpoint, s)
 	s.Stop()
 	return response
 }
@@ -66,5 +66,19 @@ func GetUser() User {
 	return user
 }
 
-func GetPr() {
+func GetPr(repository string, state []string) []PullRequest {
+	response := api_get("repositories/" + repository + "/pullrequests")
+
+	type PRResponse struct {
+		Values []PullRequest
+	}
+
+	// fmt.Println(string(response))
+
+	// decode response
+	var prs PRResponse
+	err := json.Unmarshal(response, &prs)
+	cobra.CheckErr(err)
+
+	return prs.Values
 }

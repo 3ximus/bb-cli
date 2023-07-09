@@ -7,8 +7,8 @@ import (
 var PrCmd = &cobra.Command{
 	Use:   "pr",
 	Short: "Manage pull requests",
-	Run: func(cmd *cobra.Command, args []string) {
-	},
+	// Run: func(cmd *cobra.Command, args []string) {
+	// },
 }
 
 func init() {

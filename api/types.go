@@ -10,3 +10,12 @@ type User struct {
 		}
 	}
 }
+
+type PullRequest struct {
+	ID           int `json:"id"`
+	Title        string `json:"title"`
+	Description  string `json:"description"`
+	State        string `json:"state"`
+	CommentCount int `json:"comment_count"`
+	TaskCount    int `json:"task_count"`
+}

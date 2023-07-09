@@ -1,7 +1,10 @@
 package pr
 
 import (
+	"bb/api"
+	"bb/util"
 	"fmt"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -10,7 +13,12 @@ var ListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List pull requests from a repository",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("X%sX", viper.GetString("repository"))
+		prs := api.GetPr(viper.GetString("repository"), []string{"OPEN"})
+		prsdata := make([][]string, len(prs))
+		for i, pr := range prs {
+			prsdata[i] = []string{fmt.Sprint(pr.ID), pr.Title, pr.State, fmt.Sprint(pr.CommentCount)}
+		}
+		util.Table([]string{"ID", "Title", "State", "CommentCount"}, prsdata)
 	},
 }
 
