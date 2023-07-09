@@ -1,17 +1,13 @@
 package pr
 
 import (
-	"fmt"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var PrCmd = &cobra.Command{
 	Use:   "pr",
 	Short: "Manage pull requests",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(viper.GetString("repo"))
-
 	},
 }
 

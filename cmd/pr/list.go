@@ -3,13 +3,14 @@ package pr
 import (
 	"fmt"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var ListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List pull requests from a repository",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("list called")
+		fmt.Printf("X%sX", viper.GetString("repository"))
 	},
 }
 

@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/briandowns/spinner v1.23.0
+	github.com/ldez/go-git-cmd-wrapper/v2 v2.6.0
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.16.0
