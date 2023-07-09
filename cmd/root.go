@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bb/cmd/auth"
+	"bb/cmd/pr"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
@@ -29,8 +30,15 @@ func init() {
 
 	// globally set config path
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.config/bb.yaml)")
+	// globally set the repository to use
+	rootCmd.PersistentFlags().StringP("repo", "r", "", "selected repository")
+	viper.BindPFlag("repo", rootCmd.Flags().Lookup("repo"))
+
+	viper.SetDefault("repo", "test")
+	viper.SetDefault("api", "https://api.bitbucket.org/2.0")
 
 	rootCmd.AddCommand(auth.AuthCmd)
+	rootCmd.AddCommand(pr.PrCmd)
 }
 
 func initConfig() {
@@ -48,8 +56,6 @@ func initConfig() {
 		viper.SetConfigName("bb")
 	}
 	viper.AutomaticEnv() // read in environment variables that match
-
-	viper.SetDefault("api", "https://api.bitbucket.org/2.0")
 
 	// If a config file is found, read it in.
 	err := viper.ReadInConfig()

@@ -17,16 +17,20 @@ jobs:
       uses: actions/setup-go@v3
       with:
         go-version: 1.19
-    - name: Build
-      run: go build -ldflags="-s -w"
-      artifacts: bb
-    # - name: Test
-    #   run: go test -v ./...
+    - name: Test
+      run: go test -v ./...
       
   release:
     runs-on: ubuntu-latest
     needs: [build]
     steps:
+    - uses: actions/checkout@v3
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.19
+    - name: Build
+      run: go build -ldflags="-s -w"
     - name: GitHub Upload Release Artifacts
       uses: Roang-zero1/github-upload-release-artifacts-action@v3.0.0
       with:

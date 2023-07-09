@@ -2,8 +2,7 @@ package auth
 
 import (
 	"bb/api"
-	"github.com/fatih/color"
-	"github.com/rodaine/table"
+	"bb/util"
 	"github.com/spf13/cobra"
 )
 
@@ -14,14 +13,9 @@ var StatusCmd = &cobra.Command{
 
 		user := api.GetUser()
 
-		headerFmt := color.New(color.FgHiBlue, color.Underline).SprintfFunc()
-		columnFmt := color.New(color.FgHiGreen).SprintfFunc()
-		tbl := table.New("ID", "Name", "Username")
-		tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
-		tbl.WithPadding(3)
-		tbl.AddRow(user.AccountId, user.DisplayName, user.Username)
-		tbl.Print()
-
+		util.Table([]string{"ID", "Username", "Name", "Link"}, [][]string{
+			{user.AccountId, user.Username, user.DisplayName, user.Links.Html.Href},
+		})
 	},
 }
 

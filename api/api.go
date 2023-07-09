@@ -55,25 +55,16 @@ func api_get(content string) []byte {
 	return response
 }
 
-type User struct {
-	DisplayName string `json:"display_name"`
-	Username    string `json:"username"`
-	AccountId   string `json:"account_id"`
-	// Foo  struct {
-	//     Bar string `json:"bar"`
-	//     Baz string `json:"baz"`
-	// } `json:"foo"`
-	//  FooBar  string `json:"foo.bar"`
-}
-
 func GetUser() User {
 	response := api_get("user")
 
 	// decode response
 	var user User
-
 	err := json.Unmarshal(response, &user)
 	cobra.CheckErr(err)
 
 	return user
+}
+
+func GetPr() {
 }
