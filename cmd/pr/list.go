@@ -61,16 +61,16 @@ var ListCmd = &cobra.Command{
 }
 
 func init() {
-	ListCmd.Flags().StringP("author", "a", "", "Filter by author nick name")
-	ListCmd.Flags().StringP("search", "S", "", "Search pull request with query")
-	ListCmd.Flags().VarP(&state, "state", "s", `Filter by state. Default: "open"
-Possible options: "open", "merged", "declined" or "superseded"`)
+	ListCmd.Flags().StringP("author", "a", "", "filter by author nick name")
+	ListCmd.Flags().StringP("search", "S", "", "search pull request with query")
+	ListCmd.Flags().VarP(&state, "state", "s", `filter by state. Default: "open"
+	possible options: "open", "merged", "declined" or "superseded"`)
 	ListCmd.RegisterFlagCompletionFunc("state", stateCompletion)
-	ListCmd.Flags().IntP("pages", "p", 1, "Number of pages with results to retrieve")
+	ListCmd.Flags().IntP("pages", "p", 1, "number of pages with results to retrieve")
 
 	// TODO
-	ListCmd.Flags().String("destination", "", "Filter by destination branch. \033[31mNot implemented\033[m")
-	ListCmd.Flags().String("source", "", "Filter by source branch. \033[31mNot implemented\033[m")
+	ListCmd.Flags().String("destination", "", "filter by destination branch. \033[31mNot implemented\033[m")
+	ListCmd.Flags().String("source", "", "filter by source branch. \033[31mNot implemented\033[m")
 }
 
 func formatState(state string) string {

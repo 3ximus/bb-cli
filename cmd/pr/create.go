@@ -2,8 +2,11 @@ package pr
 
 import (
 	"bb/api"
+	"github.com/ldez/go-git-cmd-wrapper/v2/branch"
+	"github.com/ldez/go-git-cmd-wrapper/v2/git"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"strings"
 )
 
 var CreateCmd = &cobra.Command{
@@ -21,9 +24,15 @@ var CreateCmd = &cobra.Command{
 }
 
 func init() {
-	CreateCmd.Flags().StringP("title", "t", "", "Title for the pull request")
-	CreateCmd.Flags().StringP("body", "b", "", "Description for the pull request")
-	CreateCmd.Flags().StringP("source", "s", "", "Source branch: Defaults to current branch")
-	CreateCmd.Flags().StringP("destination", "d", "dev", "Description for the pull request: Defaults to dev")
-	CreateCmd.Flags().BoolP("close-source", "c", true, "Close source branch")
+	CreateCmd.Flags().StringP("title", "t", "", "title for the pull request")
+	CreateCmd.Flags().StringP("body", "b", "", "description for the pull request")
+	CreateCmd.Flags().StringP("source", "s", getCurrentBranch(), "source branch. Defaults to current branch")
+	CreateCmd.Flags().StringP("destination", "d", "dev", "description for the pull request: Defaults to dev")
+	CreateCmd.Flags().BoolP("close-source", "c", true, "close source branch")
+}
+
+func getCurrentBranch() string {
+	branch, err := git.Branch(branch.ShowCurrent)
+	cobra.CheckErr(err)
+	return strings.Trim(branch, "\n")
 }
