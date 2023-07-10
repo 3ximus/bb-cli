@@ -6,6 +6,7 @@ type User struct {
 	DisplayName string `json:"display_name"`
 	Username    string `json:"username"`
 	AccountId   string `json:"account_id"`
+	Nickname    string `json:"nickname"`
 	Links       struct {
 		Html struct {
 			Href string
@@ -28,7 +29,7 @@ type PullRequest struct {
 			Name string `json:"name"`
 		}
 	}
-	Source  struct {
+	Source struct {
 		Branch struct {
 			Name string `json:"name"`
 		}

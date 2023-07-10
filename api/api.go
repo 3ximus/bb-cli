@@ -69,17 +69,21 @@ func GetUser() User {
 	return user
 }
 
-func GetPr(repository string, state []string, author []string) []PullRequest {
-	query := ""
-	for i, s := range state {
-		if i == 0 {
-			query += fmt.Sprintf("state = \"%s\"", s)
-		} else {
-			query += fmt.Sprintf(" OR state = \"%s\"", s)
-		}
+func GetPr(repository string, state string, author string, search string) []PullRequest {
+	stateQuery := ""
+	if state != "" {
+		stateQuery = fmt.Sprintf("state = \"%s\"", state)
 	}
-	fmt.Println(query)
-	response := api_get("repositories/" + repository + "/pullrequests?q=" + url.QueryEscape(query))
+	authorQuery := ""
+	if author != "" {
+		authorQuery = fmt.Sprintf(" AND author.nickname = \"%s\"", author)
+	}
+	searchQuery := ""
+	if search != "" {
+		searchQuery = fmt.Sprintf(" AND title ~ \"%s\"", search)
+	}
+	fmt.Println(stateQuery + authorQuery + searchQuery)
+	response := api_get(fmt.Sprintf("repositories/%s/pullrequests?q=%s", repository, url.QueryEscape(stateQuery+authorQuery+searchQuery)))
 
 	type PRResponse struct {
 		Values []PullRequest
