@@ -50,10 +50,9 @@ var ListCmd = &cobra.Command{
 		author, _ := cmd.Flags().GetString("author")
 		search, _ := cmd.Flags().GetString("search")
 		pages, _ := cmd.Flags().GetInt("pages")
-		prs := api.GetPr(viper.GetString("repo"), strings.ToUpper(state.String()), author, search, pages)
+		prs := api.GetPrList(viper.GetString("repo"), strings.ToUpper(state.String()), author, search, pages)
 
 		fmt.Printf("\n  Pull Requests for \033[1;36m%s\033[m\n\n", viper.GetString("repo"))
-		os.Stdout.WriteString("\n")
 		for _, pr := range prs {
 			// if we didn't provide filter don't show the pr status
 			fmt.Printf("%s \033[1;32m#%d\033[m %s  \033[1;34m[ %s → %s]\033[m\n", formatState(pr.State), pr.ID, pr.Title, pr.Source.Branch.Name, pr.Destination.Branch.Name)
@@ -70,6 +69,10 @@ func init() {
 Possible options: "open", "merged", "declined" or "superseded"`)
 	ListCmd.RegisterFlagCompletionFunc("state", stateCompletion)
 	ListCmd.Flags().IntP("pages", "p", 1, "Number of pages with results to retrieve")
+
+	// TODO
+	ListCmd.Flags().String("destination", "", "Filter by destination branch. \033[31mNot implemented\033[m")
+	ListCmd.Flags().String("source", "", "Filter by source branch. \033[31mNot implemented\033[m")
 }
 
 func formatState(state string) string {
