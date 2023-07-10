@@ -9,9 +9,6 @@ var AuthCmd = &cobra.Command{
 	Use:   "auth",
 	Short: "Authentication settings and configuration",
 	Long: `This command can be used to setup your authentication with bitbucket.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("auth called")
-	},
 }
 
 func init() {

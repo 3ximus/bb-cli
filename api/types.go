@@ -24,6 +24,7 @@ type PullRequest struct {
 	CreatedOn    time.Time `json:"created_on"`
 	UpdatedOn    time.Time `json:"updated_on"`
 	Author       User      `json:"author"`
+	ClosedBy     User      `json:"closed_by"`
 	Destination  struct {
 		Branch struct {
 			Name string `json:"name"`
