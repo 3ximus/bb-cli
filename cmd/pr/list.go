@@ -4,11 +4,9 @@ import (
 	"bb/api"
 	"errors"
 	"fmt"
-	"os"
-	"strings"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"strings"
 )
 
 type Status string
@@ -58,7 +56,7 @@ var ListCmd = &cobra.Command{
 			fmt.Printf("%s \033[1;32m#%d\033[m %s  \033[1;34m[ %s → %s]\033[m\n", formatState(pr.State), pr.ID, pr.Title, pr.Source.Branch.Name, pr.Destination.Branch.Name)
 			fmt.Printf("%s\033[33m%s\033[m  \033[37mComments: %d\033[m\n", strings.Repeat(" ", len(formatState(pr.State))-4), pr.Author.Nickname, pr.CommentCount)
 		}
-		os.Stdout.WriteString("\n")
+		fmt.Println()
 	},
 }
 

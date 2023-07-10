@@ -3,16 +3,15 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/briandowns/spinner"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
 	"strings"
 	"time"
-
-	"github.com/briandowns/spinner"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 type PaginatedResponse[T any] struct {
