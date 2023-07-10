@@ -3,29 +3,34 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/briandowns/spinner"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 	"time"
+
+	"github.com/briandowns/spinner"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
+type PaginatedResponse[T any] struct {
+	Values   []T
+	Size     int    `json:"size"`
+	Page     int    `json:"page"`
+	PageLen  int    `json:"pagelen"`
+	Next     string `json:"next"`
+	Previous string `json:"previous"`
+}
+
 func get(endpoint string, spinner *spinner.Spinner) []byte {
-	token := viper.GetString("token")
-	username := viper.GetString("username")
-	api_endpoint := viper.GetString("api")
-	url := fmt.Sprintf("%s/%s", api_endpoint, endpoint)
-
 	client := &http.Client{}
-
+	url := fmt.Sprintf("%s/%s", viper.GetString("api"), endpoint)
 	fmt.Println(url)
-
 	req, err := http.NewRequest("GET", url, nil)
 	cobra.CheckErr(err)
-	req.SetBasicAuth(username, token)
+	req.SetBasicAuth(viper.GetString("username"), viper.GetString("token"))
 
 	resp, err := client.Do(req)
 	cobra.CheckErr(err)
@@ -69,7 +74,7 @@ func GetUser() User {
 	return user
 }
 
-func GetPr(repository string, state string, author string, search string) []PullRequest {
+func GetPr(repository string, state string, author string, search string, pages int) []PullRequest {
 	stateQuery := ""
 	if state != "" {
 		stateQuery = fmt.Sprintf("state = \"%s\"", state)
@@ -82,19 +87,39 @@ func GetPr(repository string, state string, author string, search string) []Pull
 	if search != "" {
 		searchQuery = fmt.Sprintf(" AND title ~ \"%s\"", search)
 	}
-	fmt.Println(stateQuery + authorQuery + searchQuery)
-	response := api_get(fmt.Sprintf("repositories/%s/pullrequests?q=%s", repository, url.QueryEscape(stateQuery+authorQuery+searchQuery)))
 
-	type PRResponse struct {
-		Values []PullRequest
+	var prs []PullRequest
+	var prevResponse PaginatedResponse[PullRequest]
+	for i := 0; i < pages; i++ {
+		var response []byte
+		// fmt.Printf("%v\n", prevResponse)
+		if i == 0 {
+			response = api_get(fmt.Sprintf("repositories/%s/pullrequests?q=%s", repository, url.QueryEscape(stateQuery+authorQuery+searchQuery+"")))
+		} else {
+			newUrl := strings.Replace(prevResponse.Next, "https://api.bitbucket.org/2.0/", "", 1)
+			if newUrl == "" {
+				break // there's no next page
+			}
+			response = api_get(newUrl)
+		}
+		err := json.Unmarshal(response, &prevResponse)
+		cobra.CheckErr(err)
+		prs = append(prs, prevResponse.Values...)
 	}
 
-	// fmt.Println(string(response))
+	// response := api_get(fmt.Sprintf("repositories/%s/pullrequests?q=%s", repository, url.QueryEscape(stateQuery+authorQuery+searchQuery+"")))
 
-	// decode response
-	var prs PRResponse
-	err := json.Unmarshal(response, &prs)
-	cobra.CheckErr(err)
+	// // decode response
+	// var prs PaginatedResponse[PullRequest]
+	// err := json.Unmarshal(response, &prs)
+	// cobra.CheckErr(err)
+	//
+	// response2 := api_get(strings.Replace(prs.Next, "https://api.bitbucket.org/2.0/", "", 1))
+	//
+	// // decode response
+	// var prs2 PaginatedResponse[PullRequest]
+	// err = json.Unmarshal(response2, &prs2)
+	// cobra.CheckErr(err)
 
-	return prs.Values
+	return prs
 }
