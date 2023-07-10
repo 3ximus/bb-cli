@@ -2,7 +2,7 @@ package auth
 
 import (
 	"bb/api"
-	"bb/util"
+	"fmt"
 	"github.com/spf13/cobra"
 )
 
@@ -13,9 +13,8 @@ var StatusCmd = &cobra.Command{
 
 		user := api.GetUser()
 
-		util.Table([]string{"ID", "Username", "Name", "Link"}, [][]string{
-			{user.AccountId, user.Username, user.DisplayName, user.Links.Html.Href},
-		})
+		fmt.Printf("\n \033[1;34mID\033[m       %s\n \033[1;34mUsername\033[m %s\n \033[1;34mName\033[m     %s\n \033[1;34mLink\033[m     %s\n\n",
+			user.AccountId, user.Username, user.DisplayName, user.Links.Html.Href)
 	},
 }
 

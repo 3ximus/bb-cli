@@ -2,35 +2,73 @@ package pr
 
 import (
 	"bb/api"
-	"bb/util"
 	"fmt"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"os"
 )
 
 var ListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List pull requests from a repository",
 	Run: func(cmd *cobra.Command, args []string) {
-		prs := api.GetPr(viper.GetString("repository"), []string{"OPEN"})
-		prsdata := make([][]string, len(prs))
-		for i, pr := range prs {
-			prsdata[i] = []string{fmt.Sprint(pr.ID), pr.Title, pr.Source.Branch.Name + " → " + pr.Destination.Branch.Name, pr.State, pr.Author.DisplayName, fmt.Sprint(pr.CommentCount), fmt.Sprint(pr.UpdatedOn)}
+		stateFilter := genStateFilter(cmd)
+		prs := api.GetPr(viper.GetString("repo"), stateFilter, []string{})
+
+		os.Stdout.WriteString("\n")
+		for _, pr := range prs {
+			// if we didn't provide filter don't show the pr status
+			state := ""
+			if openFlag, _ := cmd.Flags().GetBool("open"); (len(stateFilter) == 1 && stateFilter[0] != "OPEN") || openFlag {
+				state = formatState(pr.State) + "  "
+			}
+			fmt.Printf(" \033[1;32m#%d\033[m %s%s  \033[1;34m[ %s → %s]\033[m\n", pr.ID, state, pr.Title, pr.Source.Branch.Name, pr.Destination.Branch.Name)
+			fmt.Printf("      \033[33m%s\033[m\n", pr.Author.DisplayName)
 		}
-		util.Table([]string{"ID", "Title", "Branch", "State", "Author", "Comments", "UpdatedOn"}, prsdata)
+		os.Stdout.WriteString("\n")
 	},
 }
 
 func init() {
+	ListCmd.Flags().Bool("open", false, "Filter open pull requests")
+	ListCmd.Flags().Bool("merged", false, "Filter merged pull requests")
+	ListCmd.Flags().Bool("declined", false, "Filter declined pull requests")
+	ListCmd.Flags().Bool("superseded", false, "Filter superseded pull requests")
 
-	// Here you will define your flags and configuration settings.
+	// ListCmd.Flags().Strin
+}
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// listCmd.PersistentFlags().String("foo", "", "A help for foo")
+func genStateFilter(cmd *cobra.Command) []string {
+	stateFilter := []string{}
+	if openFlag, _ := cmd.Flags().GetBool("open"); openFlag {
+		stateFilter = append(stateFilter, "OPEN")
+	}
+	if mergedFlag, _ := cmd.Flags().GetBool("merged"); mergedFlag {
+		stateFilter = append(stateFilter, "MERGED")
+	}
+	if declinedFlag, _ := cmd.Flags().GetBool("declined"); declinedFlag {
+		stateFilter = append(stateFilter, "DECLINED")
+	}
+	if supersededFlag, _ := cmd.Flags().GetBool("superseded"); supersededFlag {
+		stateFilter = append(stateFilter, "SUPERSEDED")
+	}
+	if len(stateFilter) == 0 {
+		stateFilter = append(stateFilter, "OPEN")
+	}
+	return stateFilter
+}
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// listCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+func formatState(state string) string {
+	stateString := ""
+	switch state {
+	case "OPEN":
+		stateString = "\033[1;44m OPEN \033[m"
+	case "MERGED":
+		stateString = "\033[1;45m MERGED \033[m"
+	case "DECLINED":
+		stateString = "\033[1;41m DECLINED \033[m"
+	case "SUPERSEDED":
+		stateString = "\033[1;44m SUPERSEDED \033[m"
+	}
+	return stateString
 }

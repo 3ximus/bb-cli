@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/viper"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
 	"time"
 )
@@ -19,6 +20,8 @@ func get(endpoint string, spinner *spinner.Spinner) []byte {
 	url := fmt.Sprintf("%s/%s", api_endpoint, endpoint)
 
 	client := &http.Client{}
+
+	fmt.Println(url)
 
 	req, err := http.NewRequest("GET", url, nil)
 	cobra.CheckErr(err)
@@ -66,8 +69,17 @@ func GetUser() User {
 	return user
 }
 
-func GetPr(repository string, state []string) []PullRequest {
-	response := api_get("repositories/" + repository + "/pullrequests")
+func GetPr(repository string, state []string, author []string) []PullRequest {
+	query := ""
+	for i, s := range state {
+		if i == 0 {
+			query += fmt.Sprintf("state = \"%s\"", s)
+		} else {
+			query += fmt.Sprintf(" OR state = \"%s\"", s)
+		}
+	}
+	fmt.Println(query)
+	response := api_get("repositories/" + repository + "/pullrequests?q=" + url.QueryEscape(query))
 
 	type PRResponse struct {
 		Values []PullRequest
