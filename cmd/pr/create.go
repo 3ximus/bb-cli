@@ -15,6 +15,7 @@ import (
 var CreateCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create a pull request on a repository",
+	Args: cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		repo := viper.GetString("repo")
 

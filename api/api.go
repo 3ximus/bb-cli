@@ -62,6 +62,8 @@ func api_get(endpoint string, loadingMessage string) []byte {
 	return response
 }
 
+// HIGH LEVEL GET METHODS
+
 func GetUser() User {
 	response := api_get("user", " Fetching User...")
 
@@ -111,6 +113,38 @@ func GetPrList(repository string, state string, author string, search string, pa
 
 	return prs
 }
+
+func GetPr(repository string, id int) <-chan PullRequest {
+	channel := make(chan PullRequest)
+	go func() {
+		defer close(channel)
+		var pr PullRequest
+		response := api_get(
+			fmt.Sprintf("repositories/%s/pullrequests/%d", repository, id),
+			" Fetching Pull request...")
+		err := json.Unmarshal(response, &pr)
+		cobra.CheckErr(err)
+		channel <- pr
+	}()
+	return channel
+}
+
+func GetPrStatuses(repository string, id int) <-chan []CommitStatus {
+	channel := make(chan []CommitStatus)
+	go func() {
+		defer close(channel)
+		var paginatedResponse PaginatedResponse[CommitStatus]
+		response := api_get(
+			fmt.Sprintf("repositories/%s/pullrequests/%d/statuses", repository, id),
+			" Fetching Statuses...")
+		err := json.Unmarshal(response, &paginatedResponse)
+		cobra.CheckErr(err)
+		channel <- paginatedResponse.Values
+	}()
+	return channel
+}
+
+// HIGH LEVEL POST METHODS
 
 func PostPr(repository string, source string, destination string, title string, description string, close_source bool) {
 }

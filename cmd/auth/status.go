@@ -9,6 +9,7 @@ import (
 var StatusCmd = &cobra.Command{
 	Use:   "status",
 	Short: "Show status of your authentication settings.",
+	Args: cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		user := api.GetUser()

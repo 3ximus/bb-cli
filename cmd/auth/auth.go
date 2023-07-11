@@ -1,14 +1,13 @@
 package auth
 
 import (
-	"fmt"
 	"github.com/spf13/cobra"
 )
 
 var AuthCmd = &cobra.Command{
 	Use:   "auth",
 	Short: "Authentication settings and configuration",
-	Long: `This command can be used to setup your authentication with bitbucket.`,
+	Long:  `This command can be used to setup your authentication with bitbucket.`,
 }
 
 func init() {
