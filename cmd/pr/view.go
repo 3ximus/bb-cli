@@ -23,14 +23,15 @@ var ViewCmd = &cobra.Command{
 		statusesChannel := api.GetPrStatuses(repo, id)
 
 		pr := <-prChannel
-		fmt.Printf("\n%s \033[1;32m#%d\033[m \033[1;37m%s\033[m\n\033[37m  opened by %s, %d comments, last updated: %s\033[m\n\n",
-			util.FormatPrState(pr.State), pr.ID, pr.Title, pr.Author.Nickname, pr.CommentCount, util.TimeAgo(pr.UpdatedOn))
+		fmt.Printf("\n%s \033[1;32m#%d\033[m \033[1;37m%s\033[m\n", util.FormatPrState(pr.State), pr.ID, pr.Title)
+		fmt.Printf("\033[37m  opened by %s, %d comments, last updated: %s\033[m\n\n", pr.Author.Nickname, pr.CommentCount, util.TimeAgo(pr.UpdatedOn))
 		if pr.Description != "" {
-			fmt.Println(pr.Description)
+			fmt.Printf("%s\n\n", pr.Description)
 		}
 		fmt.Println("Pipelines:")
 		for _, pipeline := range <-statusesChannel {
 			fmt.Printf("%s %s \033[37m(%s)\033[m\n", util.FormatPipelineState(pipeline.State), pipeline.Name, pipeline.RefName)
+			fmt.Printf("  \033[37m%s\033[m\n", pipeline.Url)
 		}
 		fmt.Println()
 	},
