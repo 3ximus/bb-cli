@@ -7,6 +7,7 @@ import (
 )
 
 type User struct {
+	UUID        string `json:"uuid"`
 	DisplayName string `json:"display_name"`
 	Username    string `json:"username"`
 	AccountId   string `json:"account_id"`
@@ -27,6 +28,60 @@ const (
 	SUPERSEDED PrState = "superseded"
 )
 
+type PullRequest struct {
+	ID           int     `json:"id"`
+	Title        string  `json:"title"`
+	Description  string  `json:"description"`
+	State        PrState `json:"state"`
+	CommentCount int     `json:"comment_count"`
+	TaskCount    int     `json:"task_count"`
+	Author       User    `json:"author"`
+	ClosedBy     User    `json:"closed_by"`
+	CloseSource  bool    `json:"close_source_branch"`
+	Destination  struct {
+		Branch struct {
+			Name string `json:"name"`
+		}
+	}
+	Source struct {
+		Branch struct {
+			Name string `json:"name"`
+		}
+	}
+	CreatedOn time.Time `json:"created_on"`
+	UpdatedOn time.Time `json:"updated_on"`
+}
+
+type CreatePullRequest struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	CloseSource bool   `json:"close_source_branch"`
+	Destination struct {
+		Branch struct {
+			Name string `json:"name"`
+		} `json:"branch"`
+	} `json:"destination"`
+	Source struct {
+		Branch struct {
+			Name string `json:"name"`
+		} `json:"branch"`
+	} `json:"source"`
+	Reviewers []struct {
+		AccountId string `json:"account_id"`
+	} `json:"reviewers"`
+}
+
+type CommitStatus struct {
+	RefName   string    `json:"refname"`
+	Name      string    `json:"name"`
+	State     string    `json:"state"`
+	Url       string    `json:"url"`
+	CreatedOn time.Time `json:"created_on"`
+	UpdatedOn time.Time `json:"updated_on"`
+}
+
+// DEFAULT ACTIONS OVERRIDES
+
 // String is used both by fmt.Print and by Cobra in help text
 func (e *PrState) String() string {
 	return string(*e)
@@ -46,36 +101,4 @@ func (e *PrState) Set(v PrState) error {
 // Type is only used in help text
 func (e *PrState) Type() string {
 	return "state"
-}
-
-type PullRequest struct {
-	ID           int       `json:"id"`
-	Title        string    `json:"title"`
-	Description  string    `json:"description"`
-	State        PrState   `json:"state"`
-	CommentCount int       `json:"comment_count"`
-	TaskCount    int       `json:"task_count"`
-	CreatedOn    time.Time `json:"created_on"`
-	UpdatedOn    time.Time `json:"updated_on"`
-	Author       User      `json:"author"`
-	ClosedBy     User      `json:"closed_by"`
-	Destination  struct {
-		Branch struct {
-			Name string `json:"name"`
-		}
-	}
-	Source struct {
-		Branch struct {
-			Name string `json:"name"`
-		}
-	}
-}
-
-type CommitStatus struct {
-	RefName   string    `json:"refname"`
-	Name      string    `json:"name"`
-	State     string    `json:"state"`
-	Url       string    `json:"url"`
-	CreatedOn time.Time `json:"created_on"`
-	UpdatedOn time.Time `json:"updated_on"`
 }

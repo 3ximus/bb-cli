@@ -20,6 +20,11 @@ var ListCmd = &cobra.Command{
 		state, _ := cmd.Flags().GetString("state")
 		prs := api.GetPrList(viper.GetString("repo"), strings.ToUpper(state), author, search, pages)
 
+		if len(prs) == 0 {
+			fmt.Printf("\n  No pull requests for \033[1;36m%s\033[m\n\n", viper.GetString("repo"))
+			return
+		}
+
 		fmt.Printf("\n  Pull Requests for \033[1;36m%s\033[m\n\n", viper.GetString("repo"))
 		for _, pr := range prs {
 			// if we didn't provide filter don't show the pr status
@@ -31,9 +36,9 @@ var ListCmd = &cobra.Command{
 }
 
 func init() {
-	ListCmd.Flags().StringP("author", "a", "", "filter by author nick name")
+	ListCmd.Flags().StringP("author", "a", "", "filter by author nick name (full nickname is needed due to an API limitation from bitbucket)")
 	ListCmd.Flags().StringP("search", "S", "", "search pull request with query")
-	ListCmd.Flags().StringP("state", "s", string(api.OPEN),`filter by state. Default: "open"
+	ListCmd.Flags().StringP("state", "s", string(api.OPEN), `filter by state. Default: "open"
 	possible options: "open", "merged", "declined" or "superseded"`)
 	ListCmd.RegisterFlagCompletionFunc("state", stateCompletion)
 	ListCmd.Flags().IntP("pages", "p", 1, "number of pages with results to retrieve")

@@ -36,7 +36,6 @@ func FormatPipelineState(state string) string {
 	return stateString
 }
 
-
 func TimeAgo(updatedOn time.Time) string {
 	duration := time.Since(updatedOn)
 	if duration.Hours() < 1 {

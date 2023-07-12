@@ -1,14 +1,17 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 type PaginatedResponse[T any] struct {
@@ -41,6 +44,30 @@ func api_get(endpoint string) []byte {
 	cobra.CheckErr(err)
 
 	return body
+}
+
+func api_post(endpoint string, body io.Reader) []byte {
+	client := &http.Client{}
+	url := fmt.Sprintf("%s/%s", viper.GetString("api"), endpoint)
+
+	req, err := http.NewRequest("POST", url, body)
+	cobra.CheckErr(err)
+	req.Header.Add("Content-Type", "application/json")
+	req.SetBasicAuth(viper.GetString("username"), viper.GetString("token"))
+
+	resp, err := client.Do(req)
+	cobra.CheckErr(err)
+
+	if resp.StatusCode != 201 {
+		errBody, err := ioutil.ReadAll(resp.Body)
+		cobra.CheckErr(err)
+		cobra.CheckErr(string(errBody))
+	}
+
+	responseBody, err := ioutil.ReadAll(resp.Body)
+	cobra.CheckErr(err)
+
+	return responseBody
 }
 
 // HIGH LEVEL GET METHODS
@@ -118,7 +145,50 @@ func GetPrStatuses(repository string, id int) <-chan []CommitStatus {
 	return channel
 }
 
+func GetReviewers(repository string) <-chan []User {
+	channel := make(chan []User)
+	go func() {
+		defer close(channel)
+		var paginatedResponse PaginatedResponse[User]
+		response := api_get(fmt.Sprintf("repositories/%s/effective-default-reviewers", repository))
+		err := json.Unmarshal(response, &paginatedResponse)
+		cobra.CheckErr(err)
+		channel <- paginatedResponse.Values
+	}()
+	return channel
+}
+
+func GetWorkspaceMembers(workspace string) <-chan []User {
+	channel := make(chan []User)
+	go func() {
+		defer close(channel)
+		var paginatedResponse PaginatedResponse[struct {
+			User User `json:"user"`
+		}]
+		response := api_get(fmt.Sprintf("workspaces/%s/members", workspace))
+		err := json.Unmarshal(response, &paginatedResponse)
+		cobra.CheckErr(err)
+		var users []User
+		for _, r := range paginatedResponse.Values {
+			users = append(users, r.User)
+		}
+		channel <- users
+	}()
+	return channel
+}
+
 // HIGH LEVEL POST METHODS
 
-func PostPr(repository string, source string, destination string, title string, description string, close_source bool) {
+func PostPr(repository string, data CreatePullRequest) PullRequest {
+	content, err := json.Marshal(data)
+	cobra.CheckErr(err)
+	// fmt.Println(content)
+	cobra.CheckErr(string(content))
+	response := api_post(fmt.Sprintf("repositories/%s/pullrequests", repository), bytes.NewReader(content))
+
+	// decode response
+	var pr PullRequest
+	err = json.Unmarshal(response, &pr)
+	cobra.CheckErr(err)
+	return pr
 }
