@@ -27,6 +27,9 @@ var ListCmd = &cobra.Command{
 			// if we didn't provide filter don't show the pr status
 			fmt.Printf("%s \033[1;32m#%d\033[m %s  \033[1;34m[ %s → %s]\033[m\n", util.FormatPrState(pr.State), pr.ID, pr.Title, pr.Source.Branch.Name, pr.Destination.Branch.Name)
 			fmt.Printf("%s\033[33m%s\033[m  \033[37mComments: %d\033[m\n", strings.Repeat(" ", len(util.FormatPrState(pr.State))-4), pr.Author.Nickname, pr.CommentCount)
+			if status {
+				fmt.Printf("%s%s %s \033[37m(%s)\033[m\n", strings.Repeat(" ", len(util.FormatPrState(pr.State))-4), util.FormatPipelineState(pr.Status.State), pr.Status.Name, pr.Status.RefName)
+			}
 			count++
 		}
 		if count == 0 {

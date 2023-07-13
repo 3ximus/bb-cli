@@ -48,6 +48,7 @@ type PullRequest struct {
 			Name string `json:"name"`
 		}
 	}
+	Status    CommitStatus
 	CreatedOn time.Time `json:"created_on"`
 	UpdatedOn time.Time `json:"updated_on"`
 }

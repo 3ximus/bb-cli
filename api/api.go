@@ -116,8 +116,14 @@ func GetPrList(repository string, state string, author string, search string, pa
 			}
 			err := json.Unmarshal(response, &prevResponse)
 			cobra.CheckErr(err)
+
 			// yield the value on the channel
 			for _, pr := range prevResponse.Values {
+				if status {
+					statusChannel := GetPrStatuses(repository, pr.ID)
+					pr.Status = (<-statusChannel)[0]
+				}
+
 				channel <- pr
 			}
 		}
