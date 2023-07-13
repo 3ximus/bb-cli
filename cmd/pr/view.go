@@ -13,6 +13,7 @@ import (
 var ViewCmd = &cobra.Command{
 	Use:   "view ID",
 	Short: "View details of a pull request",
+	// TODO make argument not mandatory so that we can see PRs linked to current branch
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		id, err := strconv.Atoi(args[0])

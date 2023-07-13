@@ -30,7 +30,9 @@ var CreateCmd = &cobra.Command{
 			// TODO make this into an async call that we can retrieve the result later
 			user := api.GetUser()
 			viper.Set("account_id", user.AccountId)
-			viper.WriteConfig()
+			// TODO Don't do this because it permanently saves the value from "repo"
+			// and subsequent calls will only use that value
+			// viper.WriteConfig()
 			authorId = user.AccountId
 		}
 
@@ -55,11 +57,11 @@ var CreateCmd = &cobra.Command{
 
 		// select reviewers
 		members, reviewers := <-membersChannel, <-reviewersChannel
-		if len(reviewers) > 0 {
-			members = append(reviewers)
+		if len(reviewers) == 0 {
+			reviewers = members // use members instead of reviewers
 		}
 		// TODO filter author id out
-		reviewersIndexes := chooseReviewers(members)
+		reviewersIndexes := chooseReviewers(reviewers)
 
 		if include_branch_name {
 			title = source + " " + title

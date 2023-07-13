@@ -83,40 +83,46 @@ func GetUser() User {
 	return user
 }
 
-func GetPrList(repository string, state string, author string, search string, pages int) []PullRequest {
-	stateQuery := ""
-	if state != "" {
-		stateQuery = fmt.Sprintf("state = \"%s\"", state)
-	}
-	authorQuery := ""
-	if author != "" {
-		authorQuery = fmt.Sprintf(" AND author.nickname = \"%s\"", author)
-	}
-	searchQuery := ""
-	if search != "" {
-		searchQuery = fmt.Sprintf(" AND title ~ \"%s\"", search)
-	}
+func GetPrList(repository string, state string, author string, search string, pages int, status bool) <-chan PullRequest {
+	channel := make(chan PullRequest)
+	go func() {
+		defer close(channel)
 
-	var prs []PullRequest
-	var prevResponse PaginatedResponse[PullRequest]
-	for i := 0; i < pages; i++ {
-		var response []byte
-		// fmt.Printf("%v\n", prevResponse)
-		if i == 0 {
-			response = api_get(fmt.Sprintf("repositories/%s/pullrequests?q=%s", repository, url.QueryEscape(stateQuery+authorQuery+searchQuery+"")))
-		} else {
-			newUrl := strings.Replace(prevResponse.Next, "https://api.bitbucket.org/2.0/", "", 1)
-			if newUrl == "" {
-				break // there's no next page
-			}
-			response = api_get(newUrl)
+		stateQuery := ""
+		if state != "" {
+			stateQuery = fmt.Sprintf("state = \"%s\"", state)
 		}
-		err := json.Unmarshal(response, &prevResponse)
-		cobra.CheckErr(err)
-		prs = append(prs, prevResponse.Values...)
-	}
+		authorQuery := ""
+		if author != "" {
+			authorQuery = fmt.Sprintf(" AND author.nickname = \"%s\"", author)
+		}
+		searchQuery := ""
+		if search != "" {
+			searchQuery = fmt.Sprintf(" AND title ~ \"%s\"", search)
+		}
 
-	return prs
+		var prevResponse PaginatedResponse[PullRequest]
+		for i := 0; i < pages; i++ {
+			var response []byte
+			// fmt.Printf("%v\n", prevResponse)
+			if i == 0 {
+				response = api_get(fmt.Sprintf("repositories/%s/pullrequests?q=%s", repository, url.QueryEscape(stateQuery+authorQuery+searchQuery+"")))
+			} else {
+				newUrl := strings.Replace(prevResponse.Next, "https://api.bitbucket.org/2.0/", "", 1)
+				if newUrl == "" {
+					break // there's no next page
+				}
+				response = api_get(newUrl)
+			}
+			err := json.Unmarshal(response, &prevResponse)
+			cobra.CheckErr(err)
+			// yield the value on the channel
+			for _, pr := range prevResponse.Values {
+				channel <- pr
+			}
+		}
+	}()
+	return channel
 }
 
 func GetPr(repository string, id int) <-chan PullRequest {
