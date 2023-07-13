@@ -27,6 +27,7 @@ var CreateCmd = &cobra.Command{
 		// set account id if it doesn't exist
 		authorId := viper.GetString("account_id")
 		if authorId == "" {
+			// TODO make this into an async call that we can retrieve the result later
 			user := api.GetUser()
 			viper.Set("account_id", user.AccountId)
 			viper.WriteConfig()
@@ -117,6 +118,7 @@ func init() {
 	CreateCmd.Flags().StringP("source", "s", util.GetCurrentBranch(), "source branch. Defaults to current branch")
 	CreateCmd.Flags().StringP("destination", "d", "dev", "description for the pull request: Defaults to dev")
 	CreateCmd.Flags().BoolP("close-source", "c", true, "close source branch")
+	CreateCmd.Flags().StringArrayP("reviewer", "r", []string{}, "add reviewer by their name. \033[31mNot implemented\033[m")
 
 	CreateCmd.Flags().BoolP("include-branch-name", "i", false, "include branch name in the pull request name")
 }

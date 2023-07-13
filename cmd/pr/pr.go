@@ -25,6 +25,8 @@ var PrCmd = &cobra.Command{
 func init() {
 	PrCmd.AddCommand(ListCmd)
 	PrCmd.AddCommand(CreateCmd)
+	PrCmd.AddCommand(EditCmd)
 	PrCmd.AddCommand(ViewCmd)
+	PrCmd.AddCommand(ReviewCmd)
 	PrCmd.PersistentFlags().StringP("repo", "R", "", "selected repository")
 }
