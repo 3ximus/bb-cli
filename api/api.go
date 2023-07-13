@@ -183,7 +183,6 @@ func PostPr(repository string, data CreatePullRequest) PullRequest {
 	content, err := json.Marshal(data)
 	cobra.CheckErr(err)
 	// fmt.Println(content)
-	cobra.CheckErr(string(content))
 	response := api_post(fmt.Sprintf("repositories/%s/pullrequests", repository), bytes.NewReader(content))
 
 	// decode response

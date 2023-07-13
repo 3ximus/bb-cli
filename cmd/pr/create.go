@@ -24,6 +24,15 @@ var CreateCmd = &cobra.Command{
 		repo := viper.GetString("repo")
 		scanner := bufio.NewScanner(os.Stdin)
 
+		// set account id if it doesn't exist
+		authorId := viper.GetString("account_id")
+		if authorId == "" {
+			user := api.GetUser()
+			viper.Set("account_id", user.AccountId)
+			viper.WriteConfig()
+			authorId = user.AccountId
+		}
+
 		// load reviewers
 		membersChannel := api.GetWorkspaceMembers(strings.Split(repo, "/")[0])
 		reviewersChannel := api.GetReviewers(repo)
@@ -41,13 +50,19 @@ var CreateCmd = &cobra.Command{
 		source, _ := cmd.Flags().GetString("source")
 		destination, _ := cmd.Flags().GetString("destination")
 		close_source, _ := cmd.Flags().GetBool("close_source")
+		include_branch_name, _ := cmd.Flags().GetBool("include-branch-name")
 
 		// select reviewers
 		members, reviewers := <-membersChannel, <-reviewersChannel
 		if len(reviewers) > 0 {
 			members = append(reviewers)
 		}
+		// TODO filter author id out
 		reviewersIndexes := chooseReviewers(members)
+
+		if include_branch_name {
+			title = source + " " + title
+		}
 
 		// create dto
 		newpr := api.CreatePullRequest{
@@ -62,15 +77,22 @@ var CreateCmd = &cobra.Command{
 				AccountId string `json:"account_id"`
 			}{AccountId: members[idx].AccountId})
 		}
+		if len(reviewersIndexes) == 0 {
+			newpr.Reviewers = []struct {
+				AccountId string `json:"account_id"`
+			}{}
+		}
 
 		// confirm pr
-		fmt.Printf("\033[1;37m%s\033[m  \033[1;34m[ %s → %s]\033[m\n", newpr.Title, newpr.Source.Branch.Name, newpr.Destination.Branch.Name)
-		fmt.Println("Reviewers:")
-		for _, idx := range reviewersIndexes {
-			fmt.Printf("  - %s \033[37m( ID: %s )\033[m\n", members[idx].DisplayName, members[idx].AccountId)
-		}
+		fmt.Printf("\033[1;37m%s\033[m  \033[1;34m[ %s → %s ]\033[m\n", newpr.Title, newpr.Source.Branch.Name, newpr.Destination.Branch.Name)
 		if newpr.Description != "" {
 			fmt.Printf("%s\n", newpr.Description)
+		}
+		if len(reviewersIndexes) > 0 {
+			fmt.Println("Reviewers:")
+			for _, idx := range reviewersIndexes {
+				fmt.Printf("  - %s \033[37m( ID: %s )\033[m\n", members[idx].DisplayName, members[idx].AccountId)
+			}
 		}
 		fmt.Print("? \033[1;35mCreate this PR ? [y/n]\033[m ")
 		scanner.Scan()
@@ -95,6 +117,8 @@ func init() {
 	CreateCmd.Flags().StringP("source", "s", util.GetCurrentBranch(), "source branch. Defaults to current branch")
 	CreateCmd.Flags().StringP("destination", "d", "dev", "description for the pull request: Defaults to dev")
 	CreateCmd.Flags().BoolP("close-source", "c", true, "close source branch")
+
+	CreateCmd.Flags().BoolP("include-branch-name", "i", false, "include branch name in the pull request name")
 }
 
 func readDescription(scanner *bufio.Scanner) string {
@@ -128,7 +152,7 @@ func chooseReviewers(reviewers []api.User) []int {
 		return []int{}
 	}
 
-	return UseExternalFZF(reviewers, func(i int) string {
+	return useExternalFZF(reviewers, func(i int) string {
 		return fmt.Sprintf("%s", reviewers[i].Nickname)
 	})
 
@@ -140,12 +164,12 @@ func chooseReviewers(reviewers []api.User) []int {
 	// return indexes
 }
 
-func UseExternalFZF(list []api.User, toString func(int) string) []int {
+func useExternalFZF(list []api.User, toString func(int) string) []int {
 	input := ""
 	for i := range list {
 		input += fmt.Sprintf("%d %s\n", i, toString(i))
 	}
-	cmd := exec.Command("fzf", "-m", "--height", "20%", "--reverse", "--with-nth", "2..")
+	cmd := exec.Command("fzf", "-m", "--height", "20%", "--reverse", "--with-nth", "2..", "--prompt", "Reviewers > ")
 	var selectionBuffer strings.Builder
 	cmd.Stdin = strings.NewReader(input)
 	cmd.Stdout = &selectionBuffer
@@ -153,7 +177,6 @@ func UseExternalFZF(list []api.User, toString func(int) string) []int {
 	err := cmd.Start()
 	cobra.CheckErr(err)
 	err = cmd.Wait()
-	cobra.CheckErr(err)
 
 	var result []int
 	for _, r := range strings.Split(selectionBuffer.String(), "\n") {
