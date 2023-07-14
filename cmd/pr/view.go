@@ -16,14 +16,16 @@ var ViewCmd = &cobra.Command{
 	Long: `View details of a pull request from given ID.
 	If no ID is given we'll try to find an open pull request that has it's source as the current branch`,
 	Run: func(cmd *cobra.Command, args []string) {
-
 		repo := viper.GetString("repo")
+
+		branch := util.GetCurrentBranch()
 
 		var id int
 		var err error
 		if len(args) == 0 {
-			// retrieve id of pipeline for current branch
-			id = 0
+			// retrieve id of pr for current branch
+			prsChannel := api.GetPrList(repo, []string{ string(api.OPEN), string(api.MERGED), string(api.DECLINED), string(api.SUPERSEDED) }, "", branch,"", "", 1, false)
+			id = (<-prsChannel).ID
 		} else {
 			id, err = strconv.Atoi(args[0])
 			cobra.CheckErr(err)

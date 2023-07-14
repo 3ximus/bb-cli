@@ -130,7 +130,7 @@ func GetPrList(
 		for i := 0; i < pages; i++ {
 			var response []byte
 			if i == 0 {
-				response = api_get(fmt.Sprintf("repositories/%s/pullrequests?q=%s", repository, url.QueryEscape(stateQuery+authorQuery+searchQuery+sourceQuery+destinationQuery)))
+				response = api_get(fmt.Sprintf("repositories/%s/pullrequests?sort=-id&q=%s", repository, url.QueryEscape(stateQuery+authorQuery+searchQuery+sourceQuery+destinationQuery)))
 			} else {
 				newUrl := strings.Replace(prevResponse.Next, "https://api.bitbucket.org/2.0/", "", 1)
 				if newUrl == "" {
