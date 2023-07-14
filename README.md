@@ -2,10 +2,30 @@
 
 A cli tool for bitbucket similar to [gh](https://cli.github.com/) written in `go` for bitbucket.org API
 
+## Instalation
+
+```bash
+go install -ldflags="-s -w"
+```
+
+### Setup autocompletion
+
+For example for bash
+
+```bash
+bb completion bash > bb.bash
+sudo mv bb.bash /usr/share/bash-completion/completions/
+```
+
+## Usage
+
+TODO
 
 
 
-## NOTE
+
+
+### NOTE TO SELF
 
 To generate documentation use this
 

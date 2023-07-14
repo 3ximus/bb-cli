@@ -23,5 +23,6 @@ var IssueCmd = &cobra.Command{
 }
 
 func init() {
+	IssueCmd.AddCommand(ListCmd)
 	IssueCmd.PersistentFlags().StringP("repo", "R", "", "selected repository")
 }
