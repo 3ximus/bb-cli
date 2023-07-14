@@ -83,14 +83,31 @@ func GetUser() User {
 	return user
 }
 
-func GetPrList(repository string, state string, author string, search string, pages int, status bool) <-chan PullRequest {
+func GetPrList(
+	repository string,
+	states []string,
+	author string,
+	search string,
+	source string,
+	destination string,
+	pages int,
+	status bool,
+) <-chan PullRequest {
 	channel := make(chan PullRequest)
 	go func() {
 		defer close(channel)
 
 		stateQuery := ""
-		if state != "" {
-			stateQuery = fmt.Sprintf("state = \"%s\"", state)
+		if len(states) > 0 {
+			stateQuery = "("
+			for i, s := range states {
+				if i == 0 {
+					stateQuery += fmt.Sprintf("state = \"%s\"", s)
+				} else {
+					stateQuery += fmt.Sprintf(" OR state = \"%s\"", s)
+				}
+			}
+			stateQuery += ")"
 		}
 		authorQuery := ""
 		if author != "" {
@@ -100,13 +117,20 @@ func GetPrList(repository string, state string, author string, search string, pa
 		if search != "" {
 			searchQuery = fmt.Sprintf(" AND title ~ \"%s\"", search)
 		}
+		sourceQuery := ""
+		if source != "" {
+			sourceQuery = fmt.Sprintf(" AND source.branch.name = \"%s\"", source)
+		}
+		destinationQuery := ""
+		if destination != "" {
+			destinationQuery = fmt.Sprintf(" AND destination.branch.name = \"%s\"", destination)
+		}
 
 		var prevResponse PaginatedResponse[PullRequest]
 		for i := 0; i < pages; i++ {
 			var response []byte
-			// fmt.Printf("%v\n", prevResponse)
 			if i == 0 {
-				response = api_get(fmt.Sprintf("repositories/%s/pullrequests?q=%s", repository, url.QueryEscape(stateQuery+authorQuery+searchQuery+"")))
+				response = api_get(fmt.Sprintf("repositories/%s/pullrequests?q=%s", repository, url.QueryEscape(stateQuery+authorQuery+searchQuery+sourceQuery+destinationQuery)))
 			} else {
 				newUrl := strings.Replace(prevResponse.Next, "https://api.bitbucket.org/2.0/", "", 1)
 				if newUrl == "" {

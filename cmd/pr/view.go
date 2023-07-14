@@ -11,15 +11,24 @@ import (
 )
 
 var ViewCmd = &cobra.Command{
-	Use:   "view ID",
+	Use:   "view [ID]",
 	Short: "View details of a pull request",
-	// TODO make argument not mandatory so that we can see PRs linked to current branch
-	Args:  cobra.ExactArgs(1),
+	Long: `View details of a pull request from given ID.
+	If no ID is given we'll try to find an open pull request that has it's source as the current branch`,
 	Run: func(cmd *cobra.Command, args []string) {
-		id, err := strconv.Atoi(args[0])
-		cobra.CheckErr(err)
 
 		repo := viper.GetString("repo")
+
+		var id int
+		var err error
+		if len(args) == 0 {
+			// retrieve id of pipeline for current branch
+			id = 0
+		} else {
+			id, err = strconv.Atoi(args[0])
+			cobra.CheckErr(err)
+		}
+
 		prChannel := api.GetPr(repo, id)
 		statusesChannel := api.GetPrStatuses(repo, id)
 

@@ -17,9 +17,11 @@ var ListCmd = &cobra.Command{
 		author, _ := cmd.Flags().GetString("author")
 		search, _ := cmd.Flags().GetString("search")
 		pages, _ := cmd.Flags().GetInt("pages")
-		state, _ := cmd.Flags().GetString("state")
+		state, _ := cmd.Flags().GetStringArray("state")
 		status, _ := cmd.Flags().GetBool("status")
-		prChannel := api.GetPrList(viper.GetString("repo"), strings.ToUpper(state), author, search, pages, status)
+		source, _ := cmd.Flags().GetString("source")
+		destination, _ := cmd.Flags().GetString("destination")
+		prChannel := api.GetPrList(viper.GetString("repo"), state, author, search, source, destination, pages, status)
 
 		fmt.Printf("\n  Pull Requests for \033[1;36m%s\033[m\n\n", viper.GetString("repo"))
 		count := 0
@@ -43,15 +45,13 @@ var ListCmd = &cobra.Command{
 func init() {
 	ListCmd.Flags().StringP("author", "a", "", "filter by author nick name (full nickname is needed due to an API limitation from bitbucket)")
 	ListCmd.Flags().StringP("search", "S", "", "search pull request with query")
-	ListCmd.Flags().StringP("state", "s", string(api.OPEN), `filter by state. Default: "open"
+	ListCmd.Flags().StringArrayP("state", "s", []string{string(api.OPEN)}, `filter by state. Default: "open". Multiple of these options can be given
 	possible options: "open", "merged", "declined" or "superseded"`)
 	ListCmd.RegisterFlagCompletionFunc("state", stateCompletion)
 	ListCmd.Flags().IntP("pages", "p", 1, "number of pages with results to retrieve")
 	ListCmd.Flags().Bool("status", false, "include status of each pull request on the result. (the result will be slower)")
-
-	// TODO
-	ListCmd.Flags().String("destination", "", "filter by destination branch. \033[31mNot implemented\033[m")
-	ListCmd.Flags().String("source", "", "filter by source branch. \033[31mNot implemented\033[m")
+	ListCmd.Flags().String("destination", "", "filter by destination branch.")
+	ListCmd.Flags().String("source", "", "filter by source branch.")
 }
 
 func stateCompletion(comd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
