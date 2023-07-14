@@ -4,9 +4,9 @@ import (
 	"bb/api"
 	"bb/util"
 	"fmt"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"strings"
 )
 
 var ListCmd = &cobra.Command{
@@ -17,21 +17,29 @@ var ListCmd = &cobra.Command{
 		author, _ := cmd.Flags().GetString("author")
 		search, _ := cmd.Flags().GetString("search")
 		pages, _ := cmd.Flags().GetInt("pages")
-		state, _ := cmd.Flags().GetStringArray("state")
+		states, _ := cmd.Flags().GetStringArray("state")
+		allStates, _ := cmd.Flags().GetBool("all")
+		if allStates {
+			states = []string{string(api.OPEN), string(api.MERGED), string(api.DECLINED), string(api.SUPERSEDED)}
+		}
 		status, _ := cmd.Flags().GetBool("status")
 		source, _ := cmd.Flags().GetString("source")
 		destination, _ := cmd.Flags().GetString("destination")
-		prChannel := api.GetPrList(viper.GetString("repo"), state, author, search, source, destination, pages, status)
+
+		fmt.Println(states)
+
+		prChannel := api.GetPrList(viper.GetString("repo"), states, author, search, source, destination, pages, status)
 
 		fmt.Printf("\n  Pull Requests for \033[1;36m%s\033[m\n\n", viper.GetString("repo"))
 		count := 0
 		for pr := range prChannel {
 			// if we didn't provide filter don't show the pr status
-			fmt.Printf("%s \033[1;32m#%d\033[m %s  \033[1;34m[ %s → %s]\033[m\n", util.FormatPrState(pr.State), pr.ID, pr.Title, pr.Source.Branch.Name, pr.Destination.Branch.Name)
-			fmt.Printf("%s\033[33m%s\033[m  \033[37mComments: %d\033[m\n", strings.Repeat(" ", len(util.FormatPrState(pr.State))-4), pr.Author.Nickname, pr.CommentCount)
+			fmt.Printf("%-19s \033[1;32m#%d\033[m %s  \033[1;34m[ %s → %s]\033[m\n", util.FormatPrState(pr.State), pr.ID, pr.Title, pr.Source.Branch.Name, pr.Destination.Branch.Name)
+			fmt.Printf("             \033[33m%s\033[m  \033[37mComments: %d\033[m", pr.Author.Nickname, pr.CommentCount)
 			if status {
-				fmt.Printf("%s%s %s \033[37m(%s)\033[m\n", strings.Repeat(" ", len(util.FormatPrState(pr.State))-4), util.FormatPipelineState(pr.Status.State), pr.Status.Name, pr.Status.RefName)
+				fmt.Printf(" %s", util.FormatPipelineState(pr.Status.State))
 			}
+			fmt.Println()
 			count++
 		}
 		if count == 0 {
@@ -50,6 +58,7 @@ func init() {
 	ListCmd.RegisterFlagCompletionFunc("state", stateCompletion)
 	ListCmd.Flags().IntP("pages", "p", 1, "number of pages with results to retrieve")
 	ListCmd.Flags().Bool("status", false, "include status of each pull request on the result. (the result will be slower)")
+	ListCmd.Flags().Bool("all", false, "return pull request with all possible states.")
 	ListCmd.Flags().String("destination", "", "filter by destination branch.")
 	ListCmd.Flags().String("source", "", "filter by source branch.")
 }
