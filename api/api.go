@@ -46,11 +46,11 @@ func api_get(endpoint string) []byte {
 	return body
 }
 
-func api_post(endpoint string, body io.Reader) []byte {
+func _api_post_put(method string, endpoint string, body io.Reader) []byte {
 	client := &http.Client{}
 	url := fmt.Sprintf("%s/%s", viper.GetString("api"), endpoint)
 
-	req, err := http.NewRequest("POST", url, body)
+	req, err := http.NewRequest(method, url, body)
 	cobra.CheckErr(err)
 	if body != nil {
 		req.Header.Add("Content-Type", "application/json")
@@ -70,6 +70,14 @@ func api_post(endpoint string, body io.Reader) []byte {
 	cobra.CheckErr(err)
 
 	return responseBody
+}
+
+func api_post(endpoint string, body io.Reader) []byte {
+	return _api_post_put("POST", endpoint, body)
+}
+
+func api_put(endpoint string, body io.Reader) []byte {
+	return _api_post_put("PUT", endpoint, body)
 }
 
 func api_delete(endpoint string) []byte {
@@ -94,7 +102,7 @@ func api_delete(endpoint string) []byte {
 	return body
 }
 
-// HIGH LEVEL GET METHODS
+// HIGH LEVEL METHODS
 
 func GetUser() User {
 	response := api_get("user")
@@ -237,12 +245,22 @@ func GetWorkspaceMembers(workspace string) <-chan []User {
 	return channel
 }
 
-// HIGH LEVEL POST METHODS
-
 func PostPr(repository string, data CreatePullRequest) PullRequest {
 	content, err := json.Marshal(data)
 	cobra.CheckErr(err)
 	response := api_post(fmt.Sprintf("repositories/%s/pullrequests", repository), bytes.NewReader(content))
+
+	// decode response
+	var pr PullRequest
+	err = json.Unmarshal(response, &pr)
+	cobra.CheckErr(err)
+	return pr
+}
+
+func UpdatePr(repository string, id int, data CreatePullRequest) PullRequest {
+	content, err := json.Marshal(data)
+	cobra.CheckErr(err)
+	response := api_put(fmt.Sprintf("repositories/%s/pullrequests/%d", repository, id), bytes.NewReader(content))
 
 	// decode response
 	var pr PullRequest
@@ -266,4 +284,3 @@ func DeclinePr(repository string, id int) {
 func RequestChangesPr(repository string, id int) {
 	api_post(fmt.Sprintf("repositories/%s/pullrequests/%d/request-changes", repository, id), nil)
 }
-
