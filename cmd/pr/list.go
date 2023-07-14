@@ -26,8 +26,6 @@ var ListCmd = &cobra.Command{
 		source, _ := cmd.Flags().GetString("source")
 		destination, _ := cmd.Flags().GetString("destination")
 
-		fmt.Println(states)
-
 		prChannel := api.GetPrList(viper.GetString("repo"), states, author, search, source, destination, pages, status)
 
 		fmt.Printf("\n  Pull Requests for \033[1;36m%s\033[m\n\n", viper.GetString("repo"))

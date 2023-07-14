@@ -24,8 +24,11 @@ var ViewCmd = &cobra.Command{
 		var err error
 		if len(args) == 0 {
 			// retrieve id of pr for current branch
-			prsChannel := api.GetPrList(repo, []string{string(api.OPEN), string(api.MERGED), string(api.DECLINED), string(api.SUPERSEDED)}, "", branch, "", "", 1, false)
-			id = (<-prsChannel).ID
+			pr := <-api.GetPrList(repo, []string{string(api.OPEN), string(api.MERGED), string(api.DECLINED), string(api.SUPERSEDED)}, "", "", branch, "", 1, false)
+			if pr.ID == 0 {
+				cobra.CheckErr("No pr found for this branch")
+			}
+			id = pr.ID // get the first one's ID
 		} else {
 			id, err = strconv.Atoi(args[0])
 			cobra.CheckErr(err)
