@@ -52,13 +52,15 @@ func api_post(endpoint string, body io.Reader) []byte {
 
 	req, err := http.NewRequest("POST", url, body)
 	cobra.CheckErr(err)
-	req.Header.Add("Content-Type", "application/json")
+	if body != nil {
+		req.Header.Add("Content-Type", "application/json")
+	}
 	req.SetBasicAuth(viper.GetString("username"), viper.GetString("token"))
 
 	resp, err := client.Do(req)
 	cobra.CheckErr(err)
 
-	if resp.StatusCode != 201 {
+	if resp.StatusCode != 201 && resp.StatusCode != 200 {
 		errBody, err := ioutil.ReadAll(resp.Body)
 		cobra.CheckErr(err)
 		cobra.CheckErr(string(errBody))
@@ -68,6 +70,28 @@ func api_post(endpoint string, body io.Reader) []byte {
 	cobra.CheckErr(err)
 
 	return responseBody
+}
+
+func api_delete(endpoint string) []byte {
+	client := &http.Client{}
+	url := fmt.Sprintf("%s/%s", viper.GetString("api"), endpoint)
+	req, err := http.NewRequest("DELETE", url, nil)
+	cobra.CheckErr(err)
+	req.SetBasicAuth(viper.GetString("username"), viper.GetString("token"))
+
+	resp, err := client.Do(req)
+	cobra.CheckErr(err)
+
+	if resp.StatusCode != 204 {
+		errBody, err := ioutil.ReadAll(resp.Body)
+		cobra.CheckErr(err)
+		cobra.CheckErr(string(errBody))
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	cobra.CheckErr(err)
+
+	return body
 }
 
 // HIGH LEVEL GET METHODS
@@ -218,7 +242,6 @@ func GetWorkspaceMembers(workspace string) <-chan []User {
 func PostPr(repository string, data CreatePullRequest) PullRequest {
 	content, err := json.Marshal(data)
 	cobra.CheckErr(err)
-	// fmt.Println(content)
 	response := api_post(fmt.Sprintf("repositories/%s/pullrequests", repository), bytes.NewReader(content))
 
 	// decode response
@@ -227,3 +250,20 @@ func PostPr(repository string, data CreatePullRequest) PullRequest {
 	cobra.CheckErr(err)
 	return pr
 }
+
+func ApprovePr(repository string, id int) {
+	api_post(fmt.Sprintf("repositories/%s/pullrequests/%d/approve", repository, id), nil)
+}
+
+func UnnaprovePr(repository string, id int) {
+	api_delete(fmt.Sprintf("repositories/%s/pullrequests/%d/approve", repository, id))
+}
+
+func DeclinePr(repository string, id int) {
+	api_post(fmt.Sprintf("repositories/%s/pullrequests/%d/decline", repository, id), nil)
+}
+
+func RequestChangesPr(repository string, id int) {
+	api_post(fmt.Sprintf("repositories/%s/pullrequests/%d/request-changes", repository, id), nil)
+}
+

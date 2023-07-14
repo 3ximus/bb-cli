@@ -24,10 +24,10 @@ var EditCmd = &cobra.Command{
 }
 
 func init() {
-	EditCmd.Flags().StringP("title", "t", "", "title for the pull request")
-	EditCmd.Flags().StringP("body", "b", "", "description for the pull request")
-	EditCmd.Flags().StringP("source", "s", util.GetCurrentBranch(), "source branch. Defaults to current branch")
-	EditCmd.Flags().StringP("destination", "d", "dev", "description for the pull request: Defaults to dev")
-	EditCmd.Flags().BoolP("close-source", "c", true, "close source branch")
+	EditCmd.Flags().StringP("title", "t", "", "title for the pull request. \033[31mNot implemented\033[m")
+	EditCmd.Flags().StringP("body", "b", "", "description for the pull request. \033[31mNot implemented\033[m")
+	EditCmd.Flags().StringP("source", "s", util.GetCurrentBranch(), "source branch. Defaults to current branch. \033[31mNot implemented\033[m")
+	EditCmd.Flags().StringP("destination", "d", "dev", "description for the pull request: Defaults to dev. \033[31mNot implemented\033[m")
+	EditCmd.Flags().BoolP("close-source", "c", true, "close source branch. \033[31mNot implemented\033[m")
 	EditCmd.Flags().StringArrayP("reviewer", "r", []string{}, "add reviewer by their name. \033[31mNot implemented\033[m")
 }
