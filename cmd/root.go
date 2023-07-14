@@ -3,6 +3,7 @@ package cmd
 import (
 	"bb/cmd/auth"
 	"bb/cmd/pr"
+	"bb/cmd/issue"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
@@ -35,6 +36,7 @@ func init() {
 
 	RootCmd.AddCommand(auth.AuthCmd)
 	RootCmd.AddCommand(pr.PrCmd)
+	RootCmd.AddCommand(issue.IssueCmd)
 }
 
 func initConfig() {
