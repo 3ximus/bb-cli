@@ -48,6 +48,11 @@ type PullRequest struct {
 			Name string `json:"name"`
 		}
 	}
+	Links       struct {
+		Html struct {
+			Href string
+		}
+	}
 	Status    CommitStatus
 	CreatedOn time.Time `json:"created_on"`
 	UpdatedOn time.Time `json:"updated_on"`

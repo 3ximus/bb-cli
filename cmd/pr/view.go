@@ -24,7 +24,7 @@ var ViewCmd = &cobra.Command{
 		var err error
 		if len(args) == 0 {
 			// retrieve id of pr for current branch
-			prsChannel := api.GetPrList(repo, []string{ string(api.OPEN), string(api.MERGED), string(api.DECLINED), string(api.SUPERSEDED) }, "", branch,"", "", 1, false)
+			prsChannel := api.GetPrList(repo, []string{string(api.OPEN), string(api.MERGED), string(api.DECLINED), string(api.SUPERSEDED)}, "", branch, "", "", 1, false)
 			id = (<-prsChannel).ID
 		} else {
 			id, err = strconv.Atoi(args[0])
@@ -43,6 +43,12 @@ var ViewCmd = &cobra.Command{
 			fmt.Printf("%s\n\n", pr.Description)
 		}
 
+		web, _ := cmd.Flags().GetBool("web")
+		if web {
+			util.OpenInBrowser(pr.Links.Html.Href)
+			return
+		}
+
 		// PIPELINES
 
 		pipelines := <-statusesChannel
@@ -54,6 +60,7 @@ var ViewCmd = &cobra.Command{
 			}
 			fmt.Println()
 		}
+
 	},
 }
 
@@ -61,4 +68,5 @@ func init() {
 	ViewCmd.Flags().BoolP("comments", "c", false, "View comments. \033[31mNot implemented\033[m")
 	ViewCmd.Flags().BoolP("commits", "C", false, "View commits. \033[31mNot implemented\033[m")
 	ViewCmd.Flags().BoolP("diff", "d", false, "View diff. \033[31mNot implemented\033[m")
+	ViewCmd.Flags().Bool("web", false, "Open in the browser.")
 }

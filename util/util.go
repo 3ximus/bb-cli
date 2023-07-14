@@ -3,7 +3,11 @@ package util
 import (
 	"bb/api"
 	"fmt"
+	"os/exec"
+	"runtime"
 	"time"
+
+	"github.com/spf13/cobra"
 )
 
 func FormatPrState(state api.PrState) string {
@@ -52,3 +56,17 @@ func TimeAgo(updatedOn time.Time) string {
 	return fmt.Sprintf("%d years ago", int(duration.Hours()/8760))
 }
 
+func OpenInBrowser(url string) {
+	var err error
+	switch runtime.GOOS {
+	case "linux":
+		err = exec.Command("xdg-open", url).Start()
+	case "windows":
+		err = exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
+	case "darwin":
+		err = exec.Command("open", url).Start()
+	default:
+		err = fmt.Errorf("unsupported platform")
+	}
+	cobra.CheckErr(err)
+}
