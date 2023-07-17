@@ -20,6 +20,10 @@ var CreateCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create a pull request on a repository",
 	Args:  cobra.NoArgs,
+	PreRun: func(cmd *cobra.Command, args []string) {
+		err := viper.BindPFlag("include_branch_name", cmd.Flags().Lookup("include-branch-name"))
+		cobra.CheckErr(err)
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		repo := viper.GetString("repo")
 		scanner := bufio.NewScanner(os.Stdin)
@@ -53,7 +57,7 @@ var CreateCmd = &cobra.Command{
 		source, _ := cmd.Flags().GetString("source")
 		destination, _ := cmd.Flags().GetString("destination")
 		close_source, _ := cmd.Flags().GetBool("close_source")
-		include_branch_name, _ := cmd.Flags().GetBool("include-branch-name")
+		include_branch_name := viper.GetBool("include_branch_name")
 
 		// select reviewers
 		members, reviewers := <-membersChannel, <-reviewersChannel
