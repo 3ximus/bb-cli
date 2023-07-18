@@ -23,13 +23,13 @@ type PaginatedResponse[T any] struct {
 	Previous string `json:"previous"`
 }
 
-func api_get(endpoint string) []byte {
+func bbApiGet(endpoint string) []byte {
 	client := &http.Client{}
-	url := fmt.Sprintf("%s/%s", viper.GetString("api"), endpoint)
+	url := fmt.Sprintf("%s/%s", viper.GetString("bb_api"), endpoint)
 	// fmt.Println(url)
 	req, err := http.NewRequest("GET", url, nil)
 	cobra.CheckErr(err)
-	req.SetBasicAuth(viper.GetString("username"), viper.GetString("token"))
+	req.SetBasicAuth(viper.GetString("username"), viper.GetString("bb_token"))
 
 	resp, err := client.Do(req)
 	cobra.CheckErr(err)
@@ -46,16 +46,16 @@ func api_get(endpoint string) []byte {
 	return body
 }
 
-func _api_post_put(method string, endpoint string, body io.Reader) []byte {
+func _bbApiPostPut(method string, endpoint string, body io.Reader) []byte {
 	client := &http.Client{}
-	url := fmt.Sprintf("%s/%s", viper.GetString("api"), endpoint)
+	url := fmt.Sprintf("%s/%s", viper.GetString("bb_api"), endpoint)
 
 	req, err := http.NewRequest(method, url, body)
 	cobra.CheckErr(err)
 	if body != nil {
 		req.Header.Add("Content-Type", "application/json")
 	}
-	req.SetBasicAuth(viper.GetString("username"), viper.GetString("token"))
+	req.SetBasicAuth(viper.GetString("username"), viper.GetString("bb_token"))
 
 	resp, err := client.Do(req)
 	cobra.CheckErr(err)
@@ -72,20 +72,20 @@ func _api_post_put(method string, endpoint string, body io.Reader) []byte {
 	return responseBody
 }
 
-func api_post(endpoint string, body io.Reader) []byte {
-	return _api_post_put("POST", endpoint, body)
+func bbApiPost(endpoint string, body io.Reader) []byte {
+	return _bbApiPostPut("POST", endpoint, body)
 }
 
-func api_put(endpoint string, body io.Reader) []byte {
-	return _api_post_put("PUT", endpoint, body)
+func bbApiPut(endpoint string, body io.Reader) []byte {
+	return _bbApiPostPut("PUT", endpoint, body)
 }
 
-func api_delete(endpoint string) []byte {
+func bbApiDelete(endpoint string) []byte {
 	client := &http.Client{}
-	url := fmt.Sprintf("%s/%s", viper.GetString("api"), endpoint)
+	url := fmt.Sprintf("%s/%s", viper.GetString("bb_api"), endpoint)
 	req, err := http.NewRequest("DELETE", url, nil)
 	cobra.CheckErr(err)
-	req.SetBasicAuth(viper.GetString("username"), viper.GetString("token"))
+	req.SetBasicAuth(viper.GetString("username"), viper.GetString("bb_token"))
 
 	resp, err := client.Do(req)
 	cobra.CheckErr(err)
@@ -105,7 +105,7 @@ func api_delete(endpoint string) []byte {
 // HIGH LEVEL METHODS
 
 func GetUser() User {
-	response := api_get("user")
+	response := bbApiGet("user")
 
 	// decode response
 	var user User
@@ -162,13 +162,13 @@ func GetPrList(
 		for i := 0; i < pages; i++ {
 			var response []byte
 			if i == 0 {
-				response = api_get(fmt.Sprintf("repositories/%s/pullrequests?sort=-id&q=%s", repository, url.QueryEscape(stateQuery+authorQuery+searchQuery+sourceQuery+destinationQuery)))
+				response = bbApiGet(fmt.Sprintf("repositories/%s/pullrequests?sort=-id&q=%s", repository, url.QueryEscape(stateQuery+authorQuery+searchQuery+sourceQuery+destinationQuery)))
 			} else {
 				newUrl := strings.Replace(prevResponse.Next, "https://api.bitbucket.org/2.0/", "", 1)
 				if newUrl == "" {
 					break // there's no next page
 				}
-				response = api_get(newUrl)
+				response = bbApiGet(newUrl)
 			}
 			err := json.Unmarshal(response, &prevResponse)
 			cobra.CheckErr(err)
@@ -192,7 +192,7 @@ func GetPr(repository string, id int) <-chan PullRequest {
 	go func() {
 		defer close(channel)
 		var pr PullRequest
-		response := api_get(fmt.Sprintf("repositories/%s/pullrequests/%d", repository, id))
+		response := bbApiGet(fmt.Sprintf("repositories/%s/pullrequests/%d", repository, id))
 		err := json.Unmarshal(response, &pr)
 		cobra.CheckErr(err)
 		channel <- pr
@@ -205,7 +205,7 @@ func GetPrStatuses(repository string, id int) <-chan []CommitStatus {
 	go func() {
 		defer close(channel)
 		var paginatedResponse PaginatedResponse[CommitStatus]
-		response := api_get(fmt.Sprintf("repositories/%s/pullrequests/%d/statuses", repository, id))
+		response := bbApiGet(fmt.Sprintf("repositories/%s/pullrequests/%d/statuses", repository, id))
 		err := json.Unmarshal(response, &paginatedResponse)
 		cobra.CheckErr(err)
 		channel <- paginatedResponse.Values
@@ -218,7 +218,7 @@ func GetReviewers(repository string) <-chan []User {
 	go func() {
 		defer close(channel)
 		var paginatedResponse PaginatedResponse[User]
-		response := api_get(fmt.Sprintf("repositories/%s/effective-default-reviewers", repository))
+		response := bbApiGet(fmt.Sprintf("repositories/%s/effective-default-reviewers", repository))
 		err := json.Unmarshal(response, &paginatedResponse)
 		cobra.CheckErr(err)
 		channel <- paginatedResponse.Values
@@ -233,7 +233,7 @@ func GetWorkspaceMembers(workspace string) <-chan []User {
 		var paginatedResponse PaginatedResponse[struct {
 			User User `json:"user"`
 		}]
-		response := api_get(fmt.Sprintf("workspaces/%s/members", workspace))
+		response := bbApiGet(fmt.Sprintf("workspaces/%s/members", workspace))
 		err := json.Unmarshal(response, &paginatedResponse)
 		cobra.CheckErr(err)
 		var users []User
@@ -248,7 +248,7 @@ func GetWorkspaceMembers(workspace string) <-chan []User {
 func PostPr(repository string, data CreatePullRequest) PullRequest {
 	content, err := json.Marshal(data)
 	cobra.CheckErr(err)
-	response := api_post(fmt.Sprintf("repositories/%s/pullrequests", repository), bytes.NewReader(content))
+	response := bbApiPost(fmt.Sprintf("repositories/%s/pullrequests", repository), bytes.NewReader(content))
 
 	// decode response
 	var pr PullRequest
@@ -260,7 +260,7 @@ func PostPr(repository string, data CreatePullRequest) PullRequest {
 func UpdatePr(repository string, id int, data CreatePullRequest) PullRequest {
 	content, err := json.Marshal(data)
 	cobra.CheckErr(err)
-	response := api_put(fmt.Sprintf("repositories/%s/pullrequests/%d", repository, id), bytes.NewReader(content))
+	response := bbApiPut(fmt.Sprintf("repositories/%s/pullrequests/%d", repository, id), bytes.NewReader(content))
 
 	// decode response
 	var pr PullRequest
@@ -270,17 +270,17 @@ func UpdatePr(repository string, id int, data CreatePullRequest) PullRequest {
 }
 
 func ApprovePr(repository string, id int) {
-	api_post(fmt.Sprintf("repositories/%s/pullrequests/%d/approve", repository, id), nil)
+	bbApiPost(fmt.Sprintf("repositories/%s/pullrequests/%d/approve", repository, id), nil)
 }
 
 func UnnaprovePr(repository string, id int) {
-	api_delete(fmt.Sprintf("repositories/%s/pullrequests/%d/approve", repository, id))
+	bbApiDelete(fmt.Sprintf("repositories/%s/pullrequests/%d/approve", repository, id))
 }
 
 func DeclinePr(repository string, id int) {
-	api_post(fmt.Sprintf("repositories/%s/pullrequests/%d/decline", repository, id), nil)
+	bbApiPost(fmt.Sprintf("repositories/%s/pullrequests/%d/decline", repository, id), nil)
 }
 
 func RequestChangesPr(repository string, id int) {
-	api_post(fmt.Sprintf("repositories/%s/pullrequests/%d/request-changes", repository, id), nil)
+	bbApiPost(fmt.Sprintf("repositories/%s/pullrequests/%d/request-changes", repository, id), nil)
 }

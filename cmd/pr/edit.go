@@ -33,14 +33,9 @@ var EditCmd = &cobra.Command{
 		// if no options given ask for what to change
 		var existingPr api.PullRequest
 		if !cmd.Flags().Changed("title") &&
-			!cmd.Flags().Changed("body") &&
-			!cmd.Flags().Changed("source") &&
-			!cmd.Flags().Changed("destination") {
+			!cmd.Flags().Changed("body") {
 			existingPr = <-api.GetPr(repo, id)
 			title, description = readTitleAndDescription(existingPr)
-			source = existingPr.Source.Branch.Name
-			destination = existingPr.Destination.Branch.Name
-			close_source = existingPr.CloseSource
 		}
 
 		newpr := api.CreatePullRequest{
@@ -48,7 +43,8 @@ var EditCmd = &cobra.Command{
 			Description: description,
 			CloseSource: close_source,
 		}
-		newpr.Source.Branch.Name = source
+		// TODO handle these empty fields
+		newpr.Destination.Branch.Name = source
 		newpr.Destination.Branch.Name = destination
 		newpr.Reviewers = nil
 
@@ -65,7 +61,7 @@ var EditCmd = &cobra.Command{
 func init() {
 	EditCmd.Flags().StringP("title", "t", "", "title for the pull request. \033[31mNot implemented\033[m")
 	EditCmd.Flags().StringP("body", "b", "", "description for the pull request. \033[31mNot implemented\033[m")
-	EditCmd.Flags().StringP("source", "s", util.GetCurrentBranch(), "source branch. Defaults to current branch. \033[31mNot implemented\033[m")
+	EditCmd.Flags().StringP("source", "s", "", "source branch. Defaults to current branch. \033[31mNot implemented\033[m")
 	EditCmd.Flags().StringP("destination", "d", "dev", "description for the pull request: Defaults to dev. \033[31mNot implemented\033[m")
 	EditCmd.Flags().BoolP("close-source", "c", false, "close source branch. \033[31mNot implemented\033[m")
 	EditCmd.Flags().StringArrayP("reviewer", "r", []string{}, "add reviewer by their name. \033[31mNot implemented\033[m")

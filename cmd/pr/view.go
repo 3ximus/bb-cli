@@ -17,7 +17,6 @@ var ViewCmd = &cobra.Command{
 	If no ID is given we'll try to find an open pull request that has it's source as the current branch`,
 	Run: func(cmd *cobra.Command, args []string) {
 		repo := viper.GetString("repo")
-
 		branch := util.GetCurrentBranch()
 
 		var id int

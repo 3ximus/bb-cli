@@ -32,7 +32,7 @@ func init() {
 	// globally set config path
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.config/bb.yaml)")
 
-	viper.SetDefault("api", "https://api.bitbucket.org/2.0")
+	viper.SetDefault("bb_api", "https://api.bitbucket.org/2.0")
 
 	RootCmd.AddCommand(auth.AuthCmd)
 	RootCmd.AddCommand(pr.PrCmd)
