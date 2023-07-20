@@ -12,14 +12,15 @@ import (
 var ListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List issues",
+	Long: "List issues from Jira with preset filtering. By default it filters tickets assigned to the current user",
 	Run: func(cmd *cobra.Command, args []string) {
 		nResults, _ := cmd.Flags().GetInt("results")
-		assignee, _ := cmd.Flags().GetBool("assignee")
 		reporter, _ := cmd.Flags().GetBool("reporter")
+		all, _ := cmd.Flags().GetBool("all")
 		project, _ := cmd.Flags().GetString("project")
 
 		fmt.Println()
-		for issue := range api.GetIssueList(viper.GetString("repo"), nResults, assignee, reporter, project) {
+		for issue := range api.GetIssueList(viper.GetString("repo"), nResults, all, reporter, project) {
 			timeSpent := "-"
 			if issue.Fields.TimeTracking.TimeSpent == " " {
 				timeSpent = issue.Fields.TimeTracking.TimeSpent
@@ -34,7 +35,7 @@ var ListCmd = &cobra.Command{
 
 func init() {
 	ListCmd.Flags().StringP("project", "p", "", "filter issues by project key")
-	ListCmd.Flags().BoolP("assignee", "a", true, "filter issues assigned to me. Default operation")
-	ListCmd.Flags().BoolP("reporter", "r", false, "filter issues reporting to me")
+	ListCmd.Flags().BoolP("all", "a", false, "filter all issues. (Not assigned or reporting to current user)")
+	ListCmd.Flags().BoolP("reporter", "r", false, "filter issues reporting to current user")
 	ListCmd.Flags().IntP("results", "n", 10, "max number of results retrieve")
 }

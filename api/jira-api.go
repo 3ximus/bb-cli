@@ -63,20 +63,23 @@ func GetIssue(repository string, key string) <-chan JiraIssue {
 	return channel
 }
 
-func GetIssueList(repository string, nResults int, assignee bool, reporter bool, project string) <-chan JiraIssue {
+func GetIssueList(repository string, nResults int, all bool, reporter bool, project string) <-chan JiraIssue {
 	channel := make(chan JiraIssue)
 	go func() {
 		defer close(channel)
 		var paginatedReponse IssuesPaginatedResponse
 
 		query := ""
-		if !reporter {
+		if !reporter && !all {
 			query += "assignee=currentuser()"
 		} else if reporter {
 			query += "reporter=currentuser()"
 		}
 		if project != "" {
-			query += "+AND+project=DP"
+			if query != "" {
+				query += "+AND+"
+			}
+			query += "project=DP"
 		}
 
 		// response := jiraApiGet(fmt.Sprintf("/issue/DP-1167"))
