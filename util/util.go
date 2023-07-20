@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os/exec"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -14,13 +15,13 @@ func FormatPrState(state api.PrState) string {
 	stateString := ""
 	switch state {
 	case "OPEN":
-		stateString = "\033[1;44m OPEN \033[m"
+		stateString = "\033[1;38;5;235;44m OPEN \033[m"
 	case "MERGED":
-		stateString = "\033[1;45m MERGED \033[m"
+		stateString = "\033[1;38;5;235;45m MERGED \033[m"
 	case "DECLINED":
-		stateString = "\033[1;41m DECLINED \033[m"
+		stateString = "\033[1;38;5;235;41m DECLINED \033[m"
 	case "SUPERSEDED":
-		stateString = "\033[1;44m SUPERSEDED \033[m"
+		stateString = "\033[1;38;5;235;44m SUPERSEDED \033[m"
 	}
 	return stateString
 }
@@ -29,15 +30,46 @@ func FormatPipelineState(state string) string {
 	stateString := ""
 	switch state {
 	case "INPROGRESS":
-		stateString = "\033[1;44m RUNNING \033[m"
+		stateString = "\033[1;38;5;235;44m RUNNING \033[m"
 	case "STOPPED", "merged":
 		stateString = "\033[1;38;5;235;43m STOPPED \033[m"
 	case "SUCCESSFUL", "declined":
 		stateString = "\033[1;38;5;235;42m SUCCESSFUL \033[m"
 	case "FAILED", "superseded":
-		stateString = "\033[1;41m FAILED \033[m"
+		stateString = "\033[1;38;5;235;41m FAILED \033[m"
 	}
 	return stateString
+}
+
+func FormatIssueStatus(status string) string {
+	statusString := ""
+	switch strings.ToUpper(status) {
+	case "IN PROGRESS":
+		statusString = "\033[1;38;5;235;44m IN PROGRESS \033[m"
+	case "NEED TESTING":
+		statusString = "\033[1;38;5;235;46m NEED TESTING \033[m"
+		// TODO more status
+	default:
+		statusString = fmt.Sprintf("\033[1;38;5;235;47m %s \033[m", status)
+	}
+	return statusString
+}
+
+func FormatIssuePriority(id string, name string) string {
+	priorityString := ""
+	switch id {
+	case "1":
+		priorityString = fmt.Sprintf("\033[1;31m▲ %s\033[m", name)
+	case "2":
+		priorityString = fmt.Sprintf("\033[1;35m▲ %s\033[m", name)
+	case "3":
+		priorityString = fmt.Sprintf("\033[1;33m⯀ %s\033[m", name)
+	case "4":
+		priorityString = fmt.Sprintf("\033[1;34m▼ %s\033[m", name)
+	default:
+		priorityString = fmt.Sprintf("\033[1;37m%s\033[m", name)
+	}
+	return priorityString
 }
 
 func TimeAgo(updatedOn time.Time) string {

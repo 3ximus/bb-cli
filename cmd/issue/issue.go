@@ -16,14 +16,11 @@ var IssueCmd = &cobra.Command{
 		if curRepo := util.GetCurrentRepo(); curRepo != "" {
 			viper.SetDefault("repo", curRepo)
 		}
-		if !viper.IsSet("repo") {
-			cobra.CheckErr("repo is not defined")
-		}
 
-		err = viper.BindPFlag("jira_api", cmd.Flags().Lookup("endpoint"))
+		err = viper.BindPFlag("jira_domain", cmd.Flags().Lookup("domain"))
 		cobra.CheckErr(err)
-		if !viper.IsSet("jira_api") {
-			cobra.CheckErr("jira endpoint is not defined")
+		if !viper.IsSet("jira_domain") {
+			cobra.CheckErr("jira domain is not defined")
 		}
 	},
 }
@@ -32,7 +29,5 @@ func init() {
 	IssueCmd.AddCommand(ListCmd)
 	IssueCmd.AddCommand(ViewCmd)
 	IssueCmd.PersistentFlags().StringP("repo", "R", "", "selected repository")
-	IssueCmd.PersistentFlags().StringP("endpoint", "E", "", `endpoint for your organization api on jira.
-	Format: https://XXXXXX.atlassian.net/rest/api/3
-	`)
+	IssueCmd.PersistentFlags().StringP("domain", "D", "", "your jira domain ( XXXX in https://XXXX.atlassian.net)")
 }

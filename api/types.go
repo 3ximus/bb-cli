@@ -86,6 +86,8 @@ type CommitStatus struct {
 	UpdatedOn time.Time `json:"updated_on"`
 }
 
+const JiraIssueKeyRegex = "[A-Z][A-Z0-9_]*-\\d+"
+
 type JiraIssue struct {
 	Key    string `json:"key"`
 	Fields struct {
@@ -124,7 +126,7 @@ type JiraIssue struct {
 		}
 		Description struct {
 			Content []struct {
-				Type string 
+				Type string
 				// TODO return paragraphs here  ?
 			}
 		}
@@ -134,7 +136,7 @@ type JiraIssue struct {
 			TimeSpent string
 		}
 		Comment struct {
-			Total int 
+			Total int
 		}
 		// TODO add worklog ?
 	} `json:"fields"`

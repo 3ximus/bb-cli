@@ -19,9 +19,17 @@ import (
 // 	Previous string `json:"previous"`
 // }
 
+func JiraEndpoint(domain string) string {
+	return fmt.Sprintf("https://%s.atlassian.net/rest/api/3", domain)
+}
+
+func JiraBrowse(domain string, key string) string {
+	return fmt.Sprintf("https://%s.atlassian.net/browse/%s", domain, key)
+}
+
 func jiraApiGet(endpoint string) []byte {
 	client := &http.Client{}
-	url := fmt.Sprintf("%s/%s", viper.GetString("jira_api"), endpoint)
+	url := fmt.Sprintf("%s/%s", JiraEndpoint(viper.GetString("jira_domain")), endpoint)
 	// fmt.Println(url)
 	req, err := http.NewRequest("GET", url, nil)
 	cobra.CheckErr(err)

@@ -2,11 +2,12 @@ package cmd
 
 import (
 	"bb/cmd/auth"
-	"bb/cmd/pr"
 	"bb/cmd/issue"
+	"bb/cmd/pr"
+	"os"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
 )
 
 var cfgFile string
@@ -31,8 +32,6 @@ func init() {
 
 	// globally set config path
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.config/bb.yaml)")
-
-	viper.SetDefault("bb_api", "https://api.bitbucket.org/2.0")
 
 	RootCmd.AddCommand(auth.AuthCmd)
 	RootCmd.AddCommand(pr.PrCmd)
@@ -59,5 +58,5 @@ func initConfig() {
 	err := viper.ReadInConfig()
 	cobra.CheckErr(err)
 
-	// fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
+	viper.SetDefault("bb_api", "https://api.bitbucket.org/2.0")
 }
