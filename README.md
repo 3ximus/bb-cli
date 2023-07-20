@@ -32,11 +32,12 @@ include_branch_name: true
 
 ### Setup autocompletion
 
+Generate completion for your shell with `bb completion <your-shell>` and save the content in your completions directory
+
 For example for bash
 
 ```bash
-bb completion bash > bb.bash
-sudo mv bb.bash /usr/share/bash-completion/completions/
+bb completion bash | sudo tee /usr/share/bash-completion/completions/bb.bash >/dev/null
 ```
 
 ## Usage
