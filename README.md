@@ -20,8 +20,8 @@ bb_token: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 username: fabio_almeida_vo2
 
 # Authentication options for Jira
-jira_api: "https://XXXXXXXXX.atlassian.net/rest/api/3"
-email: "your@email.com"
+jira_domain: XXXXXXXXX # In https://<your-domain>.atlassian.net
+email: your@email.com
 jira_token: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX(192 characters)
 
 # Extra options:
