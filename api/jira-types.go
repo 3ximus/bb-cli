@@ -1,6 +1,21 @@
 package api
 
+import (
+	"errors"
+	"fmt"
+)
+
 const JiraIssueKeyRegex = "[A-Z][A-Z0-9_]*-\\d+"
+
+type IssueStatus string
+
+const (
+	TODO       IssueStatus = "todo"
+	INPROGRESS IssueStatus = "inprogress"
+	TESTING    IssueStatus = "testing"
+	DONE       IssueStatus = "done"
+	BLOCKED    IssueStatus = "blocked"
+)
 
 type JiraIssue struct {
 	Key    string `json:"key"`
@@ -30,12 +45,12 @@ type JiraIssue struct {
 		}
 		Parent struct {
 		}
-		Project   struct {
+		Project struct {
 			Name string
 			Key  string
 		}
 		Components []struct {
-			Name string
+			Name        string
 			Description string
 		}
 		Description struct {
@@ -45,9 +60,9 @@ type JiraIssue struct {
 			}
 		}
 		TimeTracking struct {
-			OriginalEstimate string
+			OriginalEstimate  string
 			RemainingEstimate string
-			TimeSpent string
+			TimeSpent         string
 		}
 		Comment struct {
 			Total int
@@ -56,3 +71,25 @@ type JiraIssue struct {
 	} `json:"fields"`
 }
 
+// DEFAULT ACTIONS OVERRIDES
+
+// String is used both by fmt.Print and by Cobra in help text
+func (e *IssueStatus) String() string {
+	return string(*e)
+}
+
+// Set must have pointer receiver so it doesn't change the value of a copy
+func (e *IssueStatus) Set(v IssueStatus) error {
+	switch v {
+	case TODO, INPROGRESS, TESTING, DONE, BLOCKED:
+		*e = IssueStatus(v)
+		return nil
+	default:
+		return errors.New(fmt.Sprintf(`must be one of "%s", "%s", "%s", "%s" or "%s"`, TODO, INPROGRESS, TESTING, DONE, BLOCKED))
+	}
+}
+
+// Type is only used in help text
+func (e *IssueStatus) Type() string {
+	return "state"
+}
