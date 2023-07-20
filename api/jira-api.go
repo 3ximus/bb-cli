@@ -10,14 +10,12 @@ import (
 	"github.com/spf13/viper"
 )
 
-// type PaginatedResponse[T any] struct {
-// 	Values   []T
-// 	Size     int    `json:"size"`
-// 	Page     int    `json:"page"`
-// 	PageLen  int    `json:"pagelen"`
-// 	Next     string `json:"next"`
-// 	Previous string `json:"previous"`
-// }
+type IssuesPaginatedResponse struct {
+	Issues     []JiraIssue
+	StartAt    int `json:"startAt"`
+	MaxResults int `json:"maxResults"`
+	Total      int `json:"total"`
+}
 
 func JiraEndpoint(domain string) string {
 	return fmt.Sprintf("https://%s.atlassian.net/rest/api/3", domain)
@@ -65,13 +63,21 @@ func GetIssue(repository string, key string) <-chan JiraIssue {
 	return channel
 }
 
-func GetIssueList(repository string) <-chan JiraIssue {
+func GetIssueList(repository string, pages int) <-chan JiraIssue {
 	channel := make(chan JiraIssue)
 	go func() {
 		defer close(channel)
-		// response := jiraApiGet(fmt.Sprintf("/issue/DP-1167"))
-		response := jiraApiGet(fmt.Sprintf("search?jql="))
-		fmt.Println(string(response))
+		var paginatedReponse IssuesPaginatedResponse
+
+		for i := 0; i < pages; i++ {
+			// response := jiraApiGet(fmt.Sprintf("/issue/DP-1167"))
+			response := jiraApiGet(fmt.Sprintf("search?jql="))
+			err := json.Unmarshal(response, &paginatedReponse)
+			cobra.CheckErr(err)
+			for _, issue := range paginatedReponse.Issues {
+				channel <- issue
+			}
+		}
 	}()
 	return channel
 }

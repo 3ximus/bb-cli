@@ -14,7 +14,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-type PaginatedResponse[T any] struct {
+type BBPaginatedResponse[T any] struct {
 	Values   []T
 	Size     int    `json:"size"`
 	Page     int    `json:"page"`
@@ -158,7 +158,7 @@ func GetPrList(
 			destinationQuery = fmt.Sprintf(" AND destination.branch.name = \"%s\"", destination)
 		}
 
-		var prevResponse PaginatedResponse[PullRequest]
+		var prevResponse BBPaginatedResponse[PullRequest]
 		for i := 0; i < pages; i++ {
 			var response []byte
 			if i == 0 {
@@ -176,10 +176,9 @@ func GetPrList(
 			// yield the value on the channel
 			for _, pr := range prevResponse.Values {
 				if status {
-					statusChannel := GetPrStatuses(repository, pr.ID)
-					pr.Status = (<-statusChannel)[0]
+					status := <-GetPrStatuses(repository, pr.ID)
+					pr.Status = status[0] // only get the first one
 				}
-
 				channel <- pr
 			}
 		}
@@ -204,7 +203,7 @@ func GetPrStatuses(repository string, id int) <-chan []CommitStatus {
 	channel := make(chan []CommitStatus)
 	go func() {
 		defer close(channel)
-		var paginatedResponse PaginatedResponse[CommitStatus]
+		var paginatedResponse BBPaginatedResponse[CommitStatus]
 		response := bbApiGet(fmt.Sprintf("repositories/%s/pullrequests/%d/statuses", repository, id))
 		err := json.Unmarshal(response, &paginatedResponse)
 		cobra.CheckErr(err)
@@ -217,7 +216,7 @@ func GetReviewers(repository string) <-chan []User {
 	channel := make(chan []User)
 	go func() {
 		defer close(channel)
-		var paginatedResponse PaginatedResponse[User]
+		var paginatedResponse BBPaginatedResponse[User]
 		response := bbApiGet(fmt.Sprintf("repositories/%s/effective-default-reviewers", repository))
 		err := json.Unmarshal(response, &paginatedResponse)
 		cobra.CheckErr(err)
@@ -230,7 +229,7 @@ func GetWorkspaceMembers(workspace string) <-chan []User {
 	channel := make(chan []User)
 	go func() {
 		defer close(channel)
-		var paginatedResponse PaginatedResponse[struct {
+		var paginatedResponse BBPaginatedResponse[struct {
 			User User `json:"user"`
 		}]
 		response := bbApiGet(fmt.Sprintf("workspaces/%s/members", workspace))
