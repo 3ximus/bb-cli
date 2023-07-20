@@ -13,9 +13,13 @@ var ListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List issues",
 	Run: func(cmd *cobra.Command, args []string) {
+		nResults, _ := cmd.Flags().GetInt("results")
+		assignee, _ := cmd.Flags().GetBool("assignee")
+		reporter, _ := cmd.Flags().GetBool("reporter")
+		project, _ := cmd.Flags().GetString("project")
 
 		fmt.Println()
-		for issue := range api.GetIssueList(viper.GetString("repo"), 1) {
+		for issue := range api.GetIssueList(viper.GetString("repo"), nResults, assignee, reporter, project) {
 			timeSpent := "-"
 			if issue.Fields.TimeTracking.TimeSpent == " " {
 				timeSpent = issue.Fields.TimeTracking.TimeSpent
@@ -29,4 +33,8 @@ var ListCmd = &cobra.Command{
 }
 
 func init() {
+	ListCmd.Flags().StringP("project", "p", "", "filter issues by project key")
+	ListCmd.Flags().BoolP("assignee", "a", true, "filter issues assigned to me. Default operation")
+	ListCmd.Flags().BoolP("reporter", "r", false, "filter issues reporting to me")
+	ListCmd.Flags().IntP("results", "n", 10, "max number of results retrieve")
 }

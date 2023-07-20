@@ -63,20 +63,28 @@ func GetIssue(repository string, key string) <-chan JiraIssue {
 	return channel
 }
 
-func GetIssueList(repository string, pages int) <-chan JiraIssue {
+func GetIssueList(repository string, nResults int, assignee bool, reporter bool, project string) <-chan JiraIssue {
 	channel := make(chan JiraIssue)
 	go func() {
 		defer close(channel)
 		var paginatedReponse IssuesPaginatedResponse
 
-		for i := 0; i < pages; i++ {
-			// response := jiraApiGet(fmt.Sprintf("/issue/DP-1167"))
-			response := jiraApiGet(fmt.Sprintf("search?jql="))
-			err := json.Unmarshal(response, &paginatedReponse)
-			cobra.CheckErr(err)
-			for _, issue := range paginatedReponse.Issues {
-				channel <- issue
-			}
+		query := ""
+		if !reporter {
+			query += "assignee=currentuser()"
+		} else if reporter {
+			query += "reporter=currentuser()"
+		}
+		if project != "" {
+			query += "+AND+project=DP"
+		}
+
+		// response := jiraApiGet(fmt.Sprintf("/issue/DP-1167"))
+		response := jiraApiGet(fmt.Sprintf("search?maxResults=%d&fields=*all&jql=%s", nResults, query))
+		err := json.Unmarshal(response, &paginatedReponse)
+		cobra.CheckErr(err)
+		for _, issue := range paginatedReponse.Issues {
+			channel <- issue
 		}
 	}()
 	return channel

@@ -48,7 +48,10 @@ func FormatIssueStatus(status string) string {
 		statusString = "\033[1;38;5;235;44m IN PROGRESS \033[m"
 	case "NEED TESTING":
 		statusString = "\033[1;38;5;235;46m NEED TESTING \033[m"
-		// TODO more status
+	case "DONE":
+		statusString = "\033[1;38;5;235;42m DONE \033[m"
+	case "BLOCKED":
+		statusString = "\033[1;38;5;235;41m BLOCKED \033[m"
 	default:
 		statusString = fmt.Sprintf("\033[1;38;5;235;47m %s \033[m", status)
 	}
