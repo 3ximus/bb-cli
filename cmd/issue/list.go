@@ -20,8 +20,21 @@ var ListCmd = &cobra.Command{
 		statuses, _ := cmd.Flags().GetStringArray("status")
 		project, _ := cmd.Flags().GetString("project")
 
+		// convert status based on current settings
+		var statusConversion = []string{}
+		statusMap := viper.GetStringMapStringSlice("jira_status")
+		for _, s := range statuses {
+			if val, exists := statusMap[s]; exists {
+				for _, k := range val {
+					statusConversion = append(statusConversion, k)
+				}
+			} else {
+				statusConversion = append(statusConversion, s)
+			}
+		}
+
 		fmt.Println()
-		for issue := range api.GetIssueList(viper.GetString("repo"), nResults, all, reporter, project, statuses) {
+		for issue := range api.GetIssueList(viper.GetString("repo"), nResults, all, reporter, project, statusConversion) {
 			timeSpent := "-"
 			if issue.Fields.TimeTracking.TimeSpent == " " {
 				timeSpent = issue.Fields.TimeTracking.TimeSpent

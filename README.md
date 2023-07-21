@@ -28,6 +28,13 @@ jira_token: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX(192 characters)
 
 # include branch name at beggining of the pull request (useful to link with jira tickets)
 include_branch_name: true
+
+# define custom status for jira tickets, to more easily filter by the preset options
+jira_status:
+  inprogress: ['In Progress', 'Selected for Development']
+  todo: ['À FAIRE']
+  open: ['OUVERT', 'To estimate_T']
+
 ```
 
 ### Setup autocompletion
@@ -54,11 +61,11 @@ To generate documentation use this
 package doc
 
 import (
-	"bb/cmd"
-	"github.com/spf13/cobra/doc"
+    "bb/cmd"
+    "github.com/spf13/cobra/doc"
 )
 
 func main() {
-	doc.GenManTree(cmd.RootCmd, nil, "doc")
+    doc.GenManTree(cmd.RootCmd, nil, "doc")
 }
 ```
