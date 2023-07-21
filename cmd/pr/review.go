@@ -2,6 +2,7 @@ package pr
 
 import (
 	"bb/api"
+	"bb/util"
 	"fmt"
 	"strconv"
 
@@ -10,15 +11,28 @@ import (
 )
 
 var ReviewCmd = &cobra.Command{
-	Use:   "review ID",
+	Use:   "review [ID]",
 	Short: "Review a pull request",
-	Long:  "Merge, approve, unnaprove, decline or request/unrequest changes in a pull request",
-	Args:  cobra.ExactArgs(1),
+	Long: `Merge, approve, unnaprove, decline or request/unrequest changes in a pull request
+	If no ID is given the operation will be applied to the first PR found for the current branch`,
 	Run: func(cmd *cobra.Command, args []string) {
-		id, err := strconv.Atoi(args[0])
-		cobra.CheckErr(err)
-
 		repo := viper.GetString("repo")
+		branch := util.GetCurrentBranch()
+
+		// TODO allow to give source branch name instead of just using current branch
+		var id int
+		var err error
+		if len(args) == 0 {
+			// retrieve id of pr for current branch
+			pr := <-api.GetPrList(repo, []string{string(api.OPEN), string(api.MERGED), string(api.DECLINED), string(api.SUPERSEDED)}, "", "", branch, "", 1, false)
+			if pr.ID == 0 {
+				cobra.CheckErr("No pr found for this branch")
+			}
+			id = pr.ID // get the first one's ID
+		} else {
+			id, err = strconv.Atoi(args[0])
+			cobra.CheckErr(err)
+		}
 
 		approve, _ := cmd.Flags().GetBool("approve")
 		if approve {
@@ -35,10 +49,23 @@ var ReviewCmd = &cobra.Command{
 			api.DeclinePr(repo, id)
 			fmt.Printf("Pull request #%d \033[1;31mDeclined\033[m\n", id)
 		}
+		merge, _ := cmd.Flags().GetBool("merge")
+		if merge {
+			fmt.Println("Not implemented")
+		}
 		requestChanges, _ := cmd.Flags().GetBool("request-changes")
 		if requestChanges {
 			api.RequestChangesPr(repo, id)
 			fmt.Printf("\033[1;34mRequested changes\033[m for pull request #%d\n", id)
+		}
+		unrequestChanges, _ := cmd.Flags().GetBool("unrequest-changes")
+		if unrequestChanges {
+			fmt.Printf("Not implemented")
+		}
+
+		if !approve && !unnaprove && !decline && !requestChanges && !unrequestChanges {
+			fmt.Println("No operation selected")
+			cmd.Help()
 		}
 	},
 }
