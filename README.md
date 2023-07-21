@@ -1,6 +1,8 @@
-# Bitbucket CLI
+# Attlassian CLI
 
-A cli tool for bitbucket and jira similar to [gh](https://cli.github.com/) written in `go` for bitbucket.org API
+A cli tool for bitbucket and jira similar to [gh](https://cli.github.com/) written in `go`
+
+_Currently under development_
 
 ## Instalation
 
