@@ -12,7 +12,7 @@ import (
 
 var ReviewCmd = &cobra.Command{
 	Use:   "review [ID]",
-	Short: "Review a pull request",
+	Short: "Review a pull request (merge, approve, unnaprove, decline ...)",
 	Long: `Merge, approve, unnaprove, decline or request/unrequest changes in a pull request
 	If no ID is given the operation will be applied to the first PR found for the current branch`,
 	Run: func(cmd *cobra.Command, args []string) {

@@ -64,7 +64,7 @@ func GetIssue(repository string, key string) <-chan JiraIssue {
 	return channel
 }
 
-func GetIssueList(repository string, nResults int, all bool, reporter bool, project string, statuses []string) <-chan JiraIssue {
+func GetIssueList(repository string, nResults int, all bool, reporter bool, project string, statuses []string, prioritySort bool) <-chan JiraIssue {
 	channel := make(chan JiraIssue)
 	go func() {
 		defer close(channel)
@@ -80,7 +80,7 @@ func GetIssueList(repository string, nResults int, all bool, reporter bool, proj
 			if query != "" {
 				query += "+AND+"
 			}
-			query += "project=DP"
+			query += fmt.Sprintf("project=%s", url.QueryEscape(project))
 		}
 		if len(statuses) > 0 {
 			if query != "" {
@@ -96,6 +96,9 @@ func GetIssueList(repository string, nResults int, all bool, reporter bool, proj
 				}
 			}
 			query += ")"
+		}
+		if prioritySort {
+			query+="+order+by+priority+desc"
 		}
 
 		// response := jiraApiGet(fmt.Sprintf("/issue/DP-1167"))

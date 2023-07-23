@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 func FormatPrState(state api.PrState) string {
@@ -42,21 +43,27 @@ func FormatPipelineState(state string) string {
 }
 
 func FormatIssueStatus(status string) string {
-	// TODO check for jira_status mappings here
-	statusString := ""
-	switch strings.ToUpper(status) {
-	case "IN PROGRESS":
-		statusString = "\033[1;38;5;235;44m IN PROGRESS \033[m"
-	case "NEED TESTING":
-		statusString = "\033[1;38;5;235;46m NEED TESTING \033[m"
-	case "DONE":
-		statusString = "\033[1;38;5;235;42m DONE \033[m"
-	case "BLOCKED":
-		statusString = "\033[1;38;5;235;41m BLOCKED \033[m"
-	default:
-		statusString = fmt.Sprintf("\033[1;38;5;235;47m %s \033[m", status)
+	color := "\033[1;38;5;235;47m"
+	statusMap := viper.GetStringMapStringSlice("jira_status")
+	for k, v := range statusMap {
+		for _, s := range v {
+			if s == status {
+				switch strings.ToUpper(k) {
+				case "INPROGRESS":
+					color = "\033[1;38;5;235;44m"
+				case "TODO":
+					color = "\033[1;38;5;235;43m"
+				case "TESTING":
+					color = "\033[1;38;5;235;46m"
+				case "DONE":
+					color = "\033[1;38;5;235;42m"
+				case "BLOCKED":
+					color = "\033[1;38;5;235;41m"
+				}
+			}
+		}
 	}
-	return statusString
+	return fmt.Sprintf("%s %s \033[m", color, status)
 }
 
 func FormatIssuePriority(id string, name string) string {

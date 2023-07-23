@@ -19,6 +19,7 @@ var ListCmd = &cobra.Command{
 		all, _ := cmd.Flags().GetBool("all")
 		statuses, _ := cmd.Flags().GetStringArray("status")
 		project, _ := cmd.Flags().GetString("project")
+		priority, _ := cmd.Flags().GetBool("priority")
 
 		// convert status based on current settings
 		var statusConversion = []string{}
@@ -34,9 +35,9 @@ var ListCmd = &cobra.Command{
 		}
 
 		fmt.Println()
-		for issue := range api.GetIssueList(viper.GetString("repo"), nResults, all, reporter, project, statusConversion) {
+		for issue := range api.GetIssueList(viper.GetString("repo"), nResults, all, reporter, project, statusConversion, priority) {
 			timeSpent := "-"
-			if issue.Fields.TimeTracking.TimeSpent == " " {
+			if issue.Fields.TimeTracking.TimeSpent != " " {
 				timeSpent = issue.Fields.TimeTracking.TimeSpent
 			}
 			fmt.Printf("%s \033[1;32m%s\033[m %s %s\n", util.FormatIssueStatus(issue.Fields.Status.Name), issue.Key, issue.Fields.Summary, util.FormatIssuePriority(issue.Fields.Priority.Id, issue.Fields.Priority.Name))
@@ -54,6 +55,7 @@ func init() {
 	ListCmd.Flags().IntP("results", "n", 10, "max number of results retrieve")
 	ListCmd.Flags().StringArrayP("status", "s", []string{}, `filter status type.
 	possible options: "todo", "inprogress", "testing", "done", "blocked"`)
+	ListCmd.Flags().BoolP("priority", "P", false, "sort by priority")
 	ListCmd.RegisterFlagCompletionFunc("status", statusCompletion)
 }
 

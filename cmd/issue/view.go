@@ -26,7 +26,7 @@ var ViewCmd = &cobra.Command{
 		issue := <-api.GetIssue(viper.GetString("repo"), key)
 
 		timeSpent := "-"
-		if issue.Fields.TimeTracking.TimeSpent == " " {
+		if issue.Fields.TimeTracking.TimeSpent != " " {
 			timeSpent = issue.Fields.TimeTracking.TimeSpent
 		}
 

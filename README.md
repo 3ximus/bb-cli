@@ -31,7 +31,7 @@ jira_token: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX(192 characters)
 # include branch name at beggining of the pull request (useful to link with jira tickets)
 include_branch_name: true
 
-# define custom status for jira tickets, to more easily filter by the preset options
+# define custom status for jira tickets, to more easily filter by the preset options and colorize output
 jira_status:
   inprogress: ['In Progress', 'Selected for Development']
   todo: ['À FAIRE']
