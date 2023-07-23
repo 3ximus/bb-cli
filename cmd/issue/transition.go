@@ -11,7 +11,8 @@ import (
 
 var TransitionCmd = &cobra.Command{
 	Use:     "transition [KEY] [NEW STATE]",
-	Short:   "[ t ] Transition issue to another state",
+	Short:   "Transition issue to another state",
+	Long:    "Transition issue to another state. If no state is given you'll be prompted to choose on of the available states",
 	Args:    cobra.MaximumNArgs(2),
 	Aliases: []string{"t"},
 	ValidArgsFunction: func(comd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {

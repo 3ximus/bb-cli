@@ -59,8 +59,14 @@ func init() {
 	ListCmd.Flags().Bool("all", false, "return pull request with all possible states.")
 	ListCmd.Flags().String("destination", "", "filter by destination branch.")
 	ListCmd.Flags().String("source", "", "filter by source branch.")
+	ListCmd.RegisterFlagCompletionFunc("source", branchCompletion)
+	ListCmd.RegisterFlagCompletionFunc("destination", branchCompletion)
 }
 
 func stateCompletion(comd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 	return []string{"open", "merged", "declined", "superseded"}, cobra.ShellCompDirectiveDefault
+}
+
+func branchCompletion(comd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	return util.ListBranches(), cobra.ShellCompDirectiveDefault
 }
