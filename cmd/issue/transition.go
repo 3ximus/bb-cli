@@ -7,7 +7,6 @@ import (
 	"regexp"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var TransitionCmd = &cobra.Command{
@@ -19,7 +18,7 @@ var TransitionCmd = &cobra.Command{
 		if len(args) == 0 {
 			return ListBranchesMatchingJiraTickets(), cobra.ShellCompDirectiveDefault
 		} else if len(args) == 1 {
-			transitions := <-api.GetTransitions(viper.GetString("repo"), args[0])
+			transitions := <-api.GetTransitions(args[0])
 			// TODO fix this completion because the options are split into multiple strings by the space
 			var opt = []string{}
 			for _, t := range transitions {
@@ -43,7 +42,7 @@ var TransitionCmd = &cobra.Command{
 
 		// select new state
 		var newState = ""
-		transitions := <-api.GetTransitions(viper.GetString("repo"), key)
+		transitions := <-api.GetTransitions(key)
 		if len(args) == 1 {
 			optIndex := util.UseExternalFZF(transitions, "Transition To > ", func(i int) string {
 				return fmt.Sprintf("%s", transitions[i].To.Name)
@@ -63,7 +62,7 @@ var TransitionCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Println(newState)
+		api.PostTransitions(key, newState)
 	},
 }
 

@@ -35,7 +35,7 @@ var ListCmd = &cobra.Command{
 		}
 
 		fmt.Println()
-		for issue := range api.GetIssueList(viper.GetString("repo"), nResults, all, reporter, project, statusConversion, priority) {
+		for issue := range api.GetIssueList(nResults, all, reporter, project, statusConversion, priority) {
 			timeSpent := "-"
 			if issue.Fields.TimeTracking.TimeSpent != " " {
 				timeSpent = issue.Fields.TimeTracking.TimeSpent

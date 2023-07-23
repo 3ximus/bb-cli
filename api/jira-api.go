@@ -1,8 +1,10 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -31,6 +33,8 @@ func JiraBrowse(domain string, key string) string {
 	return fmt.Sprintf("https://%s.atlassian.net/browse/%s", domain, key)
 }
 
+// REST
+
 func jiraApiGet(endpoint string) []byte {
 	client := &http.Client{}
 	url := fmt.Sprintf("%s/%s", JiraEndpoint(viper.GetString("jira_domain")), endpoint)
@@ -38,25 +42,46 @@ func jiraApiGet(endpoint string) []byte {
 	req, err := http.NewRequest("GET", url, nil)
 	cobra.CheckErr(err)
 	req.SetBasicAuth(viper.GetString("email"), viper.GetString("jira_token"))
-
 	resp, err := client.Do(req)
 	cobra.CheckErr(err)
-
 	if resp.StatusCode != 200 {
 		errBody, err := ioutil.ReadAll(resp.Body)
 		cobra.CheckErr(err)
 		cobra.CheckErr(string(errBody))
 	}
-
 	body, err := ioutil.ReadAll(resp.Body)
 	cobra.CheckErr(err)
-
 	return body
+}
+
+func _jiraApiPostPut(method string, endpoint string, body io.Reader) []byte {
+	client := &http.Client{}
+	url := fmt.Sprintf("%s/%s", JiraEndpoint(viper.GetString("jira_domain")), endpoint)
+	req, err := http.NewRequest(method, url, body)
+	cobra.CheckErr(err)
+	if body != nil {
+		req.Header.Add("Content-Type", "application/json")
+	}
+	req.SetBasicAuth(viper.GetString("email"), viper.GetString("jira_token"))
+	resp, err := client.Do(req)
+	cobra.CheckErr(err)
+	if resp.StatusCode != 204 {
+		errBody, err := ioutil.ReadAll(resp.Body)
+		cobra.CheckErr(err)
+		cobra.CheckErr(string(errBody))
+	}
+	responseBody, err := ioutil.ReadAll(resp.Body)
+	cobra.CheckErr(err)
+	return responseBody
+}
+
+func jiraApiPost(endpoint string, body io.Reader) []byte {
+	return _bbApiPostPut("POST", endpoint, body)
 }
 
 // HIGH LEVEL METHODS
 
-func GetIssue(repository string, key string) <-chan JiraIssue {
+func GetIssue(key string) <-chan JiraIssue {
 	channel := make(chan JiraIssue)
 	go func() {
 		defer close(channel)
@@ -69,7 +94,7 @@ func GetIssue(repository string, key string) <-chan JiraIssue {
 	return channel
 }
 
-func GetIssueList(repository string, nResults int, all bool, reporter bool, project string, statuses []string, prioritySort bool) <-chan JiraIssue {
+func GetIssueList(nResults int, all bool, reporter bool, project string, statuses []string, prioritySort bool) <-chan JiraIssue {
 	channel := make(chan JiraIssue)
 	go func() {
 		defer close(channel)
@@ -117,7 +142,7 @@ func GetIssueList(repository string, nResults int, all bool, reporter bool, proj
 	return channel
 }
 
-func GetTransitions(repository string, key string) <-chan []JiraTransition {
+func GetTransitions(key string) <-chan []JiraTransition {
 	channel := make(chan []JiraTransition)
 	go func() {
 		defer close(channel)
@@ -128,4 +153,16 @@ func GetTransitions(repository string, key string) <-chan []JiraTransition {
 		channel <- data.Transitions
 	}()
 	return channel
+}
+
+func PostTransitions(key string, transition string) {
+	var transitionDTO = struct {
+		Transition struct {
+			Id string `json:"id"`
+		} `json:"transition"`
+	}{}
+	transitionDTO.Transition.Id = transition
+	content, err := json.Marshal(transitionDTO)
+	cobra.CheckErr(err)
+	jiraApiPost(fmt.Sprintf("/issue/%s/transitions", key), bytes.NewReader(content))
 }

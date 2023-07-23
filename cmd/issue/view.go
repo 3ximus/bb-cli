@@ -23,7 +23,7 @@ var ViewCmd = &cobra.Command{
 		} else {
 			key = args[0]
 		}
-		issue := <-api.GetIssue(viper.GetString("repo"), key)
+		issue := <-api.GetIssue(key)
 
 		timeSpent := "-"
 		if issue.Fields.TimeTracking.TimeSpent != " " {
@@ -47,4 +47,3 @@ var ViewCmd = &cobra.Command{
 func init() {
 	ViewCmd.Flags().Bool("web", false, "Open in the browser.")
 }
-
