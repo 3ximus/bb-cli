@@ -31,3 +31,13 @@ func GetCurrentBranch() string {
 	cobra.CheckErr(err)
 	return strings.Trim(branch, "\n")
 }
+
+func ListBranches() []string {
+	branch, err := git.Branch()
+	cobra.CheckErr(err)
+	var branches = []string{}
+	for _, line := range strings.Split(branch, "\n") {
+		branches = append(branches, strings.Trim(line, " *"))
+	}
+	return branches
+}

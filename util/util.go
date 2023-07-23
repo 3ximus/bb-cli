@@ -3,8 +3,10 @@ package util
 import (
 	"bb/api"
 	"fmt"
+	"os"
 	"os/exec"
 	"runtime"
+	"strconv"
 	"strings"
 	"time"
 
@@ -112,4 +114,30 @@ func OpenInBrowser(url string) {
 		err = fmt.Errorf("unsupported platform")
 	}
 	cobra.CheckErr(err)
+}
+
+func UseExternalFZF[T any](list []T, prompt string, toString func(int) string) []int {
+	input := ""
+	for i := range list {
+		input += fmt.Sprintf("%d %s\n", i, toString(i))
+	}
+	cmd := exec.Command("fzf", "-m", "--height", "20%", "--reverse", "--with-nth", "2..", "--prompt", prompt)
+	var selectionBuffer strings.Builder
+	cmd.Stdin = strings.NewReader(input)
+	cmd.Stdout = &selectionBuffer
+	cmd.Stderr = os.Stderr
+	err := cmd.Start()
+	cobra.CheckErr(err)
+	err = cmd.Wait()
+
+	var result []int
+	for _, r := range strings.Split(selectionBuffer.String(), "\n") {
+		if r == "" {
+			continue
+		}
+		idx, err := strconv.Atoi(strings.Split(r, " ")[0])
+		cobra.CheckErr(err)
+		result = append(result, idx)
+	}
+	return result
 }

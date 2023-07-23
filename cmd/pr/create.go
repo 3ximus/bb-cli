@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"strconv"
 	"strings"
 
 	// "github.com/ktr0731/go-fuzzyfinder"
@@ -161,7 +160,7 @@ func chooseReviewers(reviewers []api.User) []int {
 		return []int{}
 	}
 
-	return useExternalFZF(reviewers, func(i int) string {
+	return util.UseExternalFZF(reviewers, "Reviewers > ", func(i int) string {
 		return fmt.Sprintf("%s", reviewers[i].Nickname)
 	})
 
@@ -171,30 +170,4 @@ func chooseReviewers(reviewers []api.User) []int {
 	// }, fuzzyfinder.WithCursorPosition(fuzzyfinder.CursorPositionTop))
 	// cobra.CheckErr(err)
 	// return indexes
-}
-
-func useExternalFZF(list []api.User, toString func(int) string) []int {
-	input := ""
-	for i := range list {
-		input += fmt.Sprintf("%d %s\n", i, toString(i))
-	}
-	cmd := exec.Command("fzf", "-m", "--height", "20%", "--reverse", "--with-nth", "2..", "--prompt", "Reviewers > ")
-	var selectionBuffer strings.Builder
-	cmd.Stdin = strings.NewReader(input)
-	cmd.Stdout = &selectionBuffer
-	cmd.Stderr = os.Stderr
-	err := cmd.Start()
-	cobra.CheckErr(err)
-	err = cmd.Wait()
-
-	var result []int
-	for _, r := range strings.Split(selectionBuffer.String(), "\n") {
-		if r == "" {
-			continue
-		}
-		idx, err := strconv.Atoi(strings.Split(r, " ")[0])
-		cobra.CheckErr(err)
-		result = append(result, idx)
-	}
-	return result
 }

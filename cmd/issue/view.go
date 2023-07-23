@@ -47,3 +47,4 @@ var ViewCmd = &cobra.Command{
 func init() {
 	ViewCmd.Flags().Bool("web", false, "Open in the browser.")
 }
+

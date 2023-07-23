@@ -11,8 +11,25 @@ import (
 )
 
 var TransitionCmd = &cobra.Command{
-	Use:   "transition [KEY]",
-	Short: "Transition issue to another state",
+	Use:     "transition [KEY] [NEW STATE]",
+	Short:   "[ t ] Transition issue to another state",
+	Args:    cobra.MaximumNArgs(2),
+	Aliases: []string{"t"},
+	ValidArgsFunction: func(comd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		if len(args) == 0 {
+			return ListBranchesMatchingJiraTickets(), cobra.ShellCompDirectiveDefault
+		} else if len(args) == 1 {
+			transitions := <-api.GetTransitions(viper.GetString("repo"), args[0])
+			// TODO fix this completion because the options are split into multiple strings by the space
+			var opt = []string{}
+			for _, t := range transitions {
+				opt = append(opt, "\""+t.To.Name+"\"")
+			}
+			return opt, cobra.ShellCompDirectiveDefault
+		} else {
+			return []string{}, cobra.ShellCompDirectiveDefault
+		}
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		var key string
 		if len(args) == 0 {
@@ -23,12 +40,44 @@ var TransitionCmd = &cobra.Command{
 		} else {
 			key = args[0]
 		}
+
+		// select new state
+		var newState = ""
 		transitions := <-api.GetTransitions(viper.GetString("repo"), key)
+		if len(args) == 1 {
+			optIndex := util.UseExternalFZF(transitions, "Transition To > ", func(i int) string {
+				return fmt.Sprintf("%s", transitions[i].To.Name)
+			})
+			if len(optIndex) > 0 {
+				newState = transitions[optIndex[0]].Id
+			}
+		} else {
+			for _, t := range transitions {
+				if t.To.Name == args[1] {
+					newState = t.Id
+					break
+				}
+			}
+		}
+		if key == "" || newState == "" {
+			return
+		}
 
-		fmt.Println(transitions)
-
+		fmt.Println(newState)
 	},
 }
 
 func init() {
+}
+
+func ListBranchesMatchingJiraTickets() []string {
+	var branches = []string{}
+	re := regexp.MustCompile(api.JiraIssueKeyRegex)
+	for _, branch := range util.ListBranches() {
+		fmt.Println(branch)
+		if re.MatchString(branch) {
+			branches = append(branches, re.FindString(branch))
+		}
+	}
+	return branches
 }
