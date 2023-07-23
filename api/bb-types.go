@@ -28,6 +28,12 @@ const (
 	SUPERSEDED PrState = "superseded"
 )
 
+type Branch struct {
+	Branch struct {
+		Name string `json:"name"`
+	} `json:"branch"`
+}
+
 type PullRequest struct {
 	ID           int     `json:"id"`
 	Title        string  `json:"title"`
@@ -38,17 +44,9 @@ type PullRequest struct {
 	Author       User    `json:"author"`
 	ClosedBy     User    `json:"closed_by"`
 	CloseSource  bool    `json:"close_source_branch"`
-	Destination  struct {
-		Branch struct {
-			Name string `json:"name"`
-		}
-	}
-	Source struct {
-		Branch struct {
-			Name string `json:"name"`
-		}
-	}
-	Links struct {
+	Destination  Branch
+	Source       Branch
+	Links        struct {
 		Html struct {
 			Href string
 		}
@@ -59,20 +57,12 @@ type PullRequest struct {
 }
 
 type CreatePullRequest struct {
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	CloseSource bool   `json:"close_source_branch"`
-	Destination struct {
-		Branch struct {
-			Name string `json:"name"`
-		} `json:"branch"`
-	} `json:"destination"`
-	Source struct {
-		Branch struct {
-			Name string `json:"name"`
-		} `json:"branch"`
-	} `json:"source"`
-	Reviewers []struct {
+	Title       string  `json:"title"`
+	Description string  `json:"description"`
+	CloseSource bool    `json:"close_source_branch"`
+	Destination *Branch `json:"destination,omitempty"`
+	Source      *Branch `json:"source,omitempty"`
+	Reviewers   []struct {
 		AccountId string `json:"account_id"`
 	} `json:"reviewers,omitempty"`
 }

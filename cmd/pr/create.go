@@ -68,6 +68,7 @@ var CreateCmd = &cobra.Command{
 		reviewersIndexes := chooseReviewers(reviewers)
 
 		if include_branch_name {
+			// TODO extract jira ticket format here
 			title = source + " " + title
 		}
 

@@ -42,6 +42,7 @@ func FormatPipelineState(state string) string {
 }
 
 func FormatIssueStatus(status string) string {
+	// TODO check for jira_status mappings here
 	statusString := ""
 	switch strings.ToUpper(status) {
 	case "IN PROGRESS":
