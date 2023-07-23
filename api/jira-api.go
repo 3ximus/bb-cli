@@ -18,6 +18,11 @@ type IssuesPaginatedResponse struct {
 	Total      int `json:"total"`
 }
 
+type TransitionsPaginatedResponse struct {
+	Expand      string
+	Transitions []JiraTransition
+}
+
 func JiraEndpoint(domain string) string {
 	return fmt.Sprintf("https://%s.atlassian.net/rest/api/3", domain)
 }
@@ -98,7 +103,7 @@ func GetIssueList(repository string, nResults int, all bool, reporter bool, proj
 			query += ")"
 		}
 		if prioritySort {
-			query+="+order+by+priority+desc"
+			query += "+order+by+priority+desc"
 		}
 
 		// response := jiraApiGet(fmt.Sprintf("/issue/DP-1167"))
@@ -108,6 +113,19 @@ func GetIssueList(repository string, nResults int, all bool, reporter bool, proj
 		for _, issue := range paginatedReponse.Issues {
 			channel <- issue
 		}
+	}()
+	return channel
+}
+
+func GetTransitions(repository string, key string) <-chan []JiraTransition {
+	channel := make(chan []JiraTransition)
+	go func() {
+		defer close(channel)
+		var data TransitionsPaginatedResponse
+		response := jiraApiGet(fmt.Sprintf("/issue/%s/transitions", key))
+		err := json.Unmarshal(response, &data)
+		cobra.CheckErr(err)
+		channel <- data.Transitions
 	}()
 	return channel
 }

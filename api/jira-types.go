@@ -71,6 +71,15 @@ type JiraIssue struct {
 	} `json:"fields"`
 }
 
+type JiraTransition struct {
+	Id   string
+	Name string
+	To   struct {
+		Id   string
+		Name string
+	}
+}
+
 // DEFAULT ACTIONS OVERRIDES
 
 // String is used both by fmt.Print and by Cobra in help text
