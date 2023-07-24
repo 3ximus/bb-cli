@@ -51,9 +51,16 @@ type PullRequest struct {
 			Href string
 		}
 	}
-	Status    CommitStatus
-	CreatedOn time.Time `json:"created_on"`
-	UpdatedOn time.Time `json:"updated_on"`
+	Status       CommitStatus
+	CreatedOn    time.Time `json:"created_on"`
+	UpdatedOn    time.Time `json:"updated_on"`
+	Participants []struct {
+		User           User `json:"user"`
+		Role           string
+		Approved       bool
+		State          string
+		ParticipatedOn time.Time `json:"participated_on"`
+	}
 }
 
 type CreatePullRequest struct {

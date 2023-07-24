@@ -23,7 +23,7 @@ var EditCmd = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 	ValidArgsFunction: func(comd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		var opt = []string{}
-		for pr := range api.GetPrList(util.GetCurrentRepo(), []string{string(api.OPEN)}, "", "", "", "", 1, false) {
+		for pr := range api.GetPrList(util.GetCurrentRepo(), []string{string(api.OPEN)}, "", "", "", "", 1, false, false) {
 			opt = append(opt, fmt.Sprint(pr.ID))
 		}
 		return opt, cobra.ShellCompDirectiveDefault

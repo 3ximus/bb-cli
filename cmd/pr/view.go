@@ -18,7 +18,7 @@ var ViewCmd = &cobra.Command{
 	Args: cobra.MaximumNArgs(1),
 	ValidArgsFunction: func(comd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		var opt = []string{}
-		for pr := range api.GetPrList(util.GetCurrentRepo(), []string{string(api.OPEN)}, "", "", "", "", 1, false) {
+		for pr := range api.GetPrList(util.GetCurrentRepo(), []string{string(api.OPEN)}, "", "", "", "", 1, false, false) {
 			opt = append(opt, fmt.Sprint(pr.ID))
 		}
 		return opt, cobra.ShellCompDirectiveDefault
@@ -31,7 +31,7 @@ var ViewCmd = &cobra.Command{
 		if len(args) == 0 {
 			branch := util.GetCurrentBranch()
 			// retrieve id of pr for current branch
-			pr := <-api.GetPrList(repo, []string{string(api.OPEN), string(api.MERGED), string(api.DECLINED), string(api.SUPERSEDED)}, "", "", branch, "", 1, false)
+			pr := <-api.GetPrList(repo, []string{string(api.OPEN), string(api.MERGED), string(api.DECLINED), string(api.SUPERSEDED)}, "", "", branch, "", 1, false, false)
 			if pr.ID == 0 {
 				cobra.CheckErr("No pr found for this branch")
 			}
@@ -47,7 +47,16 @@ var ViewCmd = &cobra.Command{
 
 		pr := <-api.GetPr(repo, id)
 		fmt.Printf("\n%s \033[1;32m#%d\033[m \033[1;37m%s\033[m  \033[1;34m[ %s → %s]\033[m\n", util.FormatPrState(pr.State), pr.ID, pr.Title, pr.Source.Branch.Name, pr.Destination.Branch.Name)
-		fmt.Printf("\033[37m  opened by %s, %d comments, last updated: %s\033[m\n\n", pr.Author.Nickname, pr.CommentCount, util.TimeAgo(pr.UpdatedOn))
+		fmt.Printf("\033[37m  opened by %s, %d comments, last updated: %s\033[m\n", pr.Author.Nickname, pr.CommentCount, util.TimeAgo(pr.UpdatedOn))
+		fmt.Print("\033[37m  reviewers: \n")
+		for _, participant := range pr.Participants {
+			if participant.Approved {
+				fmt.Printf("    \033[1;32m✓ %s\n", participant.User.DisplayName)
+			} else {
+				fmt.Printf("    \033[0;37m%s\n", participant.User.DisplayName)
+			}
+		}
+		fmt.Print("\033[m\n")
 		if pr.Description != "" {
 			fmt.Printf("%s\n\n", pr.Description)
 		}

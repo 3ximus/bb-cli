@@ -124,6 +124,7 @@ func GetPrList(
 	destination string,
 	pages int,
 	status bool,
+	participants bool,
 ) <-chan PullRequest {
 	channel := make(chan PullRequest)
 	go func() {
@@ -157,12 +158,17 @@ func GetPrList(
 		if destination != "" {
 			destinationQuery = fmt.Sprintf(" AND destination.branch.name = \"%s\"", destination)
 		}
+		participantsExpansion := ""
+		if participants {
+			// this should be fields=* but it doesn't work
+			participantsExpansion = "&fields=values.id,values.title,values.description,values.state,values.comment_count,values.task_count,values.author,values.closed_by,values.close_source_branch,values.destination,values.source,values.links,values.status,values.created_on,values.updated_on,values.participants"
+		}
 
 		var prevResponse BBPaginatedResponse[PullRequest]
 		for i := 0; i < pages; i++ {
 			var response []byte
 			if i == 0 {
-				response = bbApiGet(fmt.Sprintf("repositories/%s/pullrequests?sort=-id&q=%s", repository, url.QueryEscape(stateQuery+authorQuery+searchQuery+sourceQuery+destinationQuery)))
+				response = bbApiGet(fmt.Sprintf("repositories/%s/pullrequests?sort=-id%s&q=%s", repository, participantsExpansion, url.QueryEscape(stateQuery+authorQuery+searchQuery+sourceQuery+destinationQuery)))
 			} else {
 				newUrl := strings.Replace(prevResponse.Next, "https://api.bitbucket.org/2.0/", "", 1)
 				if newUrl == "" {

@@ -17,7 +17,7 @@ var ReviewCmd = &cobra.Command{
 	If no ID is given the operation will be applied to the first PR found for the current branch`,
 	ValidArgsFunction: func(comd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		var opt = []string{}
-		for pr := range api.GetPrList(util.GetCurrentRepo(), []string{string(api.OPEN)}, "", "", "", "", 1, false) {
+		for pr := range api.GetPrList(util.GetCurrentRepo(), []string{string(api.OPEN)}, "", "", "", "", 1, false, false) {
 			opt = append(opt, fmt.Sprint(pr.ID))
 		}
 		return opt, cobra.ShellCompDirectiveDefault
@@ -31,7 +31,7 @@ var ReviewCmd = &cobra.Command{
 		if len(args) == 0 {
 			branch := util.GetCurrentBranch()
 			// retrieve id of pr for current branch
-			pr := <-api.GetPrList(repo, []string{string(api.OPEN), string(api.MERGED), string(api.DECLINED), string(api.SUPERSEDED)}, "", "", branch, "", 1, false)
+			pr := <-api.GetPrList(repo, []string{string(api.OPEN), string(api.MERGED), string(api.DECLINED), string(api.SUPERSEDED)}, "", "", branch, "", 1, false, false)
 			if pr.ID == 0 {
 				cobra.CheckErr("No pr found for this branch")
 			}
