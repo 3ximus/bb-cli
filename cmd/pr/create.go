@@ -58,6 +58,10 @@ var CreateCmd = &cobra.Command{
 		close_source, _ := cmd.Flags().GetBool("close_source")
 		include_branch_name := viper.GetBool("include_branch_name")
 
+		if source == "" {
+			source = util.GetCurrentBranch()
+		}
+
 		// select reviewers
 		members, reviewers := <-membersChannel, <-reviewersChannel
 		if len(reviewers) == 0 {
@@ -121,13 +125,12 @@ var CreateCmd = &cobra.Command{
 func init() {
 	CreateCmd.Flags().StringP("title", "t", "", "title for the pull request")
 	CreateCmd.Flags().StringP("body", "b", "", "description for the pull request")
-	CreateCmd.Flags().StringP("source", "s", util.GetCurrentBranch(), "source branch. Defaults to current branch")
+	CreateCmd.Flags().StringP("source", "s", "", "source branch. Defaults to current branch")
 	CreateCmd.Flags().StringP("destination", "d", "dev", "description for the pull request: Defaults to dev")
 	CreateCmd.RegisterFlagCompletionFunc("source", branchCompletion)
 	CreateCmd.RegisterFlagCompletionFunc("destination", branchCompletion)
 	CreateCmd.Flags().BoolP("close-source", "c", true, "close source branch")
 	CreateCmd.Flags().StringArrayP("reviewer", "r", []string{}, "add reviewer by their name. \033[31mNot implemented\033[m")
-
 	CreateCmd.Flags().BoolP("include-branch-name", "i", false, "include branch name in the pull request name")
 }
 

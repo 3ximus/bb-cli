@@ -28,7 +28,9 @@ func GetCurrentRepo() string {
 
 func GetCurrentBranch() string {
 	branch, err := git.Branch(branch.ShowCurrent)
-	cobra.CheckErr(err)
+	if err != nil {
+		cobra.CheckErr(branch)
+	}
 	return strings.Trim(branch, "\n")
 }
 

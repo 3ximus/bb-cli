@@ -20,7 +20,7 @@ var EditCmd = &cobra.Command{
 	Long: `Allows edits to an existing pull request
 	If no options are given to edit title or description it will open your EDITOR to write any changes to them.
 	By default title is on first line and description on the lines bellow`,
-	Args:  cobra.ExactArgs(1),
+	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		id, err := strconv.Atoi(args[0])
 		cobra.CheckErr(err)
@@ -83,6 +83,8 @@ func init() {
 	EditCmd.Flags().StringP("body", "b", "", "description for the pull request")
 	EditCmd.Flags().StringP("source", "s", "", "source branch. Defaults to current branch")
 	EditCmd.Flags().StringP("destination", "d", "", "description for the pull request")
+	EditCmd.RegisterFlagCompletionFunc("source", branchCompletion)
+	EditCmd.RegisterFlagCompletionFunc("destination", branchCompletion)
 	EditCmd.Flags().BoolP("close-source", "c", false, "close source branch")
 	EditCmd.Flags().StringArrayP("reviewer", "r", []string{}, "add reviewer by their name. \033[31mNot implemented\033[m")
 }
