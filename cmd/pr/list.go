@@ -40,10 +40,10 @@ var ListCmd = &cobra.Command{
 				fmt.Printf(" %s", util.FormatPipelineState(pr.Status.State))
 			}
 			if participants {
-				fmt.Print(" ( ✓ ")
+				fmt.Print(" ( ")
 				for _, participant := range pr.Participants {
 					if participant.Approved {
-						fmt.Printf("\033[1;32m%s, ", participant.User.DisplayName)
+						fmt.Printf("\033[1;32m✓ %s, ", participant.User.DisplayName)
 					} else {
 						fmt.Printf("\033[0;37m%s, ", participant.User.DisplayName)
 					}
