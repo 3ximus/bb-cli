@@ -15,6 +15,13 @@ var ReviewCmd = &cobra.Command{
 	Short: "Review a pull request (merge, approve, unnaprove, decline ...)",
 	Long: `Merge, approve, unnaprove, decline or request/unrequest changes in a pull request
 	If no ID is given the operation will be applied to the first PR found for the current branch`,
+	ValidArgsFunction: func(comd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		var opt = []string{}
+		for pr := range api.GetPrList(util.GetCurrentRepo(), []string{string(api.OPEN)}, "", "", "", "", 1, false) {
+			opt = append(opt, fmt.Sprint(pr.ID))
+		}
+		return opt, cobra.ShellCompDirectiveDefault
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		repo := viper.GetString("repo")
 

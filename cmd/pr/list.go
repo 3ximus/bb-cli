@@ -28,8 +28,9 @@ var ListCmd = &cobra.Command{
 
 		prChannel := api.GetPrList(viper.GetString("repo"), states, author, search, source, destination, pages, status)
 
-		fmt.Printf("\n  Pull Requests for \033[1;36m%s\033[m\n\n", viper.GetString("repo"))
+		// fmt.Printf("\n  Pull Requests for \033[1;36m%s\033[m\n\n", viper.GetString("repo"))
 		count := 0
+		fmt.Println()
 		for pr := range prChannel {
 			// if we didn't provide filter don't show the pr status
 			fmt.Printf("%-19s \033[1;32m#%d\033[m %s  \033[1;34m[ %s → %s]\033[m\n", util.FormatPrState(pr.State), pr.ID, pr.Title, pr.Source.Branch.Name, pr.Destination.Branch.Name)

@@ -131,7 +131,6 @@ func GetIssueList(nResults int, all bool, reporter bool, project string, statuse
 			query += "+order+by+priority+desc"
 		}
 
-		// response := jiraApiGet(fmt.Sprintf("/issue/DP-1167"))
 		response := jiraApiGet(fmt.Sprintf("search?maxResults=%d&fields=*all&jql=%s", nResults, query))
 		err := json.Unmarshal(response, &paginatedReponse)
 		cobra.CheckErr(err)

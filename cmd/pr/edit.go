@@ -21,6 +21,13 @@ var EditCmd = &cobra.Command{
 	If no options are given to edit title or description it will open your EDITOR to write any changes to them.
 	By default title is on first line and description on the lines bellow`,
 	Args: cobra.ExactArgs(1),
+	ValidArgsFunction: func(comd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		var opt = []string{}
+		for pr := range api.GetPrList(util.GetCurrentRepo(), []string{string(api.OPEN)}, "", "", "", "", 1, false) {
+			opt = append(opt, fmt.Sprint(pr.ID))
+		}
+		return opt, cobra.ShellCompDirectiveDefault
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		id, err := strconv.Atoi(args[0])
 		cobra.CheckErr(err)

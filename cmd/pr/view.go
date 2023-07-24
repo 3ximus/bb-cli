@@ -15,6 +15,14 @@ var ViewCmd = &cobra.Command{
 	Short: "View details of a pull request",
 	Long: `View details of a pull request from given ID.
 	If no ID is given we'll try to find an open pull request that has it's source as the current branch`,
+	Args: cobra.MaximumNArgs(1),
+	ValidArgsFunction: func(comd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		var opt = []string{}
+		for pr := range api.GetPrList(util.GetCurrentRepo(), []string{string(api.OPEN)}, "", "", "", "", 1, false) {
+			opt = append(opt, fmt.Sprint(pr.ID))
+		}
+		return opt, cobra.ShellCompDirectiveDefault
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		repo := viper.GetString("repo")
 
@@ -33,12 +41,17 @@ var ViewCmd = &cobra.Command{
 			cobra.CheckErr(err)
 		}
 
-		prChannel := api.GetPr(repo, id)
 		statusesChannel := api.GetPrStatuses(repo, id)
+
+		var opt = []string{}
+		for pr := range api.GetPrList(viper.GetString("repo"), []string{string(api.OPEN)}, "", "", "", "", 1, false) {
+			opt = append(opt, fmt.Sprint(pr.ID))
+		}
+		fmt.Println(opt)
 
 		// BASIC INFO
 
-		pr := <-prChannel
+		pr := <-api.GetPr(repo, id)
 		fmt.Printf("\n%s \033[1;32m#%d\033[m \033[1;37m%s\033[m  \033[1;34m[ %s → %s]\033[m\n", util.FormatPrState(pr.State), pr.ID, pr.Title, pr.Source.Branch.Name, pr.Destination.Branch.Name)
 		fmt.Printf("\033[37m  opened by %s, %d comments, last updated: %s\033[m\n\n", pr.Author.Nickname, pr.CommentCount, util.TimeAgo(pr.UpdatedOn))
 		if pr.Description != "" {

@@ -74,7 +74,6 @@ func ListBranchesMatchingJiraTickets() []string {
 	var branches = []string{}
 	re := regexp.MustCompile(api.JiraIssueKeyRegex)
 	for _, branch := range util.ListBranches() {
-		fmt.Println(branch)
 		if re.MatchString(branch) {
 			branches = append(branches, re.FindString(branch))
 		}
