@@ -43,12 +43,6 @@ var ViewCmd = &cobra.Command{
 
 		statusesChannel := api.GetPrStatuses(repo, id)
 
-		var opt = []string{}
-		for pr := range api.GetPrList(viper.GetString("repo"), []string{string(api.OPEN)}, "", "", "", "", 1, false) {
-			opt = append(opt, fmt.Sprint(pr.ID))
-		}
-		fmt.Println(opt)
-
 		// BASIC INFO
 
 		pr := <-api.GetPr(repo, id)

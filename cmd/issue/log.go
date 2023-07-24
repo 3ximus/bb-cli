@@ -9,9 +9,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var AssignCmd = &cobra.Command{
-	Use:     "assign [KEY] [USER]",
-	Short:   "Assign issue to another user",
+var LogCmd = &cobra.Command{
+	Use:     "log [KEY] [TIME]",
+	Short:   "Log time for an issue",
 	Args:    cobra.MaximumNArgs(2),
 	ValidArgsFunction: func(comd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) == 0 {
