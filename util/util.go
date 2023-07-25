@@ -51,6 +51,8 @@ func FormatIssueStatus(status string) string {
 		for _, s := range v {
 			if s == status {
 				switch strings.ToUpper(k) {
+				// case "OPEN":
+				// 	color = "\033[1;38;5;235;44m"
 				case "INPROGRESS":
 					color = "\033[1;38;5;235;44m"
 				case "TODO":

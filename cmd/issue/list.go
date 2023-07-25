@@ -64,7 +64,7 @@ func init() {
 	ListCmd.Flags().BoolP("all", "a", false, "filter all issues. (Not assigned or reporting to current user)")
 	ListCmd.Flags().BoolP("reporter", "r", false, "filter issues reporting to current user")
 	ListCmd.Flags().StringArrayP("status", "s", []string{}, `filter status type.
-	possible options: "todo", "inprogress", "testing", "done", "blocked"`)
+	possible options: "open", "todo", "inprogress", "testing", "done", "blocked"`)
 	ListCmd.RegisterFlagCompletionFunc("status", statusCompletion)
 
 	// display
@@ -75,5 +75,5 @@ func init() {
 }
 
 func statusCompletion(comd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-	return []string{"todo", "inprogress", "testing", "done", "blocked"}, cobra.ShellCompDirectiveDefault
+	return []string{"open", "todo", "inprogress", "testing", "done", "blocked"}, cobra.ShellCompDirectiveDefault
 }

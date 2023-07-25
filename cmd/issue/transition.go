@@ -44,17 +44,20 @@ var TransitionCmd = &cobra.Command{
 		// select new state
 		var newState = ""
 		transitions := <-api.GetTransitions(key)
+		var newStateName = ""
 		if len(args) == 1 {
 			optIndex := util.UseExternalFZF(transitions, "Transition To > ", func(i int) string {
 				return fmt.Sprintf("%s", transitions[i].To.Name)
 			})
 			if len(optIndex) > 0 {
 				newState = transitions[optIndex[0]].Id
+				newStateName = transitions[optIndex[0]].To.Name
 			}
 		} else {
 			for _, t := range transitions {
 				if t.To.Name == args[1] {
 					newState = t.Id
+					newStateName = t.To.Name
 					break
 				}
 			}
@@ -64,7 +67,7 @@ var TransitionCmd = &cobra.Command{
 		}
 
 		api.PostTransitions(key, newState)
-		fmt.Printf("Issue status changed for %s -> \033[1;32m%s\033[m\n", key, newState)
+		fmt.Printf("Issue status changed for %s -> \033[1;32m%s\033[m\n", key, newStateName)
 	},
 }
 
