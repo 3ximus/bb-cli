@@ -1,6 +1,7 @@
 package util
 
 import (
+	"errors"
 	"regexp"
 	"strings"
 
@@ -26,12 +27,12 @@ func GetCurrentRepo() string {
 	return remotePattern.ReplaceAllString(strings.Trim(url, "\n"), "$1")
 }
 
-func GetCurrentBranch() string {
-	branch, err := git.Branch(branch.ShowCurrent)
+func GetCurrentBranch() (string, error) {
+	output, err := git.Branch(branch.ShowCurrent)
 	if err != nil {
-		cobra.CheckErr(branch)
+		err = errors.New(output) // error message is actually stored
 	}
-	return strings.Trim(branch, "\n")
+	return strings.Trim(output, "\n"), err
 }
 
 func ListBranches() []string {

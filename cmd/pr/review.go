@@ -29,7 +29,8 @@ var ReviewCmd = &cobra.Command{
 		var id int
 		var err error
 		if len(args) == 0 {
-			branch := util.GetCurrentBranch()
+			branch, err := util.GetCurrentBranch()
+			cobra.CheckErr(err)
 			// retrieve id of pr for current branch
 			pr := <-api.GetPrList(repo, []string{string(api.OPEN), string(api.MERGED), string(api.DECLINED), string(api.SUPERSEDED)}, "", "", branch, "", 1, false, false)
 			if pr.ID == 0 {

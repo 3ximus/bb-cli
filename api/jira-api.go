@@ -168,6 +168,7 @@ func PostTransitions(key string, transition string) {
 // Post worklog in seconds
 func PostWorklog(key string, seconds int) {
 	var worklogDTO = struct {
+		// TODO add a Started field that's the current time - seconds
 		TimeSpent int `json:"timeSpentSeconds"`
 	}{}
 	worklogDTO.TimeSpent = seconds

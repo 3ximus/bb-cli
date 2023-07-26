@@ -59,7 +59,9 @@ var CreateCmd = &cobra.Command{
 		include_branch_name := viper.GetBool("include_branch_name")
 
 		if source == "" {
-			source = util.GetCurrentBranch()
+			var err error
+			source, err = util.GetCurrentBranch()
+			cobra.CheckErr(err)
 		}
 
 		// select reviewers
