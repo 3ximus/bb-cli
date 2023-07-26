@@ -64,7 +64,7 @@ func _jiraApiPostPut(method string, endpoint string, body io.Reader) []byte {
 	req.SetBasicAuth(viper.GetString("email"), viper.GetString("jira_token"))
 	resp, err := client.Do(req)
 	cobra.CheckErr(err)
-	if resp.StatusCode != 204 {
+	if resp.StatusCode != 204 && resp.StatusCode != 201 {
 		errBody, err := ioutil.ReadAll(resp.Body)
 		cobra.CheckErr(err)
 		cobra.CheckErr(string(errBody))
@@ -163,4 +163,15 @@ func PostTransitions(key string, transition string) {
 	content, err := json.Marshal(transitionDTO)
 	cobra.CheckErr(err)
 	jiraApiPost(fmt.Sprintf("/issue/%s/transitions", key), bytes.NewReader(content))
+}
+
+// Post worklog in seconds
+func PostWorklog(key string, seconds int) {
+	var worklogDTO = struct {
+		TimeSpent int `json:"timeSpentSeconds"`
+	}{}
+	worklogDTO.TimeSpent = seconds
+	content, err := json.Marshal(worklogDTO)
+	cobra.CheckErr(err)
+	jiraApiPost(fmt.Sprintf("/issue/%s/worklog", key), bytes.NewReader(content))
 }

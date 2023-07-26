@@ -10,9 +10,10 @@ import (
 )
 
 var LogCmd = &cobra.Command{
-	Use:     "log [KEY] [TIME]",
-	Short:   "Log time for an issue",
-	Args:    cobra.MaximumNArgs(2),
+	Use:   "log [KEY] [TIME...]",
+	Short: "Log time for an issue",
+	Long: `Log time for an issue.
+	Time format "2h 30m", "1d 5m" ...`,
 	ValidArgsFunction: func(comd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) == 0 {
 			return ListBranchesMatchingJiraTickets(), cobra.ShellCompDirectiveDefault
@@ -31,6 +32,10 @@ var LogCmd = &cobra.Command{
 			key = args[0]
 		}
 
-		fmt.Println("Not implemented.", key)
+		seconds, err := util.ConvertToSeconds(args[1:])
+		cobra.CheckErr(err)
+
+		api.PostWorklog(key, seconds)
+		fmt.Printf("Logged time for %s +\033[1;32m%d\033[m\n", key, seconds)
 	},
 }
