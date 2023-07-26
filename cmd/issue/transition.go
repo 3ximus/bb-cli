@@ -9,6 +9,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// TODO allow transition of multiple issues, pass new transition as a flag
+
 var TransitionCmd = &cobra.Command{
 	Use:     "transition [KEY] [NEW STATE]",
 	Short:   "Transition issue to another state",

@@ -103,6 +103,43 @@ func TimeAgo(updatedOn time.Time) string {
 	return fmt.Sprintf("%d years ago", int(duration.Hours()/8760))
 }
 
+func ConvertToSeconds(timeStrings []string) (int, error) {
+	var seconds int
+	for _, timeString := range timeStrings {
+		timeParts := strings.Split(timeString, " ")
+		for _, part := range timeParts {
+			if len(part) == 0 {
+				continue
+			}
+			value, unit := part[:len(part)-1], part[len(part)-1]
+			switch unit {
+			case 'h':
+				hours, err := strconv.Atoi(value)
+				if err != nil {
+					return 0, fmt.Errorf("Invalid format: %s", timeString)
+				}
+				seconds += hours * 60 * 60
+			case 'm':
+				minutes, err := strconv.Atoi(value)
+				if err != nil {
+					return 0, fmt.Errorf("Invalid format: %s", timeString)
+				}
+				seconds += minutes * 60
+			case 'd':
+				days, err := strconv.Atoi(value)
+				if err != nil {
+					return 0, fmt.Errorf("Invalid format: %s", timeString)
+				}
+				seconds += days * 8 * 60 * 60
+			default:
+				return 0, fmt.Errorf("Invalid format: %s", timeString)
+			}
+		}
+	}
+
+	return seconds, nil
+}
+
 func OpenInBrowser(url string) {
 	var err error
 	switch runtime.GOOS {

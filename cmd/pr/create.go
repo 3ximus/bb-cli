@@ -81,7 +81,9 @@ var CreateCmd = &cobra.Command{
 			Description: description,
 			CloseSource: close_source,
 		}
+		newpr.Source = &api.Branch{}
 		newpr.Source.Branch.Name = source
+		newpr.Destination = &api.Branch{}
 		newpr.Destination.Branch.Name = destination
 		for _, idx := range reviewersIndexes {
 			newpr.Reviewers = append(newpr.Reviewers, struct {
