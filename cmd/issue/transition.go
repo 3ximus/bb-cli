@@ -9,46 +9,36 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// TODO allow transition of multiple issues, pass new transition as a flag
-
 var TransitionCmd = &cobra.Command{
-	Use:     "transition [KEY] [NEW STATE]",
-	Short:   "Transition issue to another state",
-	Long:    "Transition issue to another state. If no state is given you'll be prompted to choose on of the available states",
-	Args:    cobra.MaximumNArgs(2),
+	Use:     "transition [KEY]...",
+	Short:   "Transition issues to another state",
+	Long:    "Transition issues to another state. You'll be prompted to choose one of the available states",
+	Args:    cobra.ExactArgs(1),
 	Aliases: []string{"t"},
 	ValidArgsFunction: func(comd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) == 0 {
 			return ListBranchesMatchingJiraTickets(), cobra.ShellCompDirectiveDefault
-		} else if len(args) == 1 {
-			transitions := <-api.GetTransitions(args[0])
-			// TODO fix this completion because the options are split into multiple strings by the space
-			var opt = []string{}
-			for _, t := range transitions {
-				opt = append(opt, "\""+t.To.Name+"\"")
-			}
-			return opt, cobra.ShellCompDirectiveDefault
 		} else {
 			return []string{}, cobra.ShellCompDirectiveDefault
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		var key string
+		var keys []string
 		if len(args) == 0 {
 			branch, err := util.GetCurrentBranch()
 			cobra.CheckErr(err)
 			re := regexp.MustCompile(api.JiraIssueKeyRegex)
-			key = re.FindString(branch)
+			keys = []string{re.FindString(branch)}
 			// TODO maybe use an option to get the key from a PR
 		} else {
-			key = args[0]
+			keys = args
 		}
 
-		// select new state
-		var newState = ""
-		transitions := <-api.GetTransitions(key)
-		var newStateName = ""
-		if len(args) == 1 {
+		for _, key := range keys {
+			// select new state
+			var newState = ""
+			transitions := <-api.GetTransitions(key)
+			var newStateName = ""
 			optIndex := util.UseExternalFZF(transitions, "Transition To > ", func(i int) string {
 				return fmt.Sprintf("%s", transitions[i].To.Name)
 			})
@@ -56,21 +46,13 @@ var TransitionCmd = &cobra.Command{
 				newState = transitions[optIndex[0]].Id
 				newStateName = transitions[optIndex[0]].To.Name
 			}
-		} else {
-			for _, t := range transitions {
-				if t.To.Name == args[1] {
-					newState = t.Id
-					newStateName = t.To.Name
-					break
-				}
+			if key == "" || newState == "" {
+				return
 			}
-		}
-		if key == "" || newState == "" {
-			return
-		}
 
-		api.PostTransitions(key, newState)
-		fmt.Printf("Issue status changed for %s -> \033[1;32m%s\033[m\n", key, newStateName)
+			api.PostTransitions(key, newState)
+			fmt.Printf("Issue status changed for %s -> \033[1;32m%s\033[m\n", key, newStateName)
+		}
 	},
 }
 

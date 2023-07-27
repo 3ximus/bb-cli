@@ -67,7 +67,6 @@ type JiraIssue struct {
 		Comment struct {
 			Total int
 		}
-		// TODO add worklog ?
 	} `json:"fields"`
 }
 
