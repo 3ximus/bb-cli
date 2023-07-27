@@ -25,6 +25,7 @@ var ViewCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		repo := viper.GetString("repo")
+		showComments, _ := cmd.Flags().GetBool("comments")
 
 		var id int
 		var err error
@@ -43,6 +44,7 @@ var ViewCmd = &cobra.Command{
 		}
 
 		statusesChannel := api.GetPrStatuses(repo, id)
+		commentsChannel := api.GetPrComments(repo, id)
 
 		// BASIC INFO
 
@@ -80,11 +82,18 @@ var ViewCmd = &cobra.Command{
 			fmt.Println()
 		}
 
+		if showComments {
+			comments := <-commentsChannel
+			for _, comment := range comments {
+				fmt.Printf("%s %s", comment.Content.Raw, comment.User.DisplayName)
+			}
+		}
+
 	},
 }
 
 func init() {
-	ViewCmd.Flags().BoolP("comments", "c", false, "View comments. \033[31mNot implemented\033[m")
+	ViewCmd.Flags().BoolP("comments", "c", false, "View comments")
 	ViewCmd.Flags().BoolP("commits", "C", false, "View commits. \033[31mNot implemented\033[m")
 	ViewCmd.Flags().BoolP("diff", "d", false, "View diff. \033[31mNot implemented\033[m")
 	ViewCmd.Flags().Bool("web", false, "Open in the browser.")

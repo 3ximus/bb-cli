@@ -218,6 +218,19 @@ func GetPrStatuses(repository string, id int) <-chan []CommitStatus {
 	return channel
 }
 
+func GetPrComments(repository string, id int) <-chan []PrComment {
+	channel := make(chan []PrComment)
+	go func() {
+		defer close(channel)
+		var paginatedResponse BBPaginatedResponse[PrComment]
+		response := bbApiGet(fmt.Sprintf("repositories/%s/pullrequests/%d/comments", repository, id))
+		err := json.Unmarshal(response, &paginatedResponse)
+		cobra.CheckErr(err)
+		channel <- paginatedResponse.Values
+	}()
+	return channel
+}
+
 func GetReviewers(repository string) <-chan []User {
 	channel := make(chan []User)
 	go func() {

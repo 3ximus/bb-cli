@@ -83,6 +83,24 @@ type CommitStatus struct {
 	UpdatedOn time.Time `json:"updated_on"`
 }
 
+type PrComment struct {
+	Id      int
+	Content struct {
+		Raw  string
+		Html string
+	}
+	User      User
+	Deleted bool
+	Type string
+	Links        struct {
+		Html struct {
+			Href string
+		}
+	}
+	CreatedOn time.Time `json:"created_on"`
+	UpdatedOn time.Time `json:"updated_on"`
+}
+
 // DEFAULT ACTIONS OVERRIDES
 
 // String is used both by fmt.Print and by Cobra in help text
