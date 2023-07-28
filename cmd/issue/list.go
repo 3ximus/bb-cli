@@ -87,6 +87,8 @@ func init() {
 	possible options: "open", "todo", "inprogress", "testing", "done", "blocked"`)
 	ListCmd.RegisterFlagCompletionFunc("status", statusCompletion)
 
+	// TODO add way to sort by recent or the ones the user has participated on
+
 	// display
 	ListCmd.Flags().BoolP("show-users", "u", false, "show users")
 	ListCmd.Flags().IntP("number-results", "n", 10, "max number of results retrieve")
