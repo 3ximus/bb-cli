@@ -22,6 +22,8 @@ var LogCmd = &cobra.Command{
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
+		transition, _ := cmd.Flags().GetBool("transition")
+
 		var key string
 		if len(args) == 0 {
 			branch, err := util.GetCurrentBranch()
@@ -38,5 +40,30 @@ var LogCmd = &cobra.Command{
 
 		api.PostWorklog(key, seconds)
 		fmt.Printf("Logged time for %s +\033[1;32m%d\033[m\n", key, seconds)
+
+		if transition {
+			// select new state
+			var newState = ""
+			transitions := <-api.GetTransitions(key)
+			var newStateName = ""
+			optIndex := util.UseExternalFZF(transitions, "Transition To > ", func(i int) string {
+				return fmt.Sprintf("%s", transitions[i].To.Name)
+			})
+			if len(optIndex) > 0 {
+				newState = transitions[optIndex[0]].Id
+				newStateName = transitions[optIndex[0]].To.Name
+			}
+			if key == "" || newState == "" {
+				return
+			}
+
+			api.PostTransitions(key, newState)
+			fmt.Printf("Issue status changed for %s -> \033[1;32m%s\033[m\n", key, newStateName)
+		}
+
 	},
+}
+
+func init() {
+	LogCmd.Flags().BoolP("transition", "t", false, "Also prompt to perform a transition")
 }
