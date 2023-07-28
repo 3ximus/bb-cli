@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"regexp"
 	"strings"
 
 	// "github.com/ktr0731/go-fuzzyfinder"
@@ -73,8 +74,9 @@ var CreateCmd = &cobra.Command{
 		reviewersIndexes := chooseReviewers(reviewers)
 
 		if include_branch_name {
-			// TODO extract jira ticket format here
-			title = source + " " + title
+			re := regexp.MustCompile(api.JiraIssueKeyRegex)
+			key := re.FindString(source)
+			title = key + " " + title
 		}
 
 		// create dto

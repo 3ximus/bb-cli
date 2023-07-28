@@ -13,7 +13,7 @@ var TransitionCmd = &cobra.Command{
 	Use:     "transition [KEY]...",
 	Short:   "Transition issues to another state",
 	Long:    "Transition issues to another state. You'll be prompted to choose one of the available states",
-	Args:    cobra.ExactArgs(1),
+	Args:    cobra.MinimumNArgs(1),
 	Aliases: []string{"t"},
 	ValidArgsFunction: func(comd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		if len(args) == 0 {
@@ -39,7 +39,7 @@ var TransitionCmd = &cobra.Command{
 			var newState = ""
 			transitions := <-api.GetTransitions(key)
 			var newStateName = ""
-			optIndex := util.UseExternalFZF(transitions, "Transition To > ", func(i int) string {
+			optIndex := util.UseExternalFZF(transitions, fmt.Sprintf("Transition %s To > ", key), func(i int) string {
 				return fmt.Sprintf("%s", transitions[i].To.Name)
 			})
 			if len(optIndex) > 0 {

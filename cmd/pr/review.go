@@ -90,5 +90,4 @@ func init() {
 	ReviewCmd.MarkFlagsMutuallyExclusive("merge", "approve", "unnaprove", "decline", "request-changes", "unrequest-changes")
 
 	ReviewCmd.Flags().String("message", "", "Attach message to action (merge)")
-	ReviewCmd.Flags().String("message", "", "Attach message to action (merge)")
 }
