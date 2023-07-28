@@ -59,7 +59,9 @@ var ReviewCmd = &cobra.Command{
 		}
 		merge, _ := cmd.Flags().GetBool("merge")
 		if merge {
-			fmt.Println("Not implemented")
+			message,_ := cmd.Flags().GetString("message")
+			api.MergePr(repo, id, message)
+			fmt.Printf("\033[1;35mMerge\033[m pull request #%d\n", id)
 		}
 		requestChanges, _ := cmd.Flags().GetBool("request-changes")
 		if requestChanges {
@@ -71,7 +73,7 @@ var ReviewCmd = &cobra.Command{
 			fmt.Printf("Not implemented")
 		}
 
-		if !approve && !unnaprove && !decline && !requestChanges && !unrequestChanges {
+		if !merge && !approve && !unnaprove && !decline && !requestChanges && !unrequestChanges {
 			fmt.Println("No operation selected")
 			cmd.Help()
 		}
@@ -79,11 +81,14 @@ var ReviewCmd = &cobra.Command{
 }
 
 func init() {
-	ReviewCmd.Flags().BoolP("merge", "m", false, "Merge pull request. \033[31mNot implemented\033[m")
+	ReviewCmd.Flags().BoolP("merge", "m", false, "Merge pull request")
 	ReviewCmd.Flags().BoolP("approve", "a", false, "Approve pull request")
 	ReviewCmd.Flags().BoolP("unnaprove", "u", false, "Unnaprove pull request")
 	ReviewCmd.Flags().BoolP("decline", "d", false, "Decline pull request")
 	ReviewCmd.Flags().BoolP("request-changes", "c", false, "Request changes to the pull request")
 	ReviewCmd.Flags().BoolP("unrequest-changes", "U", false, "Remove request changes status from pull request. \033[31mNot implemented\033[m")
 	ReviewCmd.MarkFlagsMutuallyExclusive("merge", "approve", "unnaprove", "decline", "request-changes", "unrequest-changes")
+
+	ReviewCmd.Flags().String("message", "", "Attach message to action (merge)")
+	ReviewCmd.Flags().String("message", "", "Attach message to action (merge)")
 }

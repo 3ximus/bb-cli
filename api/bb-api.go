@@ -291,6 +291,20 @@ func ApprovePr(repository string, id int) {
 	bbApiPost(fmt.Sprintf("repositories/%s/pullrequests/%d/approve", repository, id), nil)
 }
 
+func MergePr(repository string, id int, message string) {
+	content, err := json.Marshal(struct {
+		Message string `json:"message"`
+	}{
+		Message: message,
+	})
+	cobra.CheckErr(err)
+	payload := bytes.NewReader(content)
+	if message == "" {
+		payload = nil
+	}
+	bbApiPost(fmt.Sprintf("repositories/%s/pullrequests/%d/merge", repository, id), payload)
+}
+
 func UnnaprovePr(repository string, id int) {
 	bbApiDelete(fmt.Sprintf("repositories/%s/pullrequests/%d/approve", repository, id))
 }
