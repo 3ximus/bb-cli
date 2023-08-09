@@ -11,7 +11,7 @@ import (
 )
 
 var ReviewCmd = &cobra.Command{
-	Use:   "review [ID]",
+	Use:   "review [ID]...",
 	Short: "Review a pull request (merge, approve, unnaprove, decline ...)",
 	Long: `Merge, approve, unnaprove, decline or request/unrequest changes in a pull request
 	If no ID is given the operation will be applied to the first PR found for the current branch`,
@@ -38,6 +38,7 @@ var ReviewCmd = &cobra.Command{
 			}
 			id = pr.ID // get the first one's ID
 		} else {
+			// TODO allow multiple pr ids to be given
 			id, err = strconv.Atoi(args[0])
 			cobra.CheckErr(err)
 		}

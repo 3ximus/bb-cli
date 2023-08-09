@@ -38,6 +38,8 @@ var LogCmd = &cobra.Command{
 		seconds, err := util.ConvertToSeconds(args[1:])
 		cobra.CheckErr(err)
 
+		// TODO allow choosing start time ( maybe lookup last logged time like it's possible to do from within a ticket in jira)
+
 		api.PostWorklog(key, seconds)
 		fmt.Printf("Logged time for %s +\033[1;32m%d\033[m\n", key, seconds)
 
@@ -46,7 +48,7 @@ var LogCmd = &cobra.Command{
 			var newState = ""
 			transitions := <-api.GetTransitions(key)
 			var newStateName = ""
-			optIndex := util.UseExternalFZF(transitions, "Transition To > ", func(i int) string {
+			optIndex := util.SelectFZF(transitions, "Transition To > ", func(i int) string {
 				return fmt.Sprintf("%s", transitions[i].To.Name)
 			})
 			if len(optIndex) > 0 {

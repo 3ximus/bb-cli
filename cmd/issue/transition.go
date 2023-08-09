@@ -39,7 +39,7 @@ var TransitionCmd = &cobra.Command{
 			var newState = ""
 			transitions := <-api.GetTransitions(key)
 			var newStateName = ""
-			optIndex := util.UseExternalFZF(transitions, fmt.Sprintf("Transition %s To > ", key), func(i int) string {
+			optIndex := util.SelectFZF(transitions, fmt.Sprintf("Transition %s To > ", key), func(i int) string {
 				return fmt.Sprintf("%s", transitions[i].To.Name)
 			})
 			if len(optIndex) > 0 {

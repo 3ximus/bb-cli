@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -35,12 +34,12 @@ func bbApiGet(endpoint string) []byte {
 	cobra.CheckErr(err)
 
 	if resp.StatusCode != 200 {
-		errBody, err := ioutil.ReadAll(resp.Body)
+		errBody, err := io.ReadAll(resp.Body)
 		cobra.CheckErr(err)
 		cobra.CheckErr(string(errBody))
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	cobra.CheckErr(err)
 
 	return body
@@ -61,12 +60,12 @@ func _bbApiPostPut(method string, endpoint string, body io.Reader) []byte {
 	cobra.CheckErr(err)
 
 	if resp.StatusCode != 201 && resp.StatusCode != 200 {
-		errBody, err := ioutil.ReadAll(resp.Body)
+		errBody, err := io.ReadAll(resp.Body)
 		cobra.CheckErr(err)
 		cobra.CheckErr(string(errBody))
 	}
 
-	responseBody, err := ioutil.ReadAll(resp.Body)
+	responseBody, err := io.ReadAll(resp.Body)
 	cobra.CheckErr(err)
 
 	return responseBody
@@ -91,12 +90,12 @@ func bbApiDelete(endpoint string) []byte {
 	cobra.CheckErr(err)
 
 	if resp.StatusCode != 204 {
-		errBody, err := ioutil.ReadAll(resp.Body)
+		errBody, err := io.ReadAll(resp.Body)
 		cobra.CheckErr(err)
 		cobra.CheckErr(string(errBody))
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	cobra.CheckErr(err)
 
 	return body

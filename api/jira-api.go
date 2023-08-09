@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 
@@ -44,11 +43,11 @@ func jiraApiGet(endpoint string) []byte {
 	resp, err := client.Do(req)
 	cobra.CheckErr(err)
 	if resp.StatusCode != 200 {
-		errBody, err := ioutil.ReadAll(resp.Body)
+		errBody, err := io.ReadAll(resp.Body)
 		cobra.CheckErr(err)
 		cobra.CheckErr(string(errBody))
 	}
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	cobra.CheckErr(err)
 	return body
 }
@@ -65,11 +64,11 @@ func _jiraApiPostPut(method string, endpoint string, body io.Reader) []byte {
 	resp, err := client.Do(req)
 	cobra.CheckErr(err)
 	if resp.StatusCode != 204 && resp.StatusCode != 201 {
-		errBody, err := ioutil.ReadAll(resp.Body)
+		errBody, err := io.ReadAll(resp.Body)
 		cobra.CheckErr(err)
 		cobra.CheckErr(string(errBody))
 	}
-	responseBody, err := ioutil.ReadAll(resp.Body)
+	responseBody, err := io.ReadAll(resp.Body)
 	cobra.CheckErr(err)
 	return responseBody
 }

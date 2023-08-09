@@ -5,13 +5,12 @@ import (
 	"bb/util"
 	"bufio"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"os/exec"
 	"regexp"
 	"strings"
 
-	// "github.com/ktr0731/go-fuzzyfinder"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -144,7 +143,7 @@ func readDescription(scanner *bufio.Scanner) string {
 	fmt.Print("? \033[1;35mAdd body ? [y/n]\033[m ")
 	scanner.Scan()
 	if strings.TrimSpace(strings.ToLower(scanner.Text())) == "y" {
-		tmpFile, err := ioutil.TempFile("/tmp", "bitbucket-pr-body-")
+		tmpFile, err := os.CreateTemp("/tmp", "bitbucket-pr-body-")
 		cobra.CheckErr(err)
 		defer os.Remove(tmpFile.Name())
 		editor := os.Getenv("EDITOR")
@@ -159,7 +158,7 @@ func readDescription(scanner *bufio.Scanner) string {
 		cobra.CheckErr(err)
 		err = cmd.Wait()
 		cobra.CheckErr(err)
-		description, err := ioutil.ReadAll(tmpFile)
+		description, err := io.ReadAll(tmpFile)
 		return string(description)
 	}
 	fmt.Println()
@@ -167,18 +166,7 @@ func readDescription(scanner *bufio.Scanner) string {
 }
 
 func chooseReviewers(reviewers []api.User) []int {
-	if len(reviewers) == 0 {
-		return []int{}
-	}
-
-	return util.UseExternalFZF(reviewers, "Reviewers > ", func(i int) string {
+	return util.SelectFZF(reviewers, "Reviewers > ", func(i int) string {
 		return fmt.Sprintf("%s", reviewers[i].Nickname)
 	})
-
-	// This would be good to not depend on external fzf but its ugly... Maybe just use it as backup ?
-	// indexes, err := fuzzyfinder.FindMulti(reviewers, func(i int) string {
-	// 	return fmt.Sprintf("%s (%s)", reviewers[i].Nickname, reviewers[i].DisplayName)
-	// }, fuzzyfinder.WithCursorPosition(fuzzyfinder.CursorPositionTop))
-	// cobra.CheckErr(err)
-	// return indexes
 }

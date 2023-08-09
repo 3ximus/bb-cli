@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ktr0731/go-fuzzyfinder"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -153,6 +154,25 @@ func OpenInBrowser(url string) {
 		err = fmt.Errorf("unsupported platform")
 	}
 	cobra.CheckErr(err)
+}
+
+func SelectFZF[T any](list []T, prompt string, toString func(int) string) []int {
+	if len(list) == 0 {
+		return []int{}
+	}
+
+	var indexes []int
+
+	// check if fzf is installed
+	_, existsErr := exec.LookPath("fzf")
+	if existsErr == nil {
+		indexes = UseExternalFZF(list, prompt, toString)
+	}
+
+	// backup in case fzf is not installed in the system
+	indexes, err := fuzzyfinder.FindMulti(list, toString, fuzzyfinder.WithCursorPosition(fuzzyfinder.CursorPositionTop), fuzzyfinder.WithPromptString(prompt))
+	cobra.CheckErr(err)
+	return indexes
 }
 
 func UseExternalFZF[T any](list []T, prompt string, toString func(int) string) []int {
