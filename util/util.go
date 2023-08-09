@@ -167,11 +167,12 @@ func SelectFZF[T any](list []T, prompt string, toString func(int) string) []int 
 	_, existsErr := exec.LookPath("fzf")
 	if existsErr == nil {
 		indexes = UseExternalFZF(list, prompt, toString)
+	} else {
+		var err error
+		// backup in case fzf is not installed in the system
+		indexes, err = fuzzyfinder.FindMulti(list, toString, fuzzyfinder.WithCursorPosition(fuzzyfinder.CursorPositionTop), fuzzyfinder.WithPromptString(prompt))
+		cobra.CheckErr(err)
 	}
-
-	// backup in case fzf is not installed in the system
-	indexes, err := fuzzyfinder.FindMulti(list, toString, fuzzyfinder.WithCursorPosition(fuzzyfinder.CursorPositionTop), fuzzyfinder.WithPromptString(prompt))
-	cobra.CheckErr(err)
 	return indexes
 }
 
