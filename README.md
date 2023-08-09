@@ -51,6 +51,13 @@ bb completion bash | sudo tee /usr/share/bash-completion/completions/bb.bash >/d
 
 ## Usage
 
+Use the help command to display usage information for each command
+
+```
+bb help
+bb help [COMMAND]
+```
+
 TODO
 
 
