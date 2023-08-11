@@ -91,6 +91,7 @@ func init() {
 
 	// display
 	ListCmd.Flags().BoolP("show-users", "u", false, "show users")
+	ListCmd.Flags().BoolP("one-line", "o", false, "show one issue per line. \033[31mNot implemented\033[m")
 	ListCmd.Flags().IntP("number-results", "n", 10, "max number of results retrieve")
 	// sort
 	ListCmd.Flags().BoolP("priority", "P", false, "sort by priority")

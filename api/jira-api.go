@@ -126,7 +126,9 @@ func GetIssueList(nResults int, all bool, reporter bool, project string, statuse
 			query += ")"
 		}
 		if prioritySort {
-			query += "+order+by+priority+desc"
+			query += "+order+by+priority+desc,status+asc"
+		} else {
+			query += "+order+by+status+asc,priority+desc"
 		}
 
 		response := jiraApiGet(fmt.Sprintf("search?maxResults=%d&fields=*all&jql=%s", nResults, query))
