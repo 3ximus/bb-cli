@@ -182,7 +182,9 @@ func GetPrList(
 			for _, pr := range prevResponse.Values {
 				if status {
 					status := <-GetPrStatuses(repository, pr.ID)
-					pr.Status = status[0] // only get the first one
+					if status != nil && len(status) > 0 {
+						pr.Status = status[0] // only get the first one
+					}
 				}
 				channel <- pr
 			}

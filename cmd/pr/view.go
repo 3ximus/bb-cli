@@ -73,7 +73,7 @@ var ViewCmd = &cobra.Command{
 		// PIPELINES
 
 		pipelines := <-statusesChannel
-		if len(pipelines) != 0 {
+		if pipelines != nil && len(pipelines) > 0 {
 			fmt.Println("Pipelines:")
 			for _, pipeline := range pipelines {
 				fmt.Printf("%s %s \033[37m(%s)\033[m\n", util.FormatPipelineState(pipeline.State), pipeline.Name, pipeline.RefName)

@@ -4,7 +4,7 @@ import (
 	"bb/api"
 	"bb/util"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"os/exec"
 	"strconv"
@@ -29,6 +29,7 @@ var EditCmd = &cobra.Command{
 		return opt, cobra.ShellCompDirectiveDefault
 	},
 	Run: func(cmd *cobra.Command, args []string) {
+		// TODO try reading pr from current branch
 		id, err := strconv.Atoi(args[0])
 		cobra.CheckErr(err)
 
@@ -97,7 +98,7 @@ func init() {
 }
 
 func readTitleAndDescription(pr api.PullRequest) (string, string) {
-	tmpFile, err := ioutil.TempFile("/tmp", "bitbucket-pr-edit-")
+	tmpFile, err := os.CreateTemp("/tmp", "bitbucket-pr-edit-")
 	cobra.CheckErr(err)
 
 	tmpFile.WriteString(pr.Title + "\n\n")
@@ -118,7 +119,7 @@ func readTitleAndDescription(pr api.PullRequest) (string, string) {
 	cobra.CheckErr(err)
 	err = cmd.Wait()
 	cobra.CheckErr(err)
-	fullFile, err := ioutil.ReadAll(tmpFile)
+	fullFile, err := io.ReadAll(tmpFile)
 
 	title := ""
 	description := ""
