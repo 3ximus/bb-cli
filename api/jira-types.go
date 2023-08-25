@@ -29,9 +29,10 @@ type JiraIssue struct {
 			AccountId   string `json:"accountId"`
 			DisplayName string `json:"displayName"`
 		}
-		IssueType struct {
-			Name string `json:"name"`
-		}
+		Type struct {
+			Name    string
+			Subtask bool
+		} `json:"issuetype"`
 		Assignee struct {
 			AccountId   string `json:"accountId"`
 			DisplayName string `json:"displayName"`

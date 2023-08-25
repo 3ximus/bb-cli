@@ -35,40 +35,85 @@ func FormatPipelineState(state string) string {
 	switch state {
 	case "INPROGRESS":
 		stateString = "\033[1;38;5;235;44m RUNNING \033[m"
-	case "STOPPED", "merged":
+	case "STOPPED", "stopped":
 		stateString = "\033[1;38;5;235;43m STOPPED \033[m"
-	case "SUCCESSFUL", "declined":
+	case "SUCCESSFUL", "successful":
 		stateString = "\033[1;38;5;235;42m SUCCESSFUL \033[m"
-	case "FAILED", "superseded":
+	case "FAILED", "failed":
 		stateString = "\033[1;38;5;235;41m FAILED \033[m"
 	}
 	return stateString
 }
 
-func FormatIssueStatus(status string) string {
-	color := "\033[1;38;5;235;47m"
-	statusMap := viper.GetStringMapStringSlice("jira_status")
-	for k, v := range statusMap {
-		for _, s := range v {
-			if s == status {
+func FormatIssueType(issueType string) string {
+	icon := "\033[1;37m"
+	typeMap := viper.GetStringMapStringSlice("jira_type")
+	for k, v := range typeMap {
+		for _, t := range v {
+			if t == issueType {
 				switch strings.ToUpper(k) {
-				// case "OPEN":
-				// 	color = "\033[1;38;5;235;44m"
-				case "INPROGRESS":
-					color = "\033[1;38;5;235;44m"
-				case "TODO":
-					color = "\033[1;38;5;235;43m"
-				case "TESTING":
-					color = "\033[1;38;5;235;46m"
-				case "DONE":
-					color = "\033[1;38;5;235;42m"
-				case "BLOCKED":
-					color = "\033[1;38;5;235;41m"
+				case "BUG":
+					icon = "\033[1;31m"
+				case "TASK":
+					icon = "\033[1;34m" // 
+				case "EPIC":
+					icon = "\033[1;35m"
 				}
 			}
 		}
 	}
-	return fmt.Sprintf("%s %s \033[m", color, status)
+	return fmt.Sprintf("%s\033[m", icon)
+}
+
+func FormatIssueStatus(status string) string {
+	str := fmt.Sprintf("\033[1;38;5;235;47m %s \033[m", status) // default
+	statusMap := viper.GetStringMapStringSlice("jira_status")
+	iconMap := viper.GetStringMap("jira_status_icons")
+	for k, v := range statusMap {
+		for _, s := range v {
+			if s == status {
+				switch strings.ToUpper(k) {
+				case "OPEN":
+					if icon, ok := iconMap[k]; ok {
+						str = fmt.Sprintf("\033[1;34m%s", icon)
+					} else {
+						str = fmt.Sprintf("\033[1;38;5;235;47m %s \033[m", status)
+					}
+				case "INPROGRESS":
+					if icon, ok := iconMap[k]; ok {
+						str = fmt.Sprintf("\033[1;34m%s", icon)
+					} else {
+						str = fmt.Sprintf("\033[1;38;5;235;44m %s \033[m", status)
+					}
+				case "TODO":
+					if icon, ok := iconMap[k]; ok {
+						str = fmt.Sprintf("\033[1;33m%s", icon)
+					} else {
+						str = fmt.Sprintf("\033[1;38;5;235;43m %s \033[m", status)
+					}
+				case "TESTING":
+					if icon, ok := iconMap[k]; ok {
+						str = fmt.Sprintf("\033[1;36m%s", icon)
+					} else {
+						str = fmt.Sprintf("\033[1;38;5;235;46m %s \033[m", status)
+					}
+				case "DONE":
+					if icon, ok := iconMap[k]; ok {
+						str = fmt.Sprintf("\033[1;32m%s", icon)
+					} else {
+						str = fmt.Sprintf("\033[1;38;5;235;42m %s \033[m", status)
+					}
+				case "BLOCKED":
+					if icon, ok := iconMap[k]; ok {
+						str = fmt.Sprintf("\033[1;31m%s", icon)
+					} else {
+						str = fmt.Sprintf("\033[1;38;5;235;41m %s \033[m", status)
+					}
+				}
+			}
+		}
+	}
+	return str
 }
 
 func FormatIssuePriority(id string, name string) string {

@@ -60,7 +60,7 @@ var ListCmd = &cobra.Command{
 			if issue.Fields.TimeTracking.TimeSpent != " " {
 				timeSpent = issue.Fields.TimeTracking.TimeSpent
 			}
-			fmt.Printf("%s \033[1;32m%s\033[m %s %s\n", util.FormatIssueStatus(issue.Fields.Status.Name), issue.Key, issue.Fields.Summary, util.FormatIssuePriority(issue.Fields.Priority.Id, issue.Fields.Priority.Name))
+			fmt.Printf("%s \033[1;32m%s\033[m %s %s %s\n", util.FormatIssueStatus(issue.Fields.Status.Name), issue.Key, util.FormatIssueType(issue.Fields.Type.Name), issue.Fields.Summary, util.FormatIssuePriority(issue.Fields.Priority.Id, issue.Fields.Priority.Name))
 			// TODO format spacing better
 			if showUsers {
 				if all {

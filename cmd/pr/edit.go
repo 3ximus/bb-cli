@@ -109,7 +109,7 @@ func readTitleAndDescription(pr api.PullRequest) (string, string) {
 	defer os.Remove(tmpFile.Name())
 	editor := os.Getenv("EDITOR")
 	if editor == "" {
-		editor = "vim"
+		editor = "vi"
 	}
 	cmd := exec.Command(editor, tmpFile.Name())
 	cmd.Stdin = os.Stdin
