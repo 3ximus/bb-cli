@@ -55,7 +55,7 @@ var CreateCmd = &cobra.Command{
 		}
 		source, _ := cmd.Flags().GetString("source")
 		destination, _ := cmd.Flags().GetString("destination")
-		close_source, _ := cmd.Flags().GetBool("close_source")
+		close_source, _ := cmd.Flags().GetBool("close-source")
 		include_branch_name := viper.GetBool("include_branch_name")
 
 		if source == "" {
