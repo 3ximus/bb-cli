@@ -46,23 +46,36 @@ func FormatPipelineState(state string) string {
 }
 
 func FormatIssueType(issueType string) string {
-	icon := "\033[1;37m"
+	str := "\033[1;37m"
 	typeMap := viper.GetStringMapStringSlice("jira_type")
+	iconMap := viper.GetStringMap("jira_type_icon")
 	for k, v := range typeMap {
 		for _, t := range v {
 			if t == issueType {
 				switch strings.ToUpper(k) {
 				case "BUG":
-					icon = "\033[1;31m"
+					if icon, ok := iconMap[k]; ok {
+						str = fmt.Sprintf("\033[1;31m%s", icon)
+					} else {
+						str = fmt.Sprintf("\033[1;31m%s", issueType)
+					}
 				case "TASK":
-					icon = "\033[1;34m" // 
+					if icon, ok := iconMap[k]; ok {
+						str = fmt.Sprintf("\033[1;34m%s", icon)
+					} else {
+						str = fmt.Sprintf("\033[1;34m%s", issueType)
+					}
 				case "EPIC":
-					icon = "\033[1;35m"
+					if icon, ok := iconMap[k]; ok {
+						str = fmt.Sprintf("\033[1;35m%s", icon)
+					} else {
+						str = fmt.Sprintf("\033[1;35m%s", issueType)
+					}
 				}
 			}
 		}
 	}
-	return fmt.Sprintf("%s\033[m", icon)
+	return fmt.Sprintf("%s\033[m", str)
 }
 
 func FormatIssueStatus(status string) string {
@@ -120,13 +133,13 @@ func FormatIssuePriority(id string, name string) string {
 	priorityString := ""
 	switch id {
 	case "1":
-		priorityString = fmt.Sprintf("\033[1;31m▲ %s\033[m", name)
+		priorityString = fmt.Sprintf("\033[1;31m %s\033[m", name)
 	case "2":
-		priorityString = fmt.Sprintf("\033[1;35m▲ %s\033[m", name)
+		priorityString = fmt.Sprintf("\033[1;35m %s\033[m", name)
 	case "3":
-		priorityString = fmt.Sprintf("\033[1;33m⯀ %s\033[m", name)
+		priorityString = fmt.Sprintf("\033[1;33m %s\033[m", name)
 	case "4":
-		priorityString = fmt.Sprintf("\033[1;34m▼ %s\033[m", name)
+		priorityString = fmt.Sprintf("\033[1;34m %s\033[m", name)
 	default:
 		priorityString = fmt.Sprintf("\033[1;37m%s\033[m", name)
 	}
