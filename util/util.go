@@ -214,6 +214,21 @@ func OpenInBrowser(url string) {
 	cobra.CheckErr(err)
 }
 
+func OpenInEditor(file *os.File) {
+	editor := os.Getenv("EDITOR")
+	if editor == "" {
+		editor = "vi"
+	}
+	cmd := exec.Command(editor, file.Name())
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Start()
+	cobra.CheckErr(err)
+	err = cmd.Wait()
+	cobra.CheckErr(err)
+}
+
 func SelectFZF[T any](list []T, prompt string, toString func(int) string) []int {
 	if len(list) == 0 {
 		return []int{}

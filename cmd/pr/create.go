@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"os/exec"
 	"regexp"
 	"strings"
 
@@ -146,18 +145,7 @@ func readDescription(scanner *bufio.Scanner) string {
 		tmpFile, err := os.CreateTemp("/tmp", "bitbucket-pr-body-")
 		cobra.CheckErr(err)
 		defer os.Remove(tmpFile.Name())
-		editor := os.Getenv("EDITOR")
-		if editor == "" {
-			editor = "vi"
-		}
-		cmd := exec.Command(editor, tmpFile.Name())
-		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		err = cmd.Start()
-		cobra.CheckErr(err)
-		err = cmd.Wait()
-		cobra.CheckErr(err)
+		util.OpenInEditor(tmpFile)
 		description, err := io.ReadAll(tmpFile)
 		return string(description)
 	}
