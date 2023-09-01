@@ -183,6 +183,7 @@ func GetPrList(
 				if status {
 					status := <-GetPrStatuses(repository, pr.ID)
 					if status != nil && len(status) > 0 {
+						// TODO FIX instead of getting the first one get the latest one
 						pr.Status = status[0] // only get the first one
 					}
 				}

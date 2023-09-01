@@ -15,6 +15,13 @@ import (
 	"github.com/spf13/viper"
 )
 
+type JiraResultConfig struct {
+	Values []string `mapstructure:"values"`
+	Text   string   `mapstructure:"text"`
+	Icon   string   `mapstructure:"icon"`
+	Color  string   `mapstructure:"color"`
+}
+
 func FormatPrState(state api.PrState) string {
 	stateString := ""
 	switch state {
@@ -46,82 +53,46 @@ func FormatPipelineState(state string) string {
 }
 
 func FormatIssueType(issueType string) string {
-	str := "\033[1;37m"
-	typeMap := viper.GetStringMapStringSlice("jira_type")
-	iconMap := viper.GetStringMap("jira_type_icon")
-	for k, v := range typeMap {
-		for _, t := range v {
-			if t == issueType {
-				switch strings.ToUpper(k) {
-				case "BUG":
-					if icon, ok := iconMap[k]; ok {
-						str = fmt.Sprintf("\033[1;31m%s", icon)
-					} else {
-						str = fmt.Sprintf("\033[1;31m%s", issueType)
-					}
-				case "TASK":
-					if icon, ok := iconMap[k]; ok {
-						str = fmt.Sprintf("\033[1;34m%s", icon)
-					} else {
-						str = fmt.Sprintf("\033[1;34m%s", issueType)
-					}
-				case "EPIC":
-					if icon, ok := iconMap[k]; ok {
-						str = fmt.Sprintf("\033[1;35m%s", icon)
-					} else {
-						str = fmt.Sprintf("\033[1;35m%s", issueType)
-					}
+	str := ""
+
+	jiraStatusMap := make(map[string]JiraResultConfig)
+	if err := viper.UnmarshalKey("jira_type", &jiraStatusMap); err != nil {
+		cobra.CheckErr(err)
+	}
+
+	for k, v := range jiraStatusMap {
+		for _, s := range v.Values {
+			if s == issueType {
+				if v.Text != "" {
+					str = fmt.Sprintf("\033[%sm %s \033[m", v.Color, v.Text)
+				} else if v.Icon != "" {
+					str = fmt.Sprintf("\033[%sm%s\033[m", v.Color, v.Icon)
+				} else {
+					str = fmt.Sprintf("\033[%sm %s \033[m", v.Color, strings.ToUpper(k))
 				}
 			}
 		}
 	}
-	return fmt.Sprintf("%s\033[m", str)
+	return str
 }
 
 func FormatIssueStatus(status string) string {
 	str := fmt.Sprintf("\033[1;38;5;235;47m %s \033[m", status) // default
-	statusMap := viper.GetStringMapStringSlice("jira_status")
-	iconMap := viper.GetStringMap("jira_status_icons")
-	for k, v := range statusMap {
-		for _, s := range v {
+
+	jiraStatusMap := make(map[string]JiraResultConfig)
+	if err := viper.UnmarshalKey("jira_status", &jiraStatusMap); err != nil {
+		cobra.CheckErr(err)
+	}
+
+	for k, v := range jiraStatusMap {
+		for _, s := range v.Values {
 			if s == status {
-				switch strings.ToUpper(k) {
-				case "OPEN":
-					if icon, ok := iconMap[k]; ok {
-						str = fmt.Sprintf("\033[1;34m%s", icon)
-					} else {
-						str = fmt.Sprintf("\033[1;38;5;235;47m %s \033[m", status)
-					}
-				case "INPROGRESS":
-					if icon, ok := iconMap[k]; ok {
-						str = fmt.Sprintf("\033[1;34m%s", icon)
-					} else {
-						str = fmt.Sprintf("\033[1;38;5;235;44m %s \033[m", status)
-					}
-				case "TODO":
-					if icon, ok := iconMap[k]; ok {
-						str = fmt.Sprintf("\033[1;33m%s", icon)
-					} else {
-						str = fmt.Sprintf("\033[1;38;5;235;43m %s \033[m", status)
-					}
-				case "TESTING":
-					if icon, ok := iconMap[k]; ok {
-						str = fmt.Sprintf("\033[1;36m%s", icon)
-					} else {
-						str = fmt.Sprintf("\033[1;38;5;235;46m %s \033[m", status)
-					}
-				case "DONE":
-					if icon, ok := iconMap[k]; ok {
-						str = fmt.Sprintf("\033[1;32m%s", icon)
-					} else {
-						str = fmt.Sprintf("\033[1;38;5;235;42m %s \033[m", status)
-					}
-				case "BLOCKED":
-					if icon, ok := iconMap[k]; ok {
-						str = fmt.Sprintf("\033[1;31m%s", icon)
-					} else {
-						str = fmt.Sprintf("\033[1;38;5;235;41m %s \033[m", status)
-					}
+				if v.Text != "" {
+					str = fmt.Sprintf("\033[%sm %s \033[m", v.Color, v.Text)
+				} else if v.Icon != "" {
+					str = fmt.Sprintf("\033[%sm%s\033[m", v.Color, v.Icon)
+				} else {
+					str = fmt.Sprintf("\033[%sm %s \033[m", v.Color, strings.ToUpper(k))
 				}
 			}
 		}
