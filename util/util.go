@@ -40,14 +40,14 @@ func FormatPrState(state api.PrState) string {
 func FormatPipelineState(state string) string {
 	stateString := ""
 	switch state {
-	case "INPROGRESS":
+	case "INPROGRESS", "IN_PROGRESS":
 		stateString = "\033[1;38;5;235;44m RUNNING \033[m"
 	case "STOPPED", "stopped":
 		stateString = "\033[1;38;5;235;43m STOPPED \033[m"
 	case "SUCCESSFUL", "successful":
-		stateString = "\033[1;38;5;235;42m SUCCESSFUL \033[m"
+		stateString = "\033[1;38;5;235;42m PASS \033[m"
 	case "FAILED", "failed":
-		stateString = "\033[1;38;5;235;41m FAILED \033[m"
+		stateString = "\033[1;38;5;235;41m FAIL \033[m"
 	}
 	return stateString
 }

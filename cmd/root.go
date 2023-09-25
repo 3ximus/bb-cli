@@ -3,6 +3,7 @@ package cmd
 import (
 	"bb/cmd/auth"
 	"bb/cmd/issue"
+	"bb/cmd/pipeline"
 	"bb/cmd/pr"
 	"os"
 
@@ -36,6 +37,7 @@ func init() {
 	RootCmd.AddCommand(auth.AuthCmd)
 	RootCmd.AddCommand(pr.PrCmd)
 	RootCmd.AddCommand(issue.IssueCmd)
+	RootCmd.AddCommand(pipeline.PipelineCmd)
 }
 
 func initConfig() {

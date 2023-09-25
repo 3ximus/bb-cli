@@ -318,3 +318,32 @@ func DeclinePr(repository string, id int) {
 func RequestChangesPr(repository string, id int) {
 	bbApiPost(fmt.Sprintf("repositories/%s/pullrequests/%d/request-changes", repository, id), nil)
 }
+
+func GetPipelineList(repository string, pages int) <-chan Pipeline {
+	channel := make(chan Pipeline)
+	go func() {
+		defer close(channel)
+
+		var prevResponse BBPaginatedResponse[Pipeline]
+		for i := 0; i < pages; i++ {
+			var response []byte
+			if i == 0 {
+				response = bbApiGet(fmt.Sprintf("repositories/%s/pipelines?sort=-created_on&pagelen=5", repository))
+			} else {
+				newUrl := strings.Replace(prevResponse.Next, "https://api.bitbucket.org/2.0/", "", 1)
+				if newUrl == "" {
+					break // there's no next page
+				}
+				response = bbApiGet(newUrl)
+			}
+			err := json.Unmarshal(response, &prevResponse)
+			cobra.CheckErr(err)
+
+			for _, pipeline := range prevResponse.Values {
+				channel <- pipeline
+			}
+
+		}
+	}()
+	return channel
+}

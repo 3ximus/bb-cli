@@ -12,11 +12,7 @@ type User struct {
 	Username    string `json:"username"`
 	AccountId   string `json:"account_id"`
 	Nickname    string `json:"nickname"`
-	Links       struct {
-		Html struct {
-			Href string
-		}
-	}
+	Links       struct{ Html struct{ Href string } }
 }
 
 type PrState string
@@ -46,11 +42,7 @@ type PullRequest struct {
 	CloseSource  bool    `json:"close_source_branch"`
 	Destination  Branch
 	Source       Branch
-	Links        struct {
-		Html struct {
-			Href string
-		}
-	}
+	Links        struct{ Html struct{ Href string } }
 	Status       CommitStatus
 	CreatedOn    time.Time `json:"created_on"`
 	UpdatedOn    time.Time `json:"updated_on"`
@@ -83,6 +75,30 @@ type CommitStatus struct {
 	UpdatedOn time.Time `json:"updated_on"`
 }
 
+type Pipeline struct {
+	BuildNumber int `json:"build_number"`
+	State       struct {
+		Name   string `json:"name"`
+		Result struct {
+			Name string
+		}
+	} `json:"state"`
+	Target struct {
+		Source      string
+		Destination string
+		RefName     string `json:"ref_name"`
+		PullRequest struct {
+			Id    int
+			Title string
+			Links struct{ Html struct{ Href string } }
+		} `json:"pullrequest"`
+	}
+	Author            User      `json:"creator"`
+	DurationInSeconds int       `json:"duration_in_seconds"`
+	CompletedOn       time.Time `json:"completed_on"`
+	CreatedOn         time.Time `json:"created_on"`
+}
+
 type PrComment struct {
 	Id      int
 	Content struct {
@@ -90,13 +106,9 @@ type PrComment struct {
 		Html string
 	}
 	User      User
-	Deleted bool
-	Type string
-	Links        struct {
-		Html struct {
-			Href string
-		}
-	}
+	Deleted   bool
+	Type      string
+	Links     struct{ Html struct{ Href string } }
 	CreatedOn time.Time `json:"created_on"`
 	UpdatedOn time.Time `json:"updated_on"`
 }
