@@ -93,6 +93,9 @@ type Pipeline struct {
 			Links struct{ Html struct{ Href string } }
 		} `json:"pullrequest"`
 	}
+	Trigger struct{
+		Name string
+	}
 	Author            User      `json:"creator"`
 	DurationInSeconds int       `json:"duration_in_seconds"`
 	CompletedOn       time.Time `json:"completed_on"`

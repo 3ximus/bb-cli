@@ -29,7 +29,7 @@ var ListCmd = &cobra.Command{
 				fmt.Printf("\033[1;34m[ %s ]\033[m\n", pipeline.Target.RefName)
 			}
 
-			fmt.Printf("       \033[33m%s\033[m\n", pipeline.Author.DisplayName) //  \033[37mComments: %d\033[m",
+			fmt.Printf("        \033[33m%s\033[m \033[37mTrigger: %s\033[m\n", pipeline.Author.DisplayName, pipeline.Trigger.Name) //  \033[37mComments: %d\033[m",
 		}
 	},
 }
