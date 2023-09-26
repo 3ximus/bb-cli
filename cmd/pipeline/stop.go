@@ -13,7 +13,7 @@ var StopCmd = &cobra.Command{
 	Short: "Stop a running pipeline",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		api.GetPipelineList(viper.GetString("repo"), 0)
+		api.GetPipelineList(viper.GetString("repo"), 0, "")
 		fmt.Println("Not implemented")
 	},
 }

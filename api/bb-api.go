@@ -22,6 +22,12 @@ type BBPaginatedResponse[T any] struct {
 	Previous string `json:"previous"`
 }
 
+func BBBrowsePipelines(repository string, id int) string {
+	return fmt.Sprintf("https://bitbucket.org/%s/pipelines/results/%d", repository, id)
+}
+
+// REST
+
 func bbApiGet(endpoint string) []byte {
 	client := &http.Client{}
 	url := fmt.Sprintf("%s/%s", viper.GetString("bb_api"), endpoint)
@@ -319,16 +325,21 @@ func RequestChangesPr(repository string, id int) {
 	bbApiPost(fmt.Sprintf("repositories/%s/pullrequests/%d/request-changes", repository, id), nil)
 }
 
-func GetPipelineList(repository string, pages int) <-chan Pipeline {
+func GetPipelineList(repository string, pages int, targetBranch string) <-chan Pipeline {
 	channel := make(chan Pipeline)
 	go func() {
 		defer close(channel)
+
+		query := ""
+		if targetBranch != "" {
+			query += fmt.Sprintf("&target.branch=%s", targetBranch)
+		}
 
 		var prevResponse BBPaginatedResponse[Pipeline]
 		for i := 0; i < pages; i++ {
 			var response []byte
 			if i == 0 {
-				response = bbApiGet(fmt.Sprintf("repositories/%s/pipelines?sort=-created_on&pagelen=5", repository))
+				response = bbApiGet(fmt.Sprintf("repositories/%s/pipelines?sort=-created_on&pagelen=5%s", repository, query))
 			} else {
 				newUrl := strings.Replace(prevResponse.Next, "https://api.bitbucket.org/2.0/", "", 1)
 				if newUrl == "" {
@@ -344,6 +355,19 @@ func GetPipelineList(repository string, pages int) <-chan Pipeline {
 			}
 
 		}
+	}()
+	return channel
+}
+
+func GetPipeline(repository string, id int) <-chan Pipeline {
+	channel := make(chan Pipeline)
+	go func() {
+		defer close(channel)
+		var pipeline Pipeline
+		response := bbApiGet(fmt.Sprintf("repositories/%s/pipelines/%d", repository, id))
+		err := json.Unmarshal(response, &pipeline)
+		cobra.CheckErr(err)
+		channel <- pipeline
 	}()
 	return channel
 }

@@ -13,7 +13,7 @@ var RunCmd = &cobra.Command{
 	Short: "Run pipeline for branch",
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		api.GetPipelineList(viper.GetString("repo"), 0)
+		api.GetPipelineList(viper.GetString("repo"), 0, "")
 		fmt.Println("Not implemented")
 	},
 }

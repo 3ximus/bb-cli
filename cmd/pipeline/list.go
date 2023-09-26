@@ -15,7 +15,7 @@ var ListCmd = &cobra.Command{
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		pages, _ := cmd.Flags().GetInt("pages")
-		pipelineChannel := api.GetPipelineList(viper.GetString("repo"), pages)
+		pipelineChannel := api.GetPipelineList(viper.GetString("repo"), pages, "")
 		for pipeline := range pipelineChannel {
 			if pipeline.State.Result.Name == "" {
 				fmt.Printf(" %s", util.FormatPipelineState(pipeline.State.Name))
