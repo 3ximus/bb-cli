@@ -43,13 +43,14 @@ var CreateCmd = &cobra.Command{
 		reviewersChannel := api.GetReviewers(repo)
 
 		title, _ := cmd.Flags().GetString("title")
-		description, _ := cmd.Flags().GetString("body")
+		description, _ := cmd.Flags().GetBool("body")
+		body := ""
 		if title == "" {
 			fmt.Print("? \033[1;35mTitle \033[m")
 			scanner.Scan()
 			title = scanner.Text()
-			if description == "" {
-				description = readDescription(scanner)
+			if description {
+				body = readDescription(scanner)
 			}
 		}
 		source, _ := cmd.Flags().GetString("source")
@@ -80,7 +81,7 @@ var CreateCmd = &cobra.Command{
 		// create dto
 		newpr := api.CreatePullRequest{
 			Title:       title,
-			Description: description,
+			Description: body,
 			CloseSource: close_source,
 		}
 		newpr.Source = &api.Branch{}
@@ -128,9 +129,9 @@ var CreateCmd = &cobra.Command{
 
 func init() {
 	CreateCmd.Flags().StringP("title", "t", "", "title for the pull request")
-	CreateCmd.Flags().StringP("body", "b", "", "description for the pull request")
+	CreateCmd.Flags().BoolP("body", "b", false, "add description for the pull request")
 	CreateCmd.Flags().StringP("source", "s", "", "source branch. Defaults to current branch")
-	CreateCmd.Flags().StringP("destination", "d", "dev", "description for the pull request: Defaults to dev")
+	CreateCmd.Flags().StringP("destination", "d", "dev", "destination for the pull request: Defaults to dev")
 	CreateCmd.RegisterFlagCompletionFunc("source", branchCompletion)
 	CreateCmd.RegisterFlagCompletionFunc("destination", branchCompletion)
 	CreateCmd.Flags().BoolP("close-source", "c", true, "close source branch")
@@ -139,18 +140,12 @@ func init() {
 }
 
 func readDescription(scanner *bufio.Scanner) string {
-	fmt.Print("? \033[1;35mAdd body ? [y/n]\033[m ")
-	scanner.Scan()
-	if strings.TrimSpace(strings.ToLower(scanner.Text())) == "y" {
-		tmpFile, err := os.CreateTemp("/tmp", "bitbucket-pr-body-")
-		cobra.CheckErr(err)
-		defer os.Remove(tmpFile.Name())
-		util.OpenInEditor(tmpFile)
-		description, err := io.ReadAll(tmpFile)
-		return string(description)
-	}
-	fmt.Println()
-	return ""
+	tmpFile, err := os.CreateTemp("/tmp", "bitbucket-pr-body-")
+	cobra.CheckErr(err)
+	defer os.Remove(tmpFile.Name())
+	util.OpenInEditor(tmpFile)
+	description, err := io.ReadAll(tmpFile)
+	return string(description)
 }
 
 func chooseReviewers(reviewers []api.User) []int {

@@ -18,9 +18,9 @@ var ListCmd = &cobra.Command{
 		pipelineChannel := api.GetPipelineList(viper.GetString("repo"), pages, "")
 		for pipeline := range pipelineChannel {
 			if pipeline.State.Result.Name == "" {
-				fmt.Printf(" %s", util.FormatPipelineState(pipeline.State.Name))
+				fmt.Printf("%s", util.FormatPipelineState(pipeline.State.Name))
 			} else {
-				fmt.Printf(" %s", util.FormatPipelineState(pipeline.State.Result.Name))
+				fmt.Printf("%s", util.FormatPipelineState(pipeline.State.Result.Name))
 			}
 			fmt.Printf(" \033[1;32m#%d\033[m ", pipeline.BuildNumber)
 			if pipeline.Target.Source != "" {
