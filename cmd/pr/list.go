@@ -4,6 +4,7 @@ import (
 	"bb/api"
 	"bb/util"
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -40,15 +41,15 @@ var ListCmd = &cobra.Command{
 				fmt.Printf(" %s", util.FormatPipelineState(pr.Status.State))
 			}
 			if participants {
-				fmt.Print(" ( ")
+				var outputStr = []string{}
 				for _, participant := range pr.Participants {
 					if participant.Approved {
-						fmt.Printf("\033[1;32m✓ %s, ", participant.User.DisplayName)
+						outputStr = append(outputStr, fmt.Sprintf("\033[1;32m✓ %s\033[m", participant.User.DisplayName))
 					} else {
-						fmt.Printf("\033[0;37m%s, ", participant.User.DisplayName)
+						outputStr = append(outputStr, fmt.Sprintf("\033[0;37m%s\033[m", participant.User.DisplayName))
 					}
 				}
-				fmt.Print("\033[m)")
+				fmt.Printf(" ( %s )", strings.Join(outputStr, ", "))
 			}
 			fmt.Println()
 			count++
