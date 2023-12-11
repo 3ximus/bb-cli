@@ -33,10 +33,29 @@ include_branch_name: true
 
 # define custom status for jira tickets, to more easily filter by the preset options and colorize output
 jira_status:
-  inprogress: ['In Progress', 'Selected for Development']
-  todo: ['À FAIRE']
-  open: ['OUVERT', 'To estimate_T']
+  inprogress:
+    values: ["In Progress", "In Progress_T"]
+    icon: "" # ﲊ 羽  
+    color: "1;34" # if I want to remove icon 1;38;5;235;44
+  todo:
+    values: ["À FAIRE"]
+    icon: "" #  
+    color: "1;33"
+  blocked:
+    values: ["Blocked"]
+    icon: "" #  ﰸ  
+    color: "1;31"
 
+# same for jira tickets
+jira_type:
+  bug:
+    values: ["Bug"]
+    icon: ""
+    color: "1;31"
+  task:
+    values: ["Tâche"]
+    icon: ""
+    color: "1;34"
 ```
 
 ### Setup autocompletion
@@ -59,8 +78,6 @@ bb help [COMMAND]
 ```
 
 TODO
-
-
 
 ### NOTE TO SELF
 
