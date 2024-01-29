@@ -4,6 +4,7 @@ import (
 	"bb/api"
 	"bb/util"
 	"fmt"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -24,10 +25,12 @@ var ListCmd = &cobra.Command{
 			}
 			fmt.Printf(" \033[1;32m#%d\033[m ", pipeline.BuildNumber)
 			if pipeline.Target.Source != "" {
-				fmt.Printf("%s \033[1;34m[ %s → %s]\033[m\n", pipeline.Target.PullRequest.Title, pipeline.Target.Source, pipeline.Target.Destination)
+				fmt.Printf("%s \033[1;34m[ %s → %s]\033[m", pipeline.Target.PullRequest.Title, pipeline.Target.Source, pipeline.Target.Destination)
 			} else {
-				fmt.Printf("\033[1;34m[ %s ]\033[m\n", pipeline.Target.RefName)
+				fmt.Printf("\033[1;34m[ %s ]\033[m", pipeline.Target.RefName)
 			}
+
+			fmt.Printf(" \033[37m%s (%s)\033[m\n", util.TimeDuration(time.Duration(pipeline.DurationInSeconds*1000000000)), util.TimeAgo(pipeline.CreatedOn))
 
 			fmt.Printf("        \033[33m%s\033[m \033[37mTrigger: %s\033[m\n", pipeline.Author.DisplayName, pipeline.Trigger.Name) //  \033[37mComments: %d\033[m",
 		}

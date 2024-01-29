@@ -119,18 +119,22 @@ func FormatIssuePriority(id string, name string) string {
 
 func TimeAgo(updatedOn time.Time) string {
 	duration := time.Since(updatedOn)
+	return fmt.Sprintf("%s ago", TimeDuration(duration))
+}
+
+func TimeDuration(duration time.Duration) string {
 	if duration.Hours() < 1 {
-		return fmt.Sprintf("%d minutes ago", int(duration.Minutes()))
+		return fmt.Sprintf("%d minutes", int(duration.Minutes()))
 	} else if duration.Hours() < 24 {
-		return fmt.Sprintf("%d hours ago", int(duration.Hours()))
+		return fmt.Sprintf("%d hours", int(duration.Hours()))
 	} else if duration.Hours() < 48 {
 		return "yesterday"
 	} else if duration.Hours() < 720 {
-		return fmt.Sprintf("%d days ago", int(duration.Hours()/24))
+		return fmt.Sprintf("%d days", int(duration.Hours()/24))
 	} else if duration.Hours() < 8760 {
-		return fmt.Sprintf("%d months ago", int(duration.Hours()/720))
+		return fmt.Sprintf("%d months", int(duration.Hours()/720))
 	}
-	return fmt.Sprintf("%d years ago", int(duration.Hours()/8760))
+	return fmt.Sprintf("%d years", int(duration.Hours()/8760))
 }
 
 func ConvertToSeconds(timeStrings []string) (int, error) {
