@@ -19,7 +19,7 @@ var EditCmd = &cobra.Command{
 	Long: `Allows edits to an existing pull request
 	If no options are given to edit title or description it will open your EDITOR to write any changes to them.
 	By default title is on first line and description on the lines bellow`,
-	Args: cobra.ExactArgs(1),
+	Args: cobra.MaximumNArgs(1),
 	ValidArgsFunction: func(comd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		var opt = []string{}
 		for pr := range api.GetPrList(util.GetCurrentRepo(), []string{string(api.OPEN)}, "", "", "", "", 1, false, false) {
@@ -28,11 +28,23 @@ var EditCmd = &cobra.Command{
 		return opt, cobra.ShellCompDirectiveDefault
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		// TODO try reading pr from current branch
-		id, err := strconv.Atoi(args[0])
-		cobra.CheckErr(err)
-
 		repo := viper.GetString("repo")
+
+		var id int
+		var err error
+		if len(args) == 0 {
+			branch, err := util.GetCurrentBranch()
+			cobra.CheckErr(err)
+			// retrieve id of pr for current branch
+			pr := <-api.GetPrList(repo, []string{string(api.OPEN), string(api.MERGED), string(api.DECLINED), string(api.SUPERSEDED)}, "", "", branch, "", 1, false, false)
+			if pr.ID == 0 {
+				cobra.CheckErr("No pr found for this branch")
+			}
+			id = pr.ID // get the first one's ID
+		} else {
+			id, err = strconv.Atoi(args[0])
+			cobra.CheckErr(err)
+		}
 
 		title, _ := cmd.Flags().GetString("title")
 		description, _ := cmd.Flags().GetString("body")
