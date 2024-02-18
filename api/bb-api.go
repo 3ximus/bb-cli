@@ -67,10 +67,9 @@ func _bbApiPostPut(method string, endpoint string, body io.Reader) []byte {
 	resp, err := client.Do(req)
 	cobra.CheckErr(err)
 
-	if resp.StatusCode != 201 && resp.StatusCode != 200 {
+	if resp.StatusCode != 201 && resp.StatusCode != 200 && resp.StatusCode != 204 {
 		errBody, err := io.ReadAll(resp.Body)
-		cobra.CheckErr(err)
-		cobra.CheckErr(string(errBody))
+		cobra.CheckErr(strings.Join([]string{fmt.Sprintf("%v", err), string(errBody)}, ","))
 	}
 
 	responseBody, err := io.ReadAll(resp.Body)
@@ -422,6 +421,10 @@ func RunPipeline(repository string, data RunPipelineRequestBody) Pipeline {
 	err = json.Unmarshal(response, &pipeline)
 	cobra.CheckErr(err)
 	return pipeline
+}
+
+func StopPipeline(repository string, id string) {
+	bbApiPost(fmt.Sprintf("repositories/%s/pipelines/%s/stopPipeline", repository, id), nil)
 }
 
 func GetEnvironmentList(repository string, status bool) <-chan Environment {
