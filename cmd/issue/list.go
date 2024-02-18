@@ -25,7 +25,8 @@ var ListCmd = &cobra.Command{
 		statuses, _ := cmd.Flags().GetStringArray("status")
 		project, _ := cmd.Flags().GetString("project")
 		priority, _ := cmd.Flags().GetBool("priority")
-		showUsers, _ := cmd.Flags().GetBool("show-users")
+		showUsers, _ := cmd.Flags().GetBool("users")
+		showTime, _ := cmd.Flags().GetBool("time")
 
 		if !cmd.Flags().Changed("project") {
 			branch, err := util.GetCurrentBranch()
@@ -54,7 +55,6 @@ var ListCmd = &cobra.Command{
 			}
 		}
 
-		fmt.Println()
 		for issue := range api.GetIssueList(nResults, all, reporter, project, statusConversion, priority) {
 			timeSpent := "-"
 			if issue.Fields.TimeTracking.TimeSpent != " " {
@@ -71,9 +71,10 @@ var ListCmd = &cobra.Command{
 					fmt.Printf("    \033[37mReporter: \033[1m%s \033[37m(%d comments)\033[m\n", issue.Fields.Reporter.DisplayName, issue.Fields.Comment.Total)
 				}
 			}
-			fmt.Printf("    \033[37mTime spent: \033[1;34m%s\033[m [ %s/%s ]\n", timeSpent, issue.Fields.TimeTracking.RemainingEstimate, issue.Fields.TimeTracking.OriginalEstimate)
+			if showTime {
+				fmt.Printf("    \033[37mTime spent: \033[1;34m%s\033[m [ %s/%s ]\n", timeSpent, issue.Fields.TimeTracking.RemainingEstimate, issue.Fields.TimeTracking.OriginalEstimate)
+			}
 		}
-		fmt.Println()
 	},
 }
 
@@ -90,8 +91,8 @@ func init() {
 	// TODO add way to sort by recent or the ones the user has participated on
 
 	// display
-	ListCmd.Flags().BoolP("show-users", "u", false, "show users")
-	ListCmd.Flags().BoolP("one-line", "o", false, "show one issue per line. \033[31mNot implemented\033[m")
+	ListCmd.Flags().BoolP("users", "u", false, "show users")
+	ListCmd.Flags().BoolP("time", "t", false, "show time information")
 	ListCmd.Flags().IntP("number-results", "n", 10, "max number of results retrieve")
 	// sort
 	ListCmd.Flags().BoolP("priority", "P", false, "sort by priority")

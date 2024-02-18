@@ -16,6 +16,7 @@ var ListCmd = &cobra.Command{
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		pages, _ := cmd.Flags().GetInt("pages")
+		showAuthor, _ := cmd.Flags().GetBool("author")
 		pipelineChannel := api.GetPipelineList(viper.GetString("repo"), pages, "")
 		for pipeline := range pipelineChannel {
 			if pipeline.State.Result.Name == "" {
@@ -32,11 +33,14 @@ var ListCmd = &cobra.Command{
 
 			fmt.Printf(" \033[37m%s (%s)\033[m\n", util.TimeDuration(time.Duration(pipeline.DurationInSeconds*1000000000)), util.TimeAgo(pipeline.CreatedOn))
 
-			fmt.Printf("        \033[33m%s\033[m \033[37mTrigger: %s\033[m\n", pipeline.Author.DisplayName, pipeline.Trigger.Name) //  \033[37mComments: %d\033[m",
+			if showAuthor {
+				fmt.Printf("        \033[33m%s\033[m \033[37mTrigger: %s\033[m\n", pipeline.Author.DisplayName, pipeline.Trigger.Name) //  \033[37mComments: %d\033[m",
+			}
 		}
 	},
 }
 
 func init() {
 	ListCmd.Flags().Int("pages", 1, "number of pages with results to retrieve")
+	ListCmd.Flags().BoolP("author", "a", false, "show author information")
 }

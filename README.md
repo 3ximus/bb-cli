@@ -31,12 +31,20 @@ jira_token: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX(192 characters)
 # include branch name at beggining of the pull request (useful to link with jira tickets)
 include_branch_name: true
 
-# define custom status for jira tickets, to more easily filter by the preset options and colorize output
+# define custom text icons or text for jira_status, jira_types, pr_status or pipeline_status. The format is as follows:
+#   identifier:
+#     values: ["State 1", "State 2"] # this is the string that matches the state being printed
+#     color: "1;34" # the ANSII sequence for the color used. if I want to remove icon 1;38;5;235;44
+#     text: "ACTUAL STATE" # string printed, takes precedence over icon
+#     icon: "ﲊ" # icon to display
+#
+# examples bellow:
+
 jira_status:
   inprogress:
     values: ["In Progress", "In Progress_T"]
     icon: "" # ﲊ 羽  
-    color: "1;34" # if I want to remove icon 1;38;5;235;44
+    color: "1;34"
   todo:
     values: ["À FAIRE"]
     icon: "" #  

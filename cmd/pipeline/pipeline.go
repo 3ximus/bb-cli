@@ -8,8 +8,9 @@ import (
 )
 
 var PipelineCmd = &cobra.Command{
-	Use:   "pipeline",
-	Short: "Manage pipelines",
+	Use:     "pipeline",
+	Aliases: []string{"pl"},
+	Short:   "Manage pipelines",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		err := viper.BindPFlag("repo", cmd.Flags().Lookup("repo"))
 		cobra.CheckErr(err)

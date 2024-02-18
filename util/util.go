@@ -15,7 +15,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-type JiraResultConfig struct {
+type ResultSwitchConfig struct {
 	Values []string `mapstructure:"values"`
 	Text   string   `mapstructure:"text"`
 	Icon   string   `mapstructure:"icon"`
@@ -23,18 +23,27 @@ type JiraResultConfig struct {
 }
 
 func FormatPrState(state api.PrState) string {
-	stateString := ""
-	switch state {
-	case "OPEN":
-		stateString = "\033[1;38;5;235;44m OPEN \033[m"
-	case "MERGED":
-		stateString = "\033[1;38;5;235;45m MERGED \033[m"
-	case "DECLINED":
-		stateString = "\033[1;38;5;235;41m DECLINED \033[m"
-	case "SUPERSEDED":
-		stateString = "\033[1;38;5;235;44m SUPERSEDED \033[m"
+	str := fmt.Sprintf("\033[1;38;5;235;47m %s \033[m", state) // default
+
+	jiraStatusMap := make(map[string]ResultSwitchConfig)
+	if err := viper.UnmarshalKey("pr_status", &jiraStatusMap); err != nil {
+		cobra.CheckErr(err)
 	}
-	return stateString
+
+	for k, v := range jiraStatusMap {
+		for _, s := range v.Values {
+			if s == state.String() {
+				if v.Text != "" {
+					str = fmt.Sprintf("\033[%sm %s \033[m", v.Color, v.Text)
+				} else if v.Icon != "" {
+					str = fmt.Sprintf("\033[%sm%s\033[m", v.Color, v.Icon)
+				} else {
+					str = fmt.Sprintf("\033[%sm %s \033[m", v.Color, strings.ToUpper(k))
+				}
+			}
+		}
+	}
+	return str
 }
 
 func FormatPipelineState(state string) string {
@@ -55,7 +64,7 @@ func FormatPipelineState(state string) string {
 func FormatIssueType(issueType string) string {
 	str := ""
 
-	jiraStatusMap := make(map[string]JiraResultConfig)
+	jiraStatusMap := make(map[string]ResultSwitchConfig)
 	if err := viper.UnmarshalKey("jira_type", &jiraStatusMap); err != nil {
 		cobra.CheckErr(err)
 	}
@@ -79,7 +88,7 @@ func FormatIssueType(issueType string) string {
 func FormatIssueStatus(status string) string {
 	str := fmt.Sprintf("\033[1;38;5;235;47m %s \033[m", status) // default
 
-	jiraStatusMap := make(map[string]JiraResultConfig)
+	jiraStatusMap := make(map[string]ResultSwitchConfig)
 	if err := viper.UnmarshalKey("jira_status", &jiraStatusMap); err != nil {
 		cobra.CheckErr(err)
 	}

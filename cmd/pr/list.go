@@ -30,13 +30,9 @@ var ListCmd = &cobra.Command{
 
 		prChannel := api.GetPrList(viper.GetString("repo"), states, author, search, source, destination, pages, status, participants)
 
-		// fmt.Printf("\n  Pull Requests for \033[1;36m%s\033[m\n\n", viper.GetString("repo"))
 		count := 0
-		fmt.Println()
 		for pr := range prChannel {
-			// if we didn't provide filter don't show the pr status
-			fmt.Printf("%-19s \033[1;32m#%d\033[m %s  \033[1;34m[ %s → %s]\033[m\n", util.FormatPrState(pr.State), pr.ID, pr.Title, pr.Source.Branch.Name, pr.Destination.Branch.Name)
-			fmt.Printf("            \033[33m%s\033[m  \033[37mComments: %d\033[m", pr.Author.Nickname, pr.CommentCount)
+			fmt.Printf("%s \033[1;32m#%d\033[m %s \033[1;34m[ %s \033[m→\033[1;34m %s ]\033[m \033[33m%s\033[m", util.FormatPrState(pr.State), pr.ID, pr.Title, pr.Source.Branch.Name, pr.Destination.Branch.Name, pr.Author.Nickname)
 			if status {
 				fmt.Printf(" %s", util.FormatPipelineState(pr.Status.State))
 			}
@@ -49,15 +45,13 @@ var ListCmd = &cobra.Command{
 						outputStr = append(outputStr, fmt.Sprintf("\033[0;37m%s\033[m", participant.User.DisplayName))
 					}
 				}
-				fmt.Printf(" ( %s )", strings.Join(outputStr, ", "))
+				fmt.Printf("\n       \033[37mComments: %d\033[m ( %s )", pr.CommentCount, strings.Join(outputStr, ", "))
 			}
 			fmt.Println()
 			count++
 		}
 		if count == 0 {
 			fmt.Printf("\n  No pull requests for \033[1;36m%s\033[m\n\n", viper.GetString("repo"))
-		} else {
-			fmt.Println()
 		}
 	},
 }
@@ -65,7 +59,7 @@ var ListCmd = &cobra.Command{
 func init() {
 	// filter
 	ListCmd.Flags().StringP("author", "a", "", "filter by author nick name (full nickname is needed due to an API limitation from bitbucket)")
-	ListCmd.Flags().StringP("search", "S", "", "search pull request with query")
+	ListCmd.Flags().String("search", "", "search pull request with query")
 	ListCmd.Flags().StringArrayP("state", "s", []string{string(api.OPEN)}, `filter by state. Default: "open". Multiple of these options can be given
 	possible options: "open", "merged", "declined" or "superseded"`)
 	ListCmd.RegisterFlagCompletionFunc("state", stateCompletion)
@@ -76,8 +70,8 @@ func init() {
 	ListCmd.Flags().Bool("all", false, "return pull request with all possible states.")
 
 	ListCmd.Flags().Int("pages", 1, "number of pages with results to retrieve")
-	ListCmd.Flags().Bool("status", false, "include status of each pull request on the result. (the result will be slower)")
-	ListCmd.Flags().BoolP("participants", "p", false, "include participant data for each pull request on the result. (the result will be slower)")
+	ListCmd.Flags().BoolP("status", "S", false, "include status of each pull request on the result. (the result will be slower)")
+	ListCmd.Flags().BoolP("participants", "p", false, "include participant and comment data for each pull request on the result. (the result will be slower)")
 }
 
 func stateCompletion(comd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
