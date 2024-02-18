@@ -31,17 +31,24 @@ func BBBrowsePipelines(repository string, id int) string {
 // REST
 
 func bbApiGet(endpoint string) []byte {
+	return bbApiRangedGet(endpoint, "")
+}
+
+func bbApiRangedGet(endpoint string, dataRange string) []byte {
 	client := &http.Client{}
 	url := fmt.Sprintf("%s/%s", viper.GetString("bb_api"), endpoint)
-	// fmt.Println(url)
 	req, err := http.NewRequest("GET", url, nil)
 	cobra.CheckErr(err)
 	req.SetBasicAuth(viper.GetString("username"), viper.GetString("bb_token"))
 
+	if dataRange != "" {
+		req.Header.Add("Range", fmt.Sprintf("bytes=%s", dataRange))
+	}
+
 	resp, err := client.Do(req)
 	cobra.CheckErr(err)
 
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != 200 && resp.StatusCode != 206 && resp.StatusCode != 416 {
 		errBody, err := io.ReadAll(resp.Body)
 		cobra.CheckErr(err)
 		cobra.CheckErr(string(errBody))
@@ -386,12 +393,16 @@ func GetPipelineStep(repository string, id string, stepId string) <-chan Pipelin
 	return channel
 }
 
-func GetPipelineStepLogs(repository string, id string, stepUUID string) <-chan string {
+func GetPipelineStepLogs(repository string, id string, stepUUID string, offset int) <-chan string {
 	channel := make(chan string)
 	go func() {
 		defer close(channel)
-		response := bbApiGet(fmt.Sprintf("repositories/%s/pipelines/%s/steps/%s/log", repository, id, stepUUID))
-		channel <- string(response)
+		response := bbApiRangedGet(fmt.Sprintf("repositories/%s/pipelines/%s/steps/%s/log", repository, id, stepUUID), fmt.Sprintf("%d-", offset))
+		if bytes.Index(response, []byte("Range Not Satisfiable")) != -1 {
+			channel <- ""
+		} else {
+			channel <- string(response)
+		}
 	}()
 	return channel
 }

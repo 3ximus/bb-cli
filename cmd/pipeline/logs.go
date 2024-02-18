@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -13,7 +14,7 @@ import (
 
 var LogsCmd = &cobra.Command{
 	Use:   "logs",
-	Short: "Show logs of a pipeline",
+	Short: "Show logs of a pipeline step",
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		repo := viper.GetString("repo")
@@ -58,13 +59,20 @@ var LogsCmd = &cobra.Command{
 
 		tail, _ := cmd.Flags().GetBool("tail")
 		if !tail {
-			fmt.Print(<-api.GetPipelineStepLogs(repo, fmt.Sprintf("%d", id), selected.UUID))
+			fmt.Print(<-api.GetPipelineStepLogs(repo, fmt.Sprintf("%d", id), selected.UUID, 0))
 		} else {
 			firstDone := false
-			// TODO this should use ranged requests
+			totalLength := 0
 			for !firstDone || selected.State.Name != "COMPLETED" {
-				fmt.Print(<-api.GetPipelineStepLogs(repo, fmt.Sprintf("%d", id), selected.UUID))
-				selected = <-api.GetPipelineStep(repo, fmt.Sprintf("%d", id), selected.UUID)
+				if firstDone {
+					time.Sleep(2 * time.Second)
+				}
+				logsChannel := api.GetPipelineStepLogs(repo, fmt.Sprintf("%d", id), selected.UUID, totalLength)
+				stepChannel := api.GetPipelineStep(repo, fmt.Sprintf("%d", id), selected.UUID)
+				response := <-logsChannel
+				fmt.Print(response)
+				totalLength += len(response)
+				selected = <-stepChannel
 				firstDone = true
 			}
 		}
