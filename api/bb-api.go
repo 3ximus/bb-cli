@@ -361,17 +361,25 @@ func GetPipeline(repository string, id string) <-chan Pipeline {
 	return channel
 }
 
-func GetPipelineSteps(repository string, id string) <-chan PipelineStep {
-	channel := make(chan PipelineStep)
+func GetPipelineSteps(repository string, id string) <-chan []PipelineStep {
+	channel := make(chan []PipelineStep)
 	go func() {
 		defer close(channel)
 		var steps BBPaginatedResponse[PipelineStep]
 		response := bbApiGet(fmt.Sprintf("repositories/%s/pipelines/%s/steps", repository, id))
 		err := json.Unmarshal(response, &steps)
 		cobra.CheckErr(err)
-		for _, step := range steps.Values {
-			channel <- step
-		}
+		channel <- steps.Values
+	}()
+	return channel
+}
+
+func GetPipelineStepLogs(repository string, id string, stepUUID string) <-chan string {
+	channel := make(chan string)
+	go func() {
+		defer close(channel)
+		response := bbApiGet(fmt.Sprintf("repositories/%s/pipelines/%s/steps/%s/log", repository, id, stepUUID))
+		channel <- string(response)
 	}()
 	return channel
 }

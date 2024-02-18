@@ -54,7 +54,7 @@ var ViewCmd = &cobra.Command{
 		fmt.Printf("        \033[33m%s\033[m \033[37mTrigger: %s\033[m\n", pipeline.Author.DisplayName, pipeline.Trigger.Name)
 
 		fmt.Println()
-		for step := range stepsChannel {
+		for _, step := range <-stepsChannel {
 			if step.State.Result.Name != "" {
 				fmt.Printf("%s %s \033[37m%s\033[m", step.Name, util.FormatPipelineState(step.State.Result.Name), util.TimeDuration(time.Duration(step.DurationInSeconds*1000000000)))
 			} else {
