@@ -22,17 +22,12 @@ type ResultSwitchConfig struct {
 	Color  string   `mapstructure:"color"`
 }
 
-func FormatPrState(state api.PrState) string {
-	str := fmt.Sprintf("\033[1;38;5;235;47m %s \033[m", state) // default
+func FormatSwitchConfig(result string, mapping map[string]ResultSwitchConfig) string {
+	str := fmt.Sprintf("\033[1;38;5;235;47m %s \033[m", result) // default
 
-	jiraStatusMap := make(map[string]ResultSwitchConfig)
-	if err := viper.UnmarshalKey("pr_status", &jiraStatusMap); err != nil {
-		cobra.CheckErr(err)
-	}
-
-	for k, v := range jiraStatusMap {
+	for k, v := range mapping {
 		for _, s := range v.Values {
-			if s == state.String() {
+			if s == result {
 				if v.Text != "" {
 					str = fmt.Sprintf("\033[%sm %s \033[m", v.Color, v.Text)
 				} else if v.Icon != "" {
@@ -46,67 +41,36 @@ func FormatPrState(state api.PrState) string {
 	return str
 }
 
-func FormatPipelineState(state string) string {
-	stateString := ""
-	switch state {
-	case "INPROGRESS", "IN_PROGRESS":
-		stateString = "\033[1;38;5;235;44m RUNNING \033[m"
-	case "STOPPED", "stopped":
-		stateString = "\033[1;38;5;235;43m STOPPED \033[m"
-	case "SUCCESSFUL", "successful":
-		stateString = "\033[1;38;5;235;42m PASS \033[m"
-	case "FAILED", "failed":
-		stateString = "\033[1;38;5;235;41m FAIL \033[m"
+func FormatPrState(state api.PrState) string {
+	prStatusMap := make(map[string]ResultSwitchConfig)
+	if err := viper.UnmarshalKey("pr_status", &prStatusMap); err != nil {
+		cobra.CheckErr(err)
 	}
-	return stateString
+	return FormatSwitchConfig(state.String(), prStatusMap)
+}
+
+func FormatPipelineState(state string) string {
+	pipelineStatusMap := make(map[string]ResultSwitchConfig)
+	if err := viper.UnmarshalKey("pipeline_status", &pipelineStatusMap); err != nil {
+		cobra.CheckErr(err)
+	}
+	return FormatSwitchConfig(state, pipelineStatusMap)
 }
 
 func FormatIssueType(issueType string) string {
-	str := ""
-
 	jiraStatusMap := make(map[string]ResultSwitchConfig)
 	if err := viper.UnmarshalKey("jira_type", &jiraStatusMap); err != nil {
 		cobra.CheckErr(err)
 	}
-
-	for k, v := range jiraStatusMap {
-		for _, s := range v.Values {
-			if s == issueType {
-				if v.Text != "" {
-					str = fmt.Sprintf("\033[%sm %s \033[m", v.Color, v.Text)
-				} else if v.Icon != "" {
-					str = fmt.Sprintf("\033[%sm%s\033[m", v.Color, v.Icon)
-				} else {
-					str = fmt.Sprintf("\033[%sm %s \033[m", v.Color, strings.ToUpper(k))
-				}
-			}
-		}
-	}
-	return str
+	return FormatSwitchConfig(issueType, jiraStatusMap)
 }
 
 func FormatIssueStatus(status string) string {
-	str := fmt.Sprintf("\033[1;38;5;235;47m %s \033[m", status) // default
-
 	jiraStatusMap := make(map[string]ResultSwitchConfig)
 	if err := viper.UnmarshalKey("jira_status", &jiraStatusMap); err != nil {
 		cobra.CheckErr(err)
 	}
-
-	for k, v := range jiraStatusMap {
-		for _, s := range v.Values {
-			if s == status {
-				if v.Text != "" {
-					str = fmt.Sprintf("\033[%sm %s \033[m", v.Color, v.Text)
-				} else if v.Icon != "" {
-					str = fmt.Sprintf("\033[%sm%s\033[m", v.Color, v.Icon)
-				} else {
-					str = fmt.Sprintf("\033[%sm %s \033[m", v.Color, strings.ToUpper(k))
-				}
-			}
-		}
-	}
-	return str
+	return FormatSwitchConfig(status, jiraStatusMap)
 }
 
 func FormatIssuePriority(id string, name string) string {

@@ -15,9 +15,10 @@ var ListCmd = &cobra.Command{
 	Short: "List pipelines from a repository",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		pages, _ := cmd.Flags().GetInt("pages")
+		nResults, _ := cmd.Flags().GetInt("number-results")
 		showAuthor, _ := cmd.Flags().GetBool("author")
-		pipelineChannel := api.GetPipelineList(viper.GetString("repo"), pages, "")
+		targetBranch, _ := cmd.Flags().GetString("target")
+		pipelineChannel := api.GetPipelineList(viper.GetString("repo"), nResults, targetBranch)
 		for pipeline := range pipelineChannel {
 			if pipeline.State.Result.Name == "" {
 				fmt.Printf("%s", util.FormatPipelineState(pipeline.State.Name))
@@ -26,7 +27,7 @@ var ListCmd = &cobra.Command{
 			}
 			fmt.Printf(" \033[1;32m#%d\033[m ", pipeline.BuildNumber)
 			if pipeline.Target.Source != "" {
-				fmt.Printf("%s \033[1;34m[ %s → %s]\033[m", pipeline.Target.PullRequest.Title, pipeline.Target.Source, pipeline.Target.Destination)
+				fmt.Printf("%s \033[1;34m[ %s → %s ]\033[m", pipeline.Target.PullRequest.Title, pipeline.Target.Source, pipeline.Target.Destination)
 			} else {
 				fmt.Printf("\033[1;34m[ %s ]\033[m", pipeline.Target.RefName)
 			}
@@ -41,6 +42,12 @@ var ListCmd = &cobra.Command{
 }
 
 func init() {
-	ListCmd.Flags().Int("pages", 1, "number of pages with results to retrieve")
+	ListCmd.Flags().IntP("number-results", "n", 10, "max number of results retrieve (max: 100)")
 	ListCmd.Flags().BoolP("author", "a", false, "show author information")
+	ListCmd.Flags().String("target", "", "filter target branch of pipeline")
+	ListCmd.RegisterFlagCompletionFunc("target", branchCompletion)
+}
+
+func branchCompletion(comd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	return util.ListBranches(), cobra.ShellCompDirectiveDefault
 }
