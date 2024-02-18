@@ -361,6 +361,22 @@ func GetPipeline(repository string, id string) <-chan Pipeline {
 	return channel
 }
 
+func GetPipelineVariables(repository string) <-chan EnvironmentVariable {
+	channel := make(chan EnvironmentVariable)
+	go func() {
+		defer close(channel)
+
+		var environmentResponse BBPaginatedResponse[EnvironmentVariable]
+		response := bbApiGet(fmt.Sprintf("repositories/%s/pipelines_config/variables", repository))
+		err := json.Unmarshal(response, &environmentResponse)
+		cobra.CheckErr(err)
+		for _, envVar := range environmentResponse.Values {
+			channel <- envVar
+		}
+	}()
+	return channel
+}
+
 func GetEnvironmentList(repository string, status bool) <-chan Environment {
 	channel := make(chan Environment)
 	go func() {

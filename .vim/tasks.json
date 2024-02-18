@@ -1,0 +1,5 @@
+{
+  "tasks": [
+    { "type": "shell", "label": "Run", "command": "go run main.go --config bb.yaml -R vo2-canada/addlean-server" }
+  ]
+}
