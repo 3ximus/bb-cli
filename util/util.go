@@ -49,7 +49,7 @@ func FormatPrState(state api.PrState) string {
 	return FormatSwitchConfig(state.String(), prStatusMap)
 }
 
-func FormatPipelineState(state string) string {
+func FormatPipelineStatus(state string) string {
 	pipelineStatusMap := make(map[string]ResultSwitchConfig)
 	if err := viper.UnmarshalKey("pipeline_status", &pipelineStatusMap); err != nil {
 		cobra.CheckErr(err)

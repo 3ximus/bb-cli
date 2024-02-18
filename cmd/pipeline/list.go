@@ -21,9 +21,9 @@ var ListCmd = &cobra.Command{
 
 		for pipeline := range api.GetPipelineList(viper.GetString("repo"), nResults, targetBranch) {
 			if pipeline.State.Result.Name == "" {
-				fmt.Printf("%s", util.FormatPipelineState(pipeline.State.Name))
+				fmt.Printf("%s", util.FormatPipelineStatus(pipeline.State.Name))
 			} else {
-				fmt.Printf("%s", util.FormatPipelineState(pipeline.State.Result.Name))
+				fmt.Printf("%s", util.FormatPipelineStatus(pipeline.State.Result.Name))
 			}
 			fmt.Printf(" \033[1;32m#%d\033[m ", pipeline.BuildNumber)
 			if pipeline.Target.Source != "" {

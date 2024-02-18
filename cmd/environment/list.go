@@ -18,9 +18,9 @@ var ListCmd = &cobra.Command{
 		for environment := range api.GetEnvironmentList(viper.GetString("repo"), status) {
 			if status {
 				if environment.Status.State.Result.Name == "" {
-					fmt.Printf("%s ", util.FormatPipelineState(environment.Status.State.Name))
+					fmt.Printf("%s ", util.FormatPipelineStatus(environment.Status.State.Name))
 				} else {
-					fmt.Printf("%s ", util.FormatPipelineState(environment.Status.State.Result.Name))
+					fmt.Printf("%s ", util.FormatPipelineStatus(environment.Status.State.Result.Name))
 				}
 			}
 			fmt.Printf("%s \033[37m%s\033[m", environment.Name, environment.EnvironmentType.Name)

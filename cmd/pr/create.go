@@ -79,7 +79,7 @@ var CreateCmd = &cobra.Command{
 		}
 
 		// create dto
-		newpr := api.CreatePullRequest{
+		newpr := api.CreatePullRequestBody{
 			Title:       title,
 			Description: body,
 			CloseSource: close_source,

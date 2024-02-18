@@ -32,7 +32,7 @@ var ListCmd = &cobra.Command{
 		for pr := range api.GetPrList(viper.GetString("repo"), states, author, search, source, destination, pages, status, participants) {
 			fmt.Printf("%s \033[1;32m#%d\033[m %s \033[1;34m[ %s \033[m→\033[1;34m %s ]\033[m \033[33m%s\033[m", util.FormatPrState(pr.State), pr.ID, pr.Title, pr.Source.Branch.Name, pr.Destination.Branch.Name, pr.Author.Nickname)
 			if status {
-				fmt.Printf(" %s", util.FormatPipelineState(pr.Status.State))
+				fmt.Printf(" %s", util.FormatPipelineStatus(pr.Status.State))
 			}
 			if participants {
 				var outputStr = []string{}

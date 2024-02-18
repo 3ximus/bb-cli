@@ -273,7 +273,7 @@ func GetWorkspaceMembers(workspace string) <-chan []User {
 	return channel
 }
 
-func PostPr(repository string, data CreatePullRequest) PullRequest {
+func PostPr(repository string, data CreatePullRequestBody) PullRequest {
 	content, err := json.Marshal(data)
 	cobra.CheckErr(err)
 	response := bbApiPost(fmt.Sprintf("repositories/%s/pullrequests", repository), bytes.NewReader(content))
@@ -285,7 +285,7 @@ func PostPr(repository string, data CreatePullRequest) PullRequest {
 	return pr
 }
 
-func UpdatePr(repository string, id int, data CreatePullRequest) PullRequest {
+func UpdatePr(repository string, id int, data CreatePullRequestBody) PullRequest {
 	content, err := json.Marshal(data)
 	cobra.CheckErr(err)
 	response := bbApiPut(fmt.Sprintf("repositories/%s/pullrequests/%d", repository, id), bytes.NewReader(content))
@@ -374,6 +374,19 @@ func GetPipelineSteps(repository string, id string) <-chan []PipelineStep {
 	return channel
 }
 
+func GetPipelineStep(repository string, id string, stepId string) <-chan PipelineStep {
+	channel := make(chan PipelineStep)
+	go func() {
+		defer close(channel)
+		var step PipelineStep
+		response := bbApiGet(fmt.Sprintf("repositories/%s/pipelines/%s/steps/%s", repository, id, stepId))
+		err := json.Unmarshal(response, &step)
+		cobra.CheckErr(err)
+		channel <- step
+	}()
+	return channel
+}
+
 func GetPipelineStepLogs(repository string, id string, stepUUID string) <-chan string {
 	channel := make(chan string)
 	go func() {
@@ -398,6 +411,17 @@ func GetPipelineVariables(repository string) <-chan EnvironmentVariable {
 		}
 	}()
 	return channel
+}
+
+func RunPipeline(repository string, data RunPipelineRequestBody) Pipeline {
+	content, err := json.Marshal(data)
+	cobra.CheckErr(err)
+	response := bbApiPost(fmt.Sprintf("repositories/%s/pipelines", repository), bytes.NewReader(content))
+
+	var pipeline Pipeline
+	err = json.Unmarshal(response, &pipeline)
+	cobra.CheckErr(err)
+	return pipeline
 }
 
 func GetEnvironmentList(repository string, status bool) <-chan Environment {

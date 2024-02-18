@@ -40,9 +40,9 @@ var ViewCmd = &cobra.Command{
 		pipeline := <-api.GetPipeline(repo, fmt.Sprintf("%d", id))
 
 		if pipeline.State.Result.Name == "" {
-			fmt.Printf("%s", util.FormatPipelineState(pipeline.State.Name))
+			fmt.Printf("%s", util.FormatPipelineStatus(pipeline.State.Name))
 		} else {
-			fmt.Printf("%s", util.FormatPipelineState(pipeline.State.Result.Name))
+			fmt.Printf("%s", util.FormatPipelineStatus(pipeline.State.Result.Name))
 		}
 		fmt.Printf(" \033[1;32m#%d\033[m ", pipeline.BuildNumber)
 		if pipeline.Target.Source != "" {
@@ -56,9 +56,11 @@ var ViewCmd = &cobra.Command{
 		fmt.Println()
 		for _, step := range <-stepsChannel {
 			if step.State.Result.Name != "" {
-				fmt.Printf("%s %s \033[37m%s\033[m", step.Name, util.FormatPipelineState(step.State.Result.Name), util.TimeDuration(time.Duration(step.DurationInSeconds*1000000000)))
+				fmt.Printf("%s %s \033[37m%s\033[m", step.Name, util.FormatPipelineStatus(step.State.Result.Name), util.TimeDuration(time.Duration(step.DurationInSeconds*1000000000)))
+			} else if step.State.Stage.Name != "" {
+				fmt.Printf("%s %s \033[37m%s\033[m", step.Name, util.FormatPipelineStatus(step.State.Stage.Name), util.TimeDuration(time.Duration(step.DurationInSeconds*1000000000)))
 			} else {
-				fmt.Printf("%s %s \033[37m%s\033[m", step.Name, util.FormatPipelineState(step.State.Stage.Name), util.TimeDuration(time.Duration(step.DurationInSeconds*1000000000)))
+				fmt.Printf("%s %s \033[37m%s\033[m", step.Name, util.FormatPipelineStatus(step.State.Name), util.TimeDuration(time.Duration(step.DurationInSeconds*1000000000)))
 			}
 			fmt.Println()
 			if showCommands {

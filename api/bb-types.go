@@ -57,7 +57,7 @@ type PullRequest struct {
 	}
 }
 
-type CreatePullRequest struct {
+type CreatePullRequestBody struct {
 	Title       string  `json:"title"`
 	Description string  `json:"description"`
 	CloseSource bool    `json:"close_source_branch"`
@@ -66,6 +66,31 @@ type CreatePullRequest struct {
 	Reviewers   []struct {
 		AccountId string `json:"account_id"`
 	} `json:"reviewers,omitempty"`
+}
+
+type RunPipelineRequestBody struct {
+	Target struct {
+		RefType     string                   `json:"ref_type"`
+		Type        string                   `json:"type"`
+		RefName     string                   `json:"ref_name"`
+		Commit      *PipelineCommitRefBody   `json:"commit"`
+		PullRequest *PipelinePullRequestBody `json:"pullrequest"`
+		Selector    *PipelineSelectorBody    `json:"selector"`
+	} `json:"target"`
+}
+
+type PipelineSelectorBody struct {
+	Type    string `json:"type"`
+	Pattern string `json:"pattern"`
+}
+
+type PipelineCommitRefBody struct {
+	Hash string `json:"hash"`
+	Type string `json:"type"`
+}
+
+type PipelinePullRequestBody struct {
+	Id string `json:"id"`
 }
 
 type CommitStatus struct {
@@ -78,6 +103,7 @@ type CommitStatus struct {
 }
 
 type Pipeline struct {
+	UUID        string
 	BuildNumber int `json:"build_number"`
 	State       struct {
 		Name   string `json:"name"`

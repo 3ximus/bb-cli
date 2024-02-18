@@ -68,7 +68,7 @@ var EditCmd = &cobra.Command{
 			close_source = existingPr.CloseSource
 		}
 
-		newpr := api.CreatePullRequest{
+		newpr := api.CreatePullRequestBody{
 			Title:       title,
 			Description: description,
 			CloseSource: close_source,
