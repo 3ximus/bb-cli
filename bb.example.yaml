@@ -1,0 +1,83 @@
+username: xxxxxxxxxxxxxxxxx
+bb_token: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+include_branch_name: true
+
+jira_domain: xxxxxxxxx
+email: xxxxxxxxxxxxxxxxxxxxxxxxxxx
+jira_token: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+pr_status:
+  open:
+    values: ["OPEN"]
+    icon: "" # ﲊ 羽  
+    color: "1;34"
+  merged:
+    values: ["MERGED"]
+    icon: "" #  
+    color: "1;35"
+  declined:
+    values: ["DECLINED"]
+    icon: "" #  ﰸ  
+    color: "1;31"
+
+pipeline_status:
+  inprogress:
+    values: ["IN_PROGRESS","in_progress"]
+    icon: "" # ﲊ 羽  
+    color: "1;34"
+  stopped:
+    values: ["STOPPED","stopped","HALTED","halted"]
+    icon: "" # 
+    color: "1;33"
+  pending:
+    values: ["PENDING","pending"]
+    icon: ""
+    color: "37"
+  pass:
+    values: ["SUCCESSFUL","successful"]
+    icon: ""
+    color: "1;32"
+  failed:
+    values: ["FAILED","failed"]
+    icon: ""
+    color: "1;31"
+
+jira_status:
+  inprogress:
+    values: ["In Progress", "In Progress_T", "NEED CHANGES"]
+    icon: "" # ﲊ 羽  
+    color: "1;34" # if I want to remove icon 1;38;5;235;44
+  todo:
+    values: ["À FAIRE"]
+    icon: "" #  
+    color: "1;33"
+  blocked:
+    values: ["Blocked"]
+    icon: "" #  ﰸ  
+    color: "1;31"
+  open:
+    values: ["OUVERT", "To estimate_T", "Selected for Development"]
+    icon: "" # 
+    color: "1;34"
+  testing:
+    values: ["Need Testing"]
+    icon: ""
+    color: "1;36"
+
+jira_type:
+  bug:
+    values: ["Bug"]
+    icon: ""
+    color: "1;31"
+  task:
+    values: ["Tâche", "Improvement"]
+    icon: ""
+    color: "1;34"
+  epic:
+    values: ["Epic"]
+    icon: ""
+    color: "1;35"
+  subtask:
+    values: ["Sous-tâche"]
+    icon: ""
+    color: "1;34"

@@ -13,6 +13,7 @@ go install -ldflags="-s -w"
 ## Configuration
 
 This is an example of possible config options:
+A full example can be seen in `bb.example.yaml`
 
 `$HOME/.config/bb.yaml` or `./bb.yaml`
 
@@ -43,27 +44,12 @@ include_branch_name: true
 jira_status:
   inprogress:
     values: ["In Progress", "In Progress_T"]
-    icon: "" # ﲊ 羽  
+    icon: ""
     color: "1;34"
   todo:
     values: ["À FAIRE"]
-    icon: "" #  
+    icon: ""
     color: "1;33"
-  blocked:
-    values: ["Blocked"]
-    icon: "" #  ﰸ  
-    color: "1;31"
-
-# same for jira tickets
-jira_type:
-  bug:
-    values: ["Bug"]
-    icon: ""
-    color: "1;31"
-  task:
-    values: ["Tâche"]
-    icon: ""
-    color: "1;34"
 ```
 
 ### Setup autocompletion
