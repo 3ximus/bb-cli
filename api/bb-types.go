@@ -1,3 +1,5 @@
+// vim: foldmethod=indent foldnestmax=1
+
 package api
 
 import (
@@ -75,23 +77,6 @@ type CommitStatus struct {
 	UpdatedOn time.Time `json:"updated_on"`
 }
 
-type Environment struct {
-	UUID     string `json:"uuid"`
-	Name     string
-	Category struct {
-		Name string
-	}
-	EnvironmentType struct {
-		Name string
-	} `json:"environment_type"`
-	Lock struct {
-		Triggerer struct {
-			PipelineUUID string `json:"pipeline_uuid"`
-		}
-	}
-	Status Pipeline
-}
-
 type Pipeline struct {
 	BuildNumber int `json:"build_number"`
 	State       struct {
@@ -131,6 +116,29 @@ type PrComment struct {
 	Links     struct{ Html struct{ Href string } }
 	CreatedOn time.Time `json:"created_on"`
 	UpdatedOn time.Time `json:"updated_on"`
+}
+
+type Environment struct {
+	UUID     string `json:"uuid"`
+	Name     string
+	Category struct {
+		Name string
+	}
+	EnvironmentType struct {
+		Name string
+	} `json:"environment_type"`
+	Lock struct {
+		Triggerer struct {
+			PipelineUUID string `json:"pipeline_uuid"`
+		}
+	}
+	Status Pipeline
+}
+
+type EnvironmentVariable struct {
+	Key     string
+	Value   string
+	Secured bool
 }
 
 // DEFAULT ACTIONS OVERRIDES

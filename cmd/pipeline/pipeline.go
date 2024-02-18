@@ -28,5 +28,6 @@ func init() {
 	PipelineCmd.AddCommand(ViewCmd)
 	PipelineCmd.AddCommand(StopCmd)
 	PipelineCmd.AddCommand(RunCmd)
+	PipelineCmd.AddCommand(LogsCmd)
 	PipelineCmd.PersistentFlags().StringP("repo", "R", "", "selected repository")
 }

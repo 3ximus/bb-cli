@@ -1,3 +1,5 @@
+// vim: foldmethod=indent foldnestmax=1
+
 package api
 
 import (
@@ -373,6 +375,27 @@ func GetEnvironmentList(repository string, status bool) <-chan Environment {
 				env.Status = <-GetPipeline(repository, env.Lock.Triggerer.PipelineUUID)
 			}
 			channel <- env
+		}
+	}()
+	return channel
+}
+
+func GetEnvironmentVariables(repository string, envName string) <-chan EnvironmentVariable {
+	channel := make(chan EnvironmentVariable)
+	go func() {
+		defer close(channel)
+
+		for env := range GetEnvironmentList(repository, false) {
+			if env.Name == envName {
+				var environmentResponse BBPaginatedResponse[EnvironmentVariable]
+				response := bbApiGet(fmt.Sprintf("repositories/%s/deployments_config/environments/%s/variables", repository, env.UUID))
+				err := json.Unmarshal(response, &environmentResponse)
+				cobra.CheckErr(err)
+				for _, envVar := range environmentResponse.Values {
+					channel <- envVar
+				}
+				break
+			}
 		}
 	}()
 	return channel

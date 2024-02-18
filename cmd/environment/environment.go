@@ -25,5 +25,6 @@ var EnvironmentCmd = &cobra.Command{
 
 func init() {
 	EnvironmentCmd.AddCommand(ListCmd)
+	EnvironmentCmd.AddCommand(VariablesCmd)
 	EnvironmentCmd.PersistentFlags().StringP("repo", "R", "", "selected repository")
 }
