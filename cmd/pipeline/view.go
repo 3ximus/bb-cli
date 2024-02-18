@@ -33,7 +33,7 @@ var ViewCmd = &cobra.Command{
 			cobra.CheckErr(err)
 		}
 
-		pipeline := <-api.GetPipeline(repo, id)
+		pipeline := <-api.GetPipeline(repo, fmt.Sprintf("%d", id))
 
 		if pipeline.State.Result.Name == "" {
 			fmt.Printf("%s", util.FormatPipelineState(pipeline.State.Name))

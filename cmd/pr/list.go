@@ -28,10 +28,8 @@ var ListCmd = &cobra.Command{
 		status, _ := cmd.Flags().GetBool("status")
 		participants, _ := cmd.Flags().GetBool("participants")
 
-		prChannel := api.GetPrList(viper.GetString("repo"), states, author, search, source, destination, pages, status, participants)
-
 		count := 0
-		for pr := range prChannel {
+		for pr := range api.GetPrList(viper.GetString("repo"), states, author, search, source, destination, pages, status, participants) {
 			fmt.Printf("%s \033[1;32m#%d\033[m %s \033[1;34m[ %s \033[m→\033[1;34m %s ]\033[m \033[33m%s\033[m", util.FormatPrState(pr.State), pr.ID, pr.Title, pr.Source.Branch.Name, pr.Destination.Branch.Name, pr.Author.Nickname)
 			if status {
 				fmt.Printf(" %s", util.FormatPipelineState(pr.Status.State))

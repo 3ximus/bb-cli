@@ -75,6 +75,23 @@ type CommitStatus struct {
 	UpdatedOn time.Time `json:"updated_on"`
 }
 
+type Environment struct {
+	UUID     string `json:"uuid"`
+	Name     string
+	Category struct {
+		Name string
+	}
+	EnvironmentType struct {
+		Name string
+	} `json:"environment_type"`
+	Lock struct {
+		Triggerer struct {
+			PipelineUUID string `json:"pipeline_uuid"`
+		}
+	}
+	Status Pipeline
+}
+
 type Pipeline struct {
 	BuildNumber int `json:"build_number"`
 	State       struct {
@@ -93,7 +110,7 @@ type Pipeline struct {
 			Links struct{ Html struct{ Href string } }
 		} `json:"pullrequest"`
 	}
-	Trigger struct{
+	Trigger struct {
 		Name string
 	}
 	Author            User      `json:"creator"`

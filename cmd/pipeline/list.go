@@ -18,8 +18,8 @@ var ListCmd = &cobra.Command{
 		nResults, _ := cmd.Flags().GetInt("number-results")
 		showAuthor, _ := cmd.Flags().GetBool("author")
 		targetBranch, _ := cmd.Flags().GetString("target")
-		pipelineChannel := api.GetPipelineList(viper.GetString("repo"), nResults, targetBranch)
-		for pipeline := range pipelineChannel {
+
+		for pipeline := range api.GetPipelineList(viper.GetString("repo"), nResults, targetBranch) {
 			if pipeline.State.Result.Name == "" {
 				fmt.Printf("%s", util.FormatPipelineState(pipeline.State.Name))
 			} else {

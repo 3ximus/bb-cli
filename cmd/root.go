@@ -5,6 +5,7 @@ import (
 	"bb/cmd/issue"
 	"bb/cmd/pipeline"
 	"bb/cmd/pr"
+	"bb/cmd/environment"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -36,6 +37,7 @@ func init() {
 
 	RootCmd.AddCommand(auth.AuthCmd)
 	RootCmd.AddCommand(pr.PrCmd)
+	RootCmd.AddCommand(environment.EnvironmentCmd)
 	RootCmd.AddCommand(issue.IssueCmd)
 	RootCmd.AddCommand(pipeline.PipelineCmd)
 }

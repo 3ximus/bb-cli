@@ -335,26 +335,45 @@ func GetPipelineList(repository string, nResults int, targetBranch string) <-cha
 			query += fmt.Sprintf("&target.branch=%s", targetBranch)
 		}
 
-		var prevResponse BBPaginatedResponse[Pipeline]
+		var pipelineResponse BBPaginatedResponse[Pipeline]
 		response := bbApiGet(fmt.Sprintf("repositories/%s/pipelines?sort=-created_on&pagelen=%d%s", repository, nResults, query))
-		err := json.Unmarshal(response, &prevResponse)
+		err := json.Unmarshal(response, &pipelineResponse)
 		cobra.CheckErr(err)
-		for _, pipeline := range prevResponse.Values {
+		for _, pipeline := range pipelineResponse.Values {
 			channel <- pipeline
 		}
 	}()
 	return channel
 }
 
-func GetPipeline(repository string, id int) <-chan Pipeline {
+func GetPipeline(repository string, id string) <-chan Pipeline {
 	channel := make(chan Pipeline)
 	go func() {
 		defer close(channel)
 		var pipeline Pipeline
-		response := bbApiGet(fmt.Sprintf("repositories/%s/pipelines/%d", repository, id))
+		response := bbApiGet(fmt.Sprintf("repositories/%s/pipelines/%s", repository, id))
 		err := json.Unmarshal(response, &pipeline)
 		cobra.CheckErr(err)
 		channel <- pipeline
+	}()
+	return channel
+}
+
+func GetEnvironmentList(repository string, status bool) <-chan Environment {
+	channel := make(chan Environment)
+	go func() {
+		defer close(channel)
+
+		var environmentResponse BBPaginatedResponse[Environment]
+		response := bbApiGet(fmt.Sprintf("repositories/%s/environments", repository))
+		err := json.Unmarshal(response, &environmentResponse)
+		cobra.CheckErr(err)
+		for _, env := range environmentResponse.Values {
+			if status {
+				env.Status = <-GetPipeline(repository, env.Lock.Triggerer.PipelineUUID)
+			}
+			channel <- env
+		}
 	}()
 	return channel
 }
