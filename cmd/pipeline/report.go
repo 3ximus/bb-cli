@@ -6,15 +6,14 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-var LogsCmd = &cobra.Command{
-	Use:   "logs",
-	Short: "Show logs of a pipeline step",
+var ReportCmd = &cobra.Command{
+	Use:   "report",
+	Short: "Show test reports of a pipeline step",
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		repo := viper.GetString("repo")
@@ -57,29 +56,25 @@ var LogsCmd = &cobra.Command{
 			cobra.CheckErr("Step not found")
 		}
 
-		tail, _ := cmd.Flags().GetBool("tail")
-		if !tail {
-			fmt.Print(<-api.GetPipelineStepLogs(repo, fmt.Sprintf("%d", id), selected.UUID, 0))
-		} else {
-			firstDone := false
-			totalLength := 0
-			for !firstDone || selected.State.Name != "COMPLETED" {
-				if firstDone {
-					time.Sleep(2 * time.Second)
-				}
-				logsChannel := api.GetPipelineStepLogs(repo, fmt.Sprintf("%d", id), selected.UUID, totalLength)
-				stepChannel := api.GetPipelineStep(repo, fmt.Sprintf("%d", id), selected.UUID)
-				response := <-logsChannel
-				fmt.Print(response)
-				totalLength += len(response)
-				selected = <-stepChannel
-				firstDone = true
+		fullReportChannel := api.GetPipelineReportCases(repo, fmt.Sprintf("%d", id), selected.UUID)
+		report := <-api.GetPipelineReport(repo, fmt.Sprintf("%d", id), selected.UUID)
+		fmt.Println("Test report:")
+		fmt.Printf("\033[1;32mPassed:  %3d\033[m\n", report.Success)
+		fmt.Printf("\033[1;31mFailed:  %3d\033[m\n", report.Failed)
+		fmt.Printf("\033[1;33mSkipped: %3d\033[m\n", report.Skipped)
+		fmt.Printf("Error:   %3d\n", report.Error)
+		fmt.Printf("Total:   %3d\n", report.Total)
+
+		showFull, _ := cmd.Flags().GetBool("full")
+		if showFull {
+			for reportCase := range fullReportChannel {
+				fmt.Printf("%s \033[34m%s\033[m %s \033[37m%s\033[m\n", util.FormatPipelineStatus(reportCase.Status), reportCase.PackageName, reportCase.Name, strings.Replace(reportCase.Duration, "PT", "", 1))
 			}
 		}
 	},
 }
 
 func init() {
-	LogsCmd.Flags().StringP("step", "s", "", "select step. Without this option the step is prompet interactively")
-	LogsCmd.Flags().BoolP("tail", "t", false, "tail logs of a running pipeline step")
+	ReportCmd.Flags().StringP("step", "s", "", "select step. Without this option the step is prompet interactively")
+	ReportCmd.Flags().BoolP("full", "f", false, "show the full report")
 }

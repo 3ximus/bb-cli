@@ -8,6 +8,13 @@ import (
 	"time"
 )
 
+type ErrorResponse struct {
+	Error struct {
+		Message string
+		Detail  string
+	}
+}
+
 type User struct {
 	UUID        string `json:"uuid"`
 	DisplayName string `json:"display_name"`
@@ -152,6 +159,23 @@ type PipelineStep struct {
 	Pipeline struct {
 		UUID string
 	}
+}
+
+type PipelineReport struct {
+	Total   int `json:"number_of_test_cases"`
+	Success int `json:"number_of_successful_test_cases"`
+	Failed  int `json:"number_of_failed_test_cases"`
+	Error   int `json:"number_of_error_test_cases"`
+	Skipped int `json:"number_of_skipped_test_cases"`
+}
+
+type PipelineReportCase struct {
+	UUID               string
+	Name               string
+	FullyQualifiedName string `json:"fully_qualified_name"`
+	PackageName        string `json:"package_name"`
+	Status             string `json:"status"`
+	Duration           string `json:"duration"`
 }
 
 type StepCommand struct {

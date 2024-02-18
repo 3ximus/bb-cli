@@ -48,6 +48,15 @@ func bbApiRangedGet(endpoint string, dataRange string) []byte {
 	resp, err := client.Do(req)
 	cobra.CheckErr(err)
 
+	if resp.StatusCode == 404 {
+		var errResponse ErrorResponse
+		body, err := io.ReadAll(resp.Body)
+		cobra.CheckErr(err)
+		err = json.Unmarshal(body, &errResponse)
+		cobra.CheckErr(err)
+		cobra.CheckErr(errResponse.Error.Detail)
+	}
+
 	if resp.StatusCode != 200 && resp.StatusCode != 206 && resp.StatusCode != 416 {
 		errBody, err := io.ReadAll(resp.Body)
 		cobra.CheckErr(err)
@@ -393,11 +402,11 @@ func GetPipelineStep(repository string, id string, stepId string) <-chan Pipelin
 	return channel
 }
 
-func GetPipelineStepLogs(repository string, id string, stepUUID string, offset int) <-chan string {
+func GetPipelineStepLogs(repository string, id string, stepId string, offset int) <-chan string {
 	channel := make(chan string)
 	go func() {
 		defer close(channel)
-		response := bbApiRangedGet(fmt.Sprintf("repositories/%s/pipelines/%s/steps/%s/log", repository, id, stepUUID), fmt.Sprintf("%d-", offset))
+		response := bbApiRangedGet(fmt.Sprintf("repositories/%s/pipelines/%s/steps/%s/log", repository, id, stepId), fmt.Sprintf("%d-", offset))
 		if bytes.Index(response, []byte("Range Not Satisfiable")) != -1 {
 			channel <- ""
 		} else {
@@ -418,6 +427,35 @@ func GetPipelineVariables(repository string) <-chan EnvironmentVariable {
 		cobra.CheckErr(err)
 		for _, envVar := range environmentResponse.Values {
 			channel <- envVar
+		}
+	}()
+	return channel
+}
+
+func GetPipelineReport(repository string, id string, stepId string) <-chan PipelineReport {
+	channel := make(chan PipelineReport)
+	go func() {
+		defer close(channel)
+		var report PipelineReport
+		response := bbApiGet(fmt.Sprintf("repositories/%s/pipelines/%s/steps/%s/test_reports", repository, id, stepId))
+		err := json.Unmarshal(response, &report)
+		cobra.CheckErr(err)
+		channel <- report
+	}()
+	return channel
+}
+
+func GetPipelineReportCases(repository string, id string, stepId string) <-chan PipelineReportCase {
+	channel := make(chan PipelineReportCase)
+	go func() {
+		defer close(channel)
+		var report BBPaginatedResponse[PipelineReportCase]
+		// TODO pagelen is hardcoded, this should be changed if the number of tests are too big
+		response := bbApiGet(fmt.Sprintf("repositories/%s/pipelines/%s/steps/%s/test_reports/test_cases?pagelen=300", repository, id, stepId))
+		err := json.Unmarshal(response, &report)
+		cobra.CheckErr(err)
+		for _, rep := range report.Values {
+			channel <- rep
 		}
 	}()
 	return channel

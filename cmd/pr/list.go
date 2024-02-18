@@ -49,7 +49,7 @@ var ListCmd = &cobra.Command{
 			count++
 		}
 		if count == 0 {
-			fmt.Printf("\n  No pull requests for \033[1;36m%s\033[m\n\n", viper.GetString("repo"))
+			fmt.Printf("No pull requests for \033[1;36m%s\033[m\n", viper.GetString("repo"))
 		}
 	},
 }
