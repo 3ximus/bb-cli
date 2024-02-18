@@ -104,6 +104,36 @@ type Pipeline struct {
 	CreatedOn         time.Time `json:"created_on"`
 }
 
+type PipelineStep struct {
+	UUID              string
+	Name              string
+	DurationInSeconds int `json:"duration_in_seconds"`
+	State             struct {
+		Name   string
+		Result struct {
+			Name string
+		}
+		Stage struct {
+			Name string
+		}
+	}
+	SetupCommands    []StepCommand `json:"setup_commands"`
+	ScriptCommands   []StepCommand `json:"script_commands"`
+	TeardownCommands []StepCommand `json:"teardown_commands"`
+	Image            struct {
+		Name string
+	}
+	Pipeline struct {
+		UUID string
+	}
+}
+
+type StepCommand struct {
+	Name        string
+	Command     string
+	CommandType string
+}
+
 type PrComment struct {
 	Id      int
 	Content struct {

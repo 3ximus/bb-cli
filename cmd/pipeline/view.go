@@ -5,6 +5,7 @@ import (
 	"bb/util"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -16,6 +17,7 @@ var ViewCmd = &cobra.Command{
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		repo := viper.GetString("repo")
+		showCommands, _ := cmd.Flags().GetBool("commands")
 
 		var id int
 		var err error
@@ -33,6 +35,8 @@ var ViewCmd = &cobra.Command{
 			cobra.CheckErr(err)
 		}
 
+		// make the steps request so that it's ready to print later on
+		stepsChannel := api.GetPipelineSteps(repo, fmt.Sprintf("%d", id))
 		pipeline := <-api.GetPipeline(repo, fmt.Sprintf("%d", id))
 
 		if pipeline.State.Result.Name == "" {
@@ -49,6 +53,21 @@ var ViewCmd = &cobra.Command{
 
 		fmt.Printf("        \033[33m%s\033[m \033[37mTrigger: %s\033[m\n", pipeline.Author.DisplayName, pipeline.Trigger.Name)
 
+		fmt.Println()
+		for step := range stepsChannel {
+			if step.State.Result.Name != "" {
+				fmt.Printf("%s %s \033[37m%s\033[m", step.Name, util.FormatPipelineState(step.State.Result.Name), util.TimeDuration(time.Duration(step.DurationInSeconds*1000000000)))
+			} else {
+				fmt.Printf("%s %s \033[37m%s\033[m", step.Name, util.FormatPipelineState(step.State.Stage.Name), util.TimeDuration(time.Duration(step.DurationInSeconds*1000000000)))
+			}
+			fmt.Println()
+			if showCommands {
+				for _, command := range step.ScriptCommands {
+					fmt.Printf("\t%s\n", command.Name)
+				}
+			}
+		}
+
 		web, _ := cmd.Flags().GetBool("web")
 		if web {
 			util.OpenInBrowser(api.BBBrowsePipelines(repo, id))
@@ -59,5 +78,6 @@ var ViewCmd = &cobra.Command{
 }
 
 func init() {
-	ViewCmd.Flags().Bool("web", false, "Open in the browser.")
+	ViewCmd.Flags().Bool("web", false, "open in the browser")
+	ViewCmd.Flags().BoolP("commands", "c", false, "show step commands")
 }
