@@ -8,8 +8,9 @@ import (
 )
 
 var PrCmd = &cobra.Command{
-	Use:   "pr",
-	Short: "Manage pull requests",
+	Use:     "pull-request",
+	Aliases: []string{"pr"},
+	Short:   "Manage pull requests [pr]",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		err := viper.BindPFlag("repo", cmd.Flags().Lookup("repo"))
 		cobra.CheckErr(err)
