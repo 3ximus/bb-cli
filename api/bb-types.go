@@ -216,9 +216,10 @@ type Environment struct {
 }
 
 type EnvironmentVariable struct {
-	Key     string
-	Value   string
-	Secured bool
+	UUID    string
+	Key     string `json:"key"`
+	Value   string `json:"value"`
+	Secured bool   `json:"secured"`
 }
 
 // DEFAULT ACTIONS OVERRIDES

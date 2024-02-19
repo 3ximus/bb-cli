@@ -1,3 +1,5 @@
+// vim: foldmethod=indent foldnestmax=1
+
 package util
 
 import (
@@ -5,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -13,6 +16,7 @@ import (
 	"github.com/ktr0731/go-fuzzyfinder"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"golang.org/x/term"
 )
 
 type ResultSwitchConfig struct {
@@ -221,4 +225,14 @@ func UseExternalFZF[T any](list []T, prompt string, toString func(int) string) [
 		result = append(result, idx)
 	}
 	return result
+}
+
+/* fmt.Printf wrapper to remove ANSI colors if stdout is not a terminal */
+func Printf(format string, a ...any) {
+	if term.IsTerminal(int(os.Stdout.Fd())) {
+		fmt.Printf(format, a...)
+	} else {
+		ansiColorRegex := regexp.MustCompile(`\x1b\[[0-9;]*m`)
+		fmt.Printf(ansiColorRegex.ReplaceAllString(format, ""), a...)
+	}
 }

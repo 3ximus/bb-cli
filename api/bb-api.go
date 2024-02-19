@@ -416,22 +416,6 @@ func GetPipelineStepLogs(repository string, id string, stepId string, offset int
 	return channel
 }
 
-func GetPipelineVariables(repository string) <-chan EnvironmentVariable {
-	channel := make(chan EnvironmentVariable)
-	go func() {
-		defer close(channel)
-
-		var environmentResponse BBPaginatedResponse[EnvironmentVariable]
-		response := bbApiGet(fmt.Sprintf("repositories/%s/pipelines_config/variables", repository))
-		err := json.Unmarshal(response, &environmentResponse)
-		cobra.CheckErr(err)
-		for _, envVar := range environmentResponse.Values {
-			channel <- envVar
-		}
-	}()
-	return channel
-}
-
 func GetPipelineReport(repository string, id string, stepId string) <-chan PipelineReport {
 	channel := make(chan PipelineReport)
 	go func() {
@@ -474,6 +458,63 @@ func RunPipeline(repository string, data RunPipelineRequestBody) Pipeline {
 
 func StopPipeline(repository string, id string) {
 	bbApiPost(fmt.Sprintf("repositories/%s/pipelines/%s/stopPipeline", repository, id), nil)
+}
+
+func GetPipelineVariables(repository string) <-chan []EnvironmentVariable {
+	channel := make(chan []EnvironmentVariable)
+	go func() {
+		defer close(channel)
+		var environmentResponse BBPaginatedResponse[EnvironmentVariable]
+		response := bbApiGet(fmt.Sprintf("repositories/%s/pipelines_config/variables?pagelen=200", repository))
+		err := json.Unmarshal(response, &environmentResponse)
+		cobra.CheckErr(err)
+		channel <- environmentResponse.Values
+	}()
+	return channel
+}
+
+func CreatePipelineVariable(repository string, key string, value string) <-chan EnvironmentVariable {
+	channel := make(chan EnvironmentVariable)
+	go func() {
+		defer close(channel)
+		body := EnvironmentVariable{
+			Key:     key,
+			Value:   value,
+			Secured: false,
+		}
+		content, err := json.Marshal(body)
+		cobra.CheckErr(err)
+		response := bbApiPost(fmt.Sprintf("repositories/%s/pipelines_config/variables", repository), bytes.NewReader(content))
+		var newVar EnvironmentVariable
+		err = json.Unmarshal(response, &newVar)
+		cobra.CheckErr(err)
+		channel <- newVar
+	}()
+	return channel
+}
+
+func UpdatePipelineVariable(repository string, varUUID string, key string, value string) <-chan EnvironmentVariable {
+	channel := make(chan EnvironmentVariable)
+	go func() {
+		defer close(channel)
+		body := EnvironmentVariable{
+			Key:     key,
+			Value:   value,
+			Secured: false,
+		}
+		content, err := json.Marshal(body)
+		cobra.CheckErr(err)
+		response := bbApiPut(fmt.Sprintf("repositories/%s/pipelines_config/variables/%s", repository, varUUID), bytes.NewReader(content))
+		var newVar EnvironmentVariable
+		err = json.Unmarshal(response, &newVar)
+		cobra.CheckErr(err)
+		channel <- newVar
+	}()
+	return channel
+}
+
+func DeletePipelineVariable(repository string, varUUID string) {
+	bbApiDelete(fmt.Sprintf("repositories/%s/pipelines_config/variables/%s", repository, varUUID))
 }
 
 func GetEnvironmentList(repository string, status bool) <-chan Environment {
