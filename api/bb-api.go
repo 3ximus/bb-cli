@@ -473,14 +473,14 @@ func GetPipelineVariables(repository string) <-chan []EnvironmentVariable {
 	return channel
 }
 
-func CreatePipelineVariable(repository string, key string, value string) <-chan EnvironmentVariable {
+func CreatePipelineVariable(repository string, key string, value string, secure bool) <-chan EnvironmentVariable {
 	channel := make(chan EnvironmentVariable)
 	go func() {
 		defer close(channel)
 		body := EnvironmentVariable{
 			Key:     key,
 			Value:   value,
-			Secured: false,
+			Secured: secure,
 		}
 		content, err := json.Marshal(body)
 		cobra.CheckErr(err)
@@ -493,14 +493,14 @@ func CreatePipelineVariable(repository string, key string, value string) <-chan 
 	return channel
 }
 
-func UpdatePipelineVariable(repository string, varUUID string, key string, value string) <-chan EnvironmentVariable {
+func UpdatePipelineVariable(repository string, varUUID string, key string, value string, secure bool) <-chan EnvironmentVariable {
 	channel := make(chan EnvironmentVariable)
 	go func() {
 		defer close(channel)
 		body := EnvironmentVariable{
 			Key:     key,
 			Value:   value,
-			Secured: false,
+			Secured: secure,
 		}
 		content, err := json.Marshal(body)
 		cobra.CheckErr(err)
