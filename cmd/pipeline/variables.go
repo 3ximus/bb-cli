@@ -19,12 +19,12 @@ var VariablesCmd = &cobra.Command{
 		repo := viper.GetString("repo")
 		variables := <-api.GetPipelineVariables(repo)
 
-		setVars, _ := cmd.Flags().GetStringSlice("set")
+		setVars, _ := cmd.Flags().GetStringArray("set")
 		upsertVariables(repo, setVars, variables, false)
-		setSecureVars, _ := cmd.Flags().GetStringSlice("set-secure")
+		setSecureVars, _ := cmd.Flags().GetStringArray("set-secure")
 		upsertVariables(repo, setSecureVars, variables, true)
 
-		deleteVars, _ := cmd.Flags().GetStringSlice("delete")
+		deleteVars, _ := cmd.Flags().GetStringArray("delete")
 		if len(deleteVars) > 0 {
 			for _, toDelete := range deleteVars {
 				for _, ev := range variables {
