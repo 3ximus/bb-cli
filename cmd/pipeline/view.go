@@ -46,7 +46,7 @@ var ViewCmd = &cobra.Command{
 		}
 		fmt.Printf(" \033[1;32m#%d\033[m ", pipeline.BuildNumber)
 		if pipeline.Target.Source != "" {
-			fmt.Printf("%s \033[1;34m[ %s → %s]\033[m\n", pipeline.Target.PullRequest.Title, pipeline.Target.Source, pipeline.Target.Destination)
+			fmt.Printf("%s \033[1;34m[ %s → %s] \033[37m%s\033[m\n", pipeline.Target.PullRequest.Title, pipeline.Target.Source, pipeline.Target.Destination, util.TimeAgo(pipeline.CreatedOn))
 		} else {
 			fmt.Printf("\033[1;34m[ %s ]\033[m\n", pipeline.Target.RefName)
 		}
