@@ -104,7 +104,5 @@ func init() {
 	ViewCmd.RegisterFlagCompletionFunc("target", util.BranchCompletion)
 	ViewCmd.RegisterFlagCompletionFunc("source", util.BranchCompletion)
 	ViewCmd.Flags().BoolP("comments", "c", false, "View comments")
-	ViewCmd.Flags().BoolP("commits", "C", false, "View commits. \033[31mNot implemented\033[m")
-	ViewCmd.Flags().BoolP("diff", "d", false, "View diff. \033[31mNot implemented\033[m")
 	ViewCmd.Flags().Bool("web", false, "Open in the browser.")
 }

@@ -1,3 +1,5 @@
+// vim: foldmethod=indent foldnestmax=1
+
 package api
 
 import (
@@ -64,7 +66,7 @@ func _jiraApiPostPut(method string, endpoint string, body io.Reader) []byte {
 	req.SetBasicAuth(viper.GetString("email"), viper.GetString("jira_token"))
 	resp, err := client.Do(req)
 	cobra.CheckErr(err)
-	if resp.StatusCode != 204 && resp.StatusCode != 201 {
+	if resp.StatusCode != 204 && resp.StatusCode != 201 && resp.StatusCode != 200 {
 		errBody, err := io.ReadAll(resp.Body)
 		cobra.CheckErr(err)
 		cobra.CheckErr(string(errBody))
@@ -76,6 +78,10 @@ func _jiraApiPostPut(method string, endpoint string, body io.Reader) []byte {
 
 func jiraApiPost(endpoint string, body io.Reader) []byte {
 	return _jiraApiPostPut("POST", endpoint, body)
+}
+
+func jiraApiPut(endpoint string, body io.Reader) []byte {
+	return _jiraApiPostPut("PUT", endpoint, body)
 }
 
 // HIGH LEVEL METHODS
@@ -185,4 +191,15 @@ func PostWorklog(key string, seconds int) {
 	content, err := json.Marshal(worklogDTO)
 	cobra.CheckErr(err)
 	jiraApiPost(fmt.Sprintf("/issue/%s/worklog", key), bytes.NewReader(content))
+}
+
+func UpdateIssue(key string, data UpdateIssueRequestBody) JiraIssue {
+	content, err := json.Marshal(data)
+	cobra.CheckErr(err)
+	fmt.Println(string(content))
+	response := jiraApiPut(fmt.Sprintf("/issue/%s?returnIssue=true", key), bytes.NewReader(content))
+	var issue JiraIssue
+	err = json.Unmarshal(response, &issue)
+	cobra.CheckErr(err)
+	return issue
 }

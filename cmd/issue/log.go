@@ -60,7 +60,6 @@ var LogCmd = &cobra.Command{
 			api.PostTransitions(key, newState)
 			fmt.Printf("Issue status changed for %s -> \033[1;32m%s\033[m\n", key, newStateName)
 		}
-
 	},
 }
 
