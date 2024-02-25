@@ -4,6 +4,7 @@ package util
 
 import (
 	"bb/api"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -43,6 +44,20 @@ func FormatSwitchConfig(result string, mapping map[string]ResultSwitchConfig) st
 		}
 	}
 	return str
+}
+
+/* Returns the config switch config  */
+func GetConfig(configKey string, key string) (ResultSwitchConfig, error) {
+	mapping := make(map[string]ResultSwitchConfig)
+	if err := viper.UnmarshalKey(configKey, &mapping); err != nil {
+		cobra.CheckErr(err)
+	}
+	for k, v := range mapping {
+		if k == key {
+			return v, nil
+		}
+	}
+	return ResultSwitchConfig{}, errors.New(fmt.Sprintf("Config key not found: '%s'", configKey))
 }
 
 func FormatPrState(state api.PrState) string {

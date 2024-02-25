@@ -10,8 +10,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-// TODO add a default status listing on the config file
-
 var ListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List issues",
@@ -43,12 +41,10 @@ var ListCmd = &cobra.Command{
 
 		// convert status based on current settings
 		var statusConversion = []string{}
-		statusMap := viper.GetStringMapStringSlice("jira_status")
 		for _, s := range statuses {
-			if val, exists := statusMap[s]; exists {
-				for _, k := range val {
-					statusConversion = append(statusConversion, k)
-				}
+			statusMap, err := util.GetConfig("jira_status", s)
+			if err == nil {
+				statusConversion = append(statusConversion, statusMap.Values...)
 			} else {
 				statusConversion = append(statusConversion, s)
 			}
@@ -78,13 +74,12 @@ var ListCmd = &cobra.Command{
 }
 
 func init() {
-	// filters
 	ListCmd.Flags().StringP("project", "p", "", `filter issues by project key.
 	If "all" is given it shows all projects (when a project is detected on current branch and you still want to show all projects)`)
 	ListCmd.Flags().BoolP("all", "a", false, "filter all issues. (Not assigned or reporting to current user)")
 	ListCmd.Flags().BoolP("reporter", "r", false, "filter issues reporting to current user")
 	ListCmd.Flags().StringArrayP("status", "s", []string{}, `filter status type.
-	possible options: "open", "todo", "inprogress", "testing", "done", "blocked"`)
+	this option will provide completion for the mappings defined in "jira_status" of your config file`)
 	ListCmd.RegisterFlagCompletionFunc("status", statusCompletion)
 
 	// TODO add way to sort by recent or the ones the user has participated on
@@ -98,5 +93,10 @@ func init() {
 }
 
 func statusCompletion(comd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-	return []string{"open", "todo", "inprogress", "testing", "done", "blocked"}, cobra.ShellCompDirectiveDefault
+	statusMap := viper.GetStringMapStringSlice("jira_status")
+	status := make([]string, 0, len(statusMap))
+	for k:=range statusMap {
+		status = append(status, k)
+	}
+	return status, cobra.ShellCompDirectiveDefault
 }
