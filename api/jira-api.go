@@ -93,7 +93,7 @@ func GetIssue(key string) <-chan JiraIssue {
 	return channel
 }
 
-func GetIssueList(nResults int, all bool, reporter bool, project string, statuses []string, prioritySort bool) <-chan JiraIssue {
+func GetIssueList(nResults int, all bool, reporter bool, project string, statuses []string, searchTerm string, prioritySort bool) <-chan JiraIssue {
 	channel := make(chan JiraIssue)
 	go func() {
 		defer close(channel)
@@ -110,6 +110,12 @@ func GetIssueList(nResults int, all bool, reporter bool, project string, statuse
 				query += "+AND+"
 			}
 			query += fmt.Sprintf("project=%s", url.QueryEscape(project))
+		}
+		if searchTerm != "" {
+			if query != "" {
+				query += "+AND+"
+			}
+			query += fmt.Sprintf("summary~\"%s\"", url.QueryEscape(searchTerm))
 		}
 		if len(statuses) > 0 {
 			if query != "" {

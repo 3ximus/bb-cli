@@ -19,6 +19,7 @@ var ListCmd = &cobra.Command{
 		nResults, _ := cmd.Flags().GetInt("number-results")
 		reporter, _ := cmd.Flags().GetBool("reporter")
 		all, _ := cmd.Flags().GetBool("all")
+		search, _ := cmd.Flags().GetString("search")
 		statuses, _ := cmd.Flags().GetStringArray("status")
 		project, _ := cmd.Flags().GetString("project")
 		priority, _ := cmd.Flags().GetBool("priority")
@@ -50,13 +51,12 @@ var ListCmd = &cobra.Command{
 			}
 		}
 
-		for issue := range api.GetIssueList(nResults, all, reporter, project, statusConversion, priority) {
+		for issue := range api.GetIssueList(nResults, all, reporter, project, statusConversion, search, priority) {
 			timeSpent := "-"
 			if issue.Fields.TimeTracking.TimeSpent != " " {
 				timeSpent = issue.Fields.TimeTracking.TimeSpent
 			}
 			util.Printf("%s \033[1;32m%s\033[m %s %s %s\n", util.FormatIssueStatus(issue.Fields.Status.Name), issue.Key, util.FormatIssueType(issue.Fields.Type.Name), issue.Fields.Summary, util.FormatIssuePriority(issue.Fields.Priority.Id, issue.Fields.Priority.Name))
-			// TODO format spacing better
 			if showUsers {
 				if all {
 					util.Printf("    \033[37mAssigned: \033[1m%s\033[0;37m -> Reporter: \033[1;36m%s\033[m \033[37m(%d comments)\033[m\n", issue.Fields.Assignee.DisplayName, issue.Fields.Reporter.DisplayName, issue.Fields.Comment.Total)
@@ -74,6 +74,7 @@ var ListCmd = &cobra.Command{
 }
 
 func init() {
+	// filter
 	ListCmd.Flags().StringP("project", "p", "", `filter issues by project key.
 	If "all" is given it shows all projects (when a project is detected on current branch and you still want to show all projects)`)
 	ListCmd.Flags().BoolP("all", "a", false, "filter all issues. (Not assigned or reporting to current user)")
@@ -81,6 +82,7 @@ func init() {
 	ListCmd.Flags().StringArrayP("status", "s", []string{}, `filter status type.
 	this option will provide completion for the mappings defined in "jira_status" of your config file`)
 	ListCmd.RegisterFlagCompletionFunc("status", statusCompletion)
+	ListCmd.Flags().String("search", "", "filter issues by keyword")
 
 	// TODO add way to sort by recent or the ones the user has participated on
 

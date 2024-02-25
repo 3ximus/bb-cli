@@ -73,6 +73,10 @@ bb help [COMMAND]
 
 TODO
 
+- pr list | status filter should include options defined in config file (like issue list)
+- pipeline list | status filter should include options defined in config file (like issue list)
+
+
 ### NOTE TO SELF
 
 To generate documentation use this
