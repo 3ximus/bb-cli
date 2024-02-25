@@ -128,12 +128,12 @@ var CreateCmd = &cobra.Command{
 }
 
 func init() {
-	CreateCmd.Flags().StringP("title", "T", "", "title for the pull request")
+	CreateCmd.Flags().StringP("title", "t", "", "title for the pull request")
 	CreateCmd.Flags().BoolP("body", "b", false, "add description for the pull request")
-	CreateCmd.Flags().StringP("source", "s", "", "source branch. Defaults to current branch")
-	CreateCmd.Flags().StringP("target", "t", "dev", "target for the pull request: Defaults to dev")
-	CreateCmd.RegisterFlagCompletionFunc("source", branchCompletion)
-	CreateCmd.RegisterFlagCompletionFunc("target", branchCompletion)
+	CreateCmd.Flags().String("source", "", "source branch. Defaults to current branch")
+	CreateCmd.Flags().String("target", "dev", "target for the pull request: Defaults to dev")
+	CreateCmd.RegisterFlagCompletionFunc("source", util.BranchCompletion)
+	CreateCmd.RegisterFlagCompletionFunc("target", util.BranchCompletion)
 	CreateCmd.Flags().BoolP("close-source", "c", true, "close source branch")
 	CreateCmd.Flags().StringArrayP("reviewer", "r", []string{}, "add reviewer by their name. \033[31mNot implemented\033[m")
 	CreateCmd.Flags().BoolP("include-branch-name", "i", false, "include branch name in the pull request name")

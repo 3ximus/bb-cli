@@ -98,12 +98,12 @@ var EditCmd = &cobra.Command{
 }
 
 func init() {
-	EditCmd.Flags().StringP("title", "T", "", "title for the pull request")
+	EditCmd.Flags().StringP("title", "t", "", "title for the pull request")
 	EditCmd.Flags().StringP("body", "b", "", "description for the pull request")
-	EditCmd.Flags().StringP("source", "s", "", "source branch. Defaults to current branch")
-	EditCmd.Flags().StringP("target", "t", "", "description for the pull request")
-	EditCmd.RegisterFlagCompletionFunc("source", branchCompletion)
-	EditCmd.RegisterFlagCompletionFunc("target", branchCompletion)
+	EditCmd.Flags().String("source", "", "source branch. Defaults to current branch")
+	EditCmd.Flags().String("target", "", "description for the pull request")
+	EditCmd.RegisterFlagCompletionFunc("source", util.BranchCompletion)
+	EditCmd.RegisterFlagCompletionFunc("target", util.BranchCompletion)
 	EditCmd.Flags().BoolP("close-source", "c", false, "close source branch")
 	EditCmd.Flags().StringArrayP("reviewer", "r", []string{}, "add reviewer by their name. \033[31mNot implemented\033[m")
 }

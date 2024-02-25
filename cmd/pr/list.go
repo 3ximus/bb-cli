@@ -55,16 +55,15 @@ var ListCmd = &cobra.Command{
 }
 
 func init() {
-	// filter
 	ListCmd.Flags().StringP("author", "a", "", "filter by author nick name (full nickname is needed due to an API limitation from bitbucket)")
 	ListCmd.Flags().String("search", "", "search pull request with query")
 	ListCmd.Flags().StringArrayP("state", "s", []string{string(api.OPEN)}, `filter by state. Default: "open". Multiple of these options can be given
 	possible options: "open", "merged", "declined" or "superseded"`)
 	ListCmd.RegisterFlagCompletionFunc("state", stateCompletion)
 	ListCmd.Flags().String("target", "", "filter by target branch.")
-	ListCmd.RegisterFlagCompletionFunc("target", branchCompletion)
+	ListCmd.RegisterFlagCompletionFunc("target", util.BranchCompletion)
 	ListCmd.Flags().String("source", "", "filter by source branch.")
-	ListCmd.RegisterFlagCompletionFunc("source", branchCompletion)
+	ListCmd.RegisterFlagCompletionFunc("source", util.BranchCompletion)
 	ListCmd.Flags().Bool("all", false, "return pull request with all possible states.")
 
 	ListCmd.Flags().Int("pages", 1, "number of pages with results to retrieve")
@@ -76,6 +75,3 @@ func stateCompletion(comd *cobra.Command, args []string, toComplete string) ([]s
 	return []string{"open", "merged", "declined", "superseded"}, cobra.ShellCompDirectiveDefault
 }
 
-func branchCompletion(comd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-	return util.ListBranches(), cobra.ShellCompDirectiveDefault
-}

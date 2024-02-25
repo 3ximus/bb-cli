@@ -26,16 +26,22 @@ var ViewCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		repo := viper.GetString("repo")
 		showComments, _ := cmd.Flags().GetBool("comments")
+		targetBranch, _ := cmd.Flags().GetString("target")
+		sourceBranch, _ := cmd.Flags().GetString("source")
 
 		var id int
 		var err error
 		if len(args) == 0 {
-			branch, err := util.GetCurrentBranch()
-			cobra.CheckErr(err)
+			var err error
+			if targetBranch == "" && sourceBranch == "" {
+				sourceBranch, err = util.GetCurrentBranch()
+				targetBranch = ""
+				cobra.CheckErr(err)
+			}
 			// retrieve id of pr for current branch
-			pr := <-api.GetPrList(repo, []string{string(api.OPEN), string(api.MERGED), string(api.DECLINED), string(api.SUPERSEDED)}, "", "", branch, "", 1, false, false)
+			pr := <-api.GetPrList(repo, []string{string(api.OPEN), string(api.MERGED), string(api.DECLINED), string(api.SUPERSEDED)}, "", "", sourceBranch, targetBranch, 1, false, false)
 			if pr.ID == 0 {
-				cobra.CheckErr("No pr found for this branch")
+				cobra.CheckErr(fmt.Sprintf("No pull request found for branches (source: '%s', target: '%s')", sourceBranch, targetBranch))
 			}
 			id = pr.ID // get the first one's ID
 		} else {
@@ -93,6 +99,10 @@ var ViewCmd = &cobra.Command{
 }
 
 func init() {
+	ViewCmd.Flags().String("target", "", "filter by target branch.")
+	ViewCmd.Flags().String("source", "", "filter by source branch.")
+	ViewCmd.RegisterFlagCompletionFunc("target", util.BranchCompletion)
+	ViewCmd.RegisterFlagCompletionFunc("source", util.BranchCompletion)
 	ViewCmd.Flags().BoolP("comments", "c", false, "View comments")
 	ViewCmd.Flags().BoolP("commits", "C", false, "View commits. \033[31mNot implemented\033[m")
 	ViewCmd.Flags().BoolP("diff", "d", false, "View diff. \033[31mNot implemented\033[m")

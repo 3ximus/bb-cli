@@ -151,6 +151,8 @@ func ConvertToSeconds(timeStrings []string) (int, error) {
 	return seconds, nil
 }
 
+// EXTERNAL OPTIONS
+
 func OpenInBrowser(url string) {
 	var err error
 	switch runtime.GOOS {
@@ -227,6 +229,8 @@ func UseExternalFZF[T any](list []T, prompt string, toString func(int) string) [
 	return result
 }
 
+// LOG FUNCTIONS
+
 /* fmt.Printf wrapper to remove ANSI colors if stdout is not a terminal */
 func Printf(format string, a ...any) {
 	if term.IsTerminal(int(os.Stdout.Fd())) {
@@ -235,4 +239,10 @@ func Printf(format string, a ...any) {
 		ansiColorRegex := regexp.MustCompile(`\x1b\[[0-9;]*m`)
 		fmt.Printf(ansiColorRegex.ReplaceAllString(format, ""), a...)
 	}
+}
+
+// COMPLETION DIRECTIVES
+
+func BranchCompletion(comd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	return ListBranches(), cobra.ShellCompDirectiveDefault
 }
