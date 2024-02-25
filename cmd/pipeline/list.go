@@ -44,9 +44,5 @@ func init() {
 	ListCmd.Flags().IntP("number-results", "n", 10, "max number of results retrieve (max: 100)")
 	ListCmd.Flags().BoolP("author", "a", false, "show author information")
 	ListCmd.Flags().String("target", "", "filter target branch of pipeline")
-	ListCmd.RegisterFlagCompletionFunc("target", branchCompletion)
-}
-
-func branchCompletion(comd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-	return util.ListBranches(), cobra.ShellCompDirectiveDefault
+	ListCmd.RegisterFlagCompletionFunc("target", util.BranchCompletion)
 }

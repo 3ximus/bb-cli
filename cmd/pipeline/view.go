@@ -18,16 +18,19 @@ var ViewCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		repo := viper.GetString("repo")
 		showCommands, _ := cmd.Flags().GetBool("commands")
+		branch, _ := cmd.Flags().GetString("target")
 
 		var id int
 		var err error
 		if len(args) == 0 {
-			branch, err := util.GetCurrentBranch()
-			cobra.CheckErr(err)
+			if branch == "" {
+				branch, err = util.GetCurrentBranch()
+				cobra.CheckErr(err)
+			}
 			// retrieve id of pr for current branch
 			pipeline := <-api.GetPipelineList(repo, 1, branch)
 			if pipeline.BuildNumber == 0 {
-				cobra.CheckErr("No pipelines found for this branch")
+				cobra.CheckErr(fmt.Sprintf("No pipelines found for target branch: '%s'", branch))
 			}
 			id = pipeline.BuildNumber
 		} else {
@@ -80,6 +83,8 @@ var ViewCmd = &cobra.Command{
 }
 
 func init() {
+	ViewCmd.Flags().String("target", "", "filter by target branch.")
+	ViewCmd.RegisterFlagCompletionFunc("target", util.BranchCompletion)
 	ViewCmd.Flags().Bool("web", false, "open in the browser")
 	ViewCmd.Flags().BoolP("commands", "c", false, "show step commands")
 }
