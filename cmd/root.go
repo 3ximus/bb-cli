@@ -2,10 +2,11 @@ package cmd
 
 import (
 	"bb/cmd/auth"
+	"bb/cmd/doc"
+	"bb/cmd/environment"
 	"bb/cmd/issue"
 	"bb/cmd/pipeline"
 	"bb/cmd/pr"
-	"bb/cmd/environment"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -40,6 +41,7 @@ func init() {
 	RootCmd.AddCommand(environment.EnvironmentCmd)
 	RootCmd.AddCommand(issue.IssueCmd)
 	RootCmd.AddCommand(pipeline.PipelineCmd)
+	RootCmd.AddCommand(doc.DocCmd)
 }
 
 func initConfig() {

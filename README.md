@@ -4,6 +4,12 @@ A cli tool for bitbucket and jira similar to [gh](https://cli.github.com/) writt
 
 _Currently under development_
 
+## [Documentation](https://github.com/3ximus/bb-cli/wiki/bb)
+
+The full documentation is on the wiki of this project:
+
+https://github.com/3ximus/bb-cli/wiki/bb
+
 ## Instalation
 
 ```bash
@@ -71,25 +77,8 @@ bb help
 bb help [COMMAND]
 ```
 
-TODO
+## TODO
 
 - pr list | status filter should include options defined in config file (like issue list)
 - pipeline list | status filter should include options defined in config file (like issue list)
 
-
-### NOTE TO SELF
-
-To generate documentation use this
-
-```go
-package doc
-
-import (
-    "bb/cmd"
-    "github.com/spf13/cobra/doc"
-)
-
-func main() {
-    doc.GenManTree(cmd.RootCmd, nil, "doc")
-}
-```
