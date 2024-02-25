@@ -3,7 +3,6 @@ package pipeline
 import (
 	"bb/api"
 	"bb/util"
-	"fmt"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -21,21 +20,21 @@ var ListCmd = &cobra.Command{
 
 		for pipeline := range api.GetPipelineList(viper.GetString("repo"), nResults, targetBranch) {
 			if pipeline.State.Result.Name == "" {
-				fmt.Printf("%s", util.FormatPipelineStatus(pipeline.State.Name))
+				util.Printf("%s", util.FormatPipelineStatus(pipeline.State.Name))
 			} else {
-				fmt.Printf("%s", util.FormatPipelineStatus(pipeline.State.Result.Name))
+				util.Printf("%s", util.FormatPipelineStatus(pipeline.State.Result.Name))
 			}
-			fmt.Printf(" \033[1;32m#%d\033[m ", pipeline.BuildNumber)
+			util.Printf(" \033[1;32m#%d\033[m ", pipeline.BuildNumber)
 			if pipeline.Target.Source != "" {
-				fmt.Printf("%s \033[1;34m[ %s → %s ]\033[m", pipeline.Target.PullRequest.Title, pipeline.Target.Source, pipeline.Target.Destination)
+				util.Printf("%s \033[1;34m[ %s → %s ]\033[m", pipeline.Target.PullRequest.Title, pipeline.Target.Source, pipeline.Target.Destination)
 			} else {
-				fmt.Printf("\033[1;34m[ %s ]\033[m", pipeline.Target.RefName)
+				util.Printf("\033[1;34m[ %s ]\033[m", pipeline.Target.RefName)
 			}
 
-			fmt.Printf(" \033[37m%s (%s)\033[m\n", util.TimeDuration(time.Duration(pipeline.DurationInSeconds*1000000000)), util.TimeAgo(pipeline.CreatedOn))
+			util.Printf(" \033[37m%s (%s)\033[m\n", util.TimeDuration(time.Duration(pipeline.DurationInSeconds*1000000000)), util.TimeAgo(pipeline.CreatedOn))
 
 			if showAuthor {
-				fmt.Printf("        \033[33m%s\033[m \033[37mTrigger: %s\033[m\n", pipeline.Author.DisplayName, pipeline.Trigger.Name) //  \033[37mComments: %d\033[m",
+				util.Printf("        \033[33m%s\033[m \033[37mTrigger: %s\033[m\n", pipeline.Author.DisplayName, pipeline.Trigger.Name) //  \033[37mComments: %d\033[m",
 			}
 		}
 	},

@@ -54,7 +54,7 @@ var CreateCmd = &cobra.Command{
 			}
 		}
 		source, _ := cmd.Flags().GetString("source")
-		destination, _ := cmd.Flags().GetString("destination")
+		target, _ := cmd.Flags().GetString("target")
 		close_source, _ := cmd.Flags().GetBool("close-source")
 		include_branch_name := viper.GetBool("include_branch_name")
 
@@ -87,7 +87,7 @@ var CreateCmd = &cobra.Command{
 		newpr.Source = &api.Branch{}
 		newpr.Source.Branch.Name = source
 		newpr.Destination = &api.Branch{}
-		newpr.Destination.Branch.Name = destination
+		newpr.Destination.Branch.Name = target
 		for _, idx := range reviewersIndexes {
 			newpr.Reviewers = append(newpr.Reviewers, struct {
 				AccountId string `json:"account_id"`
@@ -128,12 +128,12 @@ var CreateCmd = &cobra.Command{
 }
 
 func init() {
-	CreateCmd.Flags().StringP("title", "t", "", "title for the pull request")
+	CreateCmd.Flags().StringP("title", "T", "", "title for the pull request")
 	CreateCmd.Flags().BoolP("body", "b", false, "add description for the pull request")
 	CreateCmd.Flags().StringP("source", "s", "", "source branch. Defaults to current branch")
-	CreateCmd.Flags().StringP("destination", "d", "dev", "destination for the pull request: Defaults to dev")
+	CreateCmd.Flags().StringP("target", "t", "dev", "target for the pull request: Defaults to dev")
 	CreateCmd.RegisterFlagCompletionFunc("source", branchCompletion)
-	CreateCmd.RegisterFlagCompletionFunc("destination", branchCompletion)
+	CreateCmd.RegisterFlagCompletionFunc("target", branchCompletion)
 	CreateCmd.Flags().BoolP("close-source", "c", true, "close source branch")
 	CreateCmd.Flags().StringArrayP("reviewer", "r", []string{}, "add reviewer by their name. \033[31mNot implemented\033[m")
 	CreateCmd.Flags().BoolP("include-branch-name", "i", false, "include branch name in the pull request name")

@@ -49,7 +49,7 @@ var EditCmd = &cobra.Command{
 		title, _ := cmd.Flags().GetString("title")
 		description, _ := cmd.Flags().GetString("body")
 		source, _ := cmd.Flags().GetString("source")
-		destination, _ := cmd.Flags().GetString("destination")
+		target, _ := cmd.Flags().GetString("target")
 		close_source, _ := cmd.Flags().GetBool("close_source")
 
 		// if no options given ask for what to change
@@ -79,11 +79,11 @@ var EditCmd = &cobra.Command{
 			newpr.Source = &api.Branch{}
 			newpr.Source.Branch.Name = source
 		}
-		if destination == "" {
+		if target == "" {
 			newpr.Destination = nil
 		} else {
 			newpr.Destination = &api.Branch{}
-			newpr.Destination.Branch.Name = destination
+			newpr.Destination.Branch.Name = target
 		}
 		newpr.Reviewers = nil
 
@@ -98,12 +98,12 @@ var EditCmd = &cobra.Command{
 }
 
 func init() {
-	EditCmd.Flags().StringP("title", "t", "", "title for the pull request")
+	EditCmd.Flags().StringP("title", "T", "", "title for the pull request")
 	EditCmd.Flags().StringP("body", "b", "", "description for the pull request")
 	EditCmd.Flags().StringP("source", "s", "", "source branch. Defaults to current branch")
-	EditCmd.Flags().StringP("destination", "d", "", "description for the pull request")
+	EditCmd.Flags().StringP("target", "t", "", "description for the pull request")
 	EditCmd.RegisterFlagCompletionFunc("source", branchCompletion)
-	EditCmd.RegisterFlagCompletionFunc("destination", branchCompletion)
+	EditCmd.RegisterFlagCompletionFunc("target", branchCompletion)
 	EditCmd.Flags().BoolP("close-source", "c", false, "close source branch")
 	EditCmd.Flags().StringArrayP("reviewer", "r", []string{}, "add reviewer by their name. \033[31mNot implemented\033[m")
 }

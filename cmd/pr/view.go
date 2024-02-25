@@ -49,19 +49,19 @@ var ViewCmd = &cobra.Command{
 		// BASIC INFO
 
 		pr := <-api.GetPr(repo, id)
-		fmt.Printf("\n%s \033[1;32m#%d\033[m \033[1;37m%s\033[m  \033[1;34m[ %s → %s]\033[m\n", util.FormatPrState(pr.State), pr.ID, pr.Title, pr.Source.Branch.Name, pr.Destination.Branch.Name)
-		fmt.Printf("\033[37m  opened by %s, %d comments, last updated: %s\033[m\n", pr.Author.Nickname, pr.CommentCount, util.TimeAgo(pr.UpdatedOn))
-		fmt.Print("\033[37m  reviewers: \n")
+		util.Printf("\n%s \033[1;32m#%d\033[m \033[1;37m%s\033[m  \033[1;34m[ %s → %s]\033[m\n", util.FormatPrState(pr.State), pr.ID, pr.Title, pr.Source.Branch.Name, pr.Destination.Branch.Name)
+		util.Printf("\033[37m  opened by %s, %d comments, last updated: %s\033[m\n", pr.Author.Nickname, pr.CommentCount, util.TimeAgo(pr.UpdatedOn))
+		util.Printf("\033[37m  reviewers: \n")
 		for _, participant := range pr.Participants {
 			if participant.Approved {
-				fmt.Printf("    \033[1;32m✓ %s\n", participant.User.DisplayName)
+				util.Printf("    \033[1;32m✓ %s\n", participant.User.DisplayName)
 			} else {
-				fmt.Printf("    \033[0;37m%s\n", participant.User.DisplayName)
+				util.Printf("    \033[0;37m%s\n", participant.User.DisplayName)
 			}
 		}
-		fmt.Print("\033[m\n")
+		util.Printf("\033[m\n")
 		if pr.Description != "" {
-			fmt.Printf("%s\n\n", pr.Description)
+			util.Printf("%s\n\n", pr.Description)
 		}
 
 		web, _ := cmd.Flags().GetBool("web")
@@ -76,8 +76,8 @@ var ViewCmd = &cobra.Command{
 		if pipelines != nil && len(pipelines) > 0 {
 			fmt.Println("Pipelines:")
 			for _, pipeline := range pipelines {
-				fmt.Printf("%s %s \033[37m(%s)\033[m\n", util.FormatPipelineStatus(pipeline.State), pipeline.Name, pipeline.RefName)
-				fmt.Printf("  \033[37m%s\033[m\n", pipeline.Url)
+				util.Printf("%s %s \033[37m(%s)\033[m\n", util.FormatPipelineStatus(pipeline.State), pipeline.Name, pipeline.RefName)
+				util.Printf("  \033[37m%s\033[m\n", pipeline.Url)
 			}
 			fmt.Println()
 		}
@@ -85,7 +85,7 @@ var ViewCmd = &cobra.Command{
 		if showComments {
 			comments := <-commentsChannel
 			for _, comment := range comments {
-				fmt.Printf("%s %s", comment.Content.Raw, comment.User.DisplayName)
+				util.Printf("%s %s", comment.Content.Raw, comment.User.DisplayName)
 			}
 		}
 

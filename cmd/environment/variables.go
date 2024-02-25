@@ -2,6 +2,7 @@ package environment
 
 import (
 	"bb/api"
+	"bb/util"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -17,9 +18,9 @@ var VariablesCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		for variable := range api.GetEnvironmentVariables(viper.GetString("repo"), args[0]) {
 			if variable.Secured {
-				fmt.Printf("%s = \033[37m***\033[m", variable.Key)
+				util.Printf("%s = \033[37m***\033[m", variable.Key)
 			} else {
-				fmt.Printf("%s = \033[37m%s\033[m", variable.Key, variable.Value)
+				util.Printf("%s = \033[37m%s\033[m", variable.Key, variable.Value)
 			}
 
 			fmt.Println()
