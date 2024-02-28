@@ -78,3 +78,6 @@ bb help [COMMAND]
 ```
 
 ## TODO
+
+- View/Edit issue checklist
+

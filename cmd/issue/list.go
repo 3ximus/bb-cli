@@ -11,22 +11,27 @@ import (
 )
 
 var ListCmd = &cobra.Command{
-	Use:   "list",
+	Use:   "list [ PROJECT-KEY | all ]",
 	Short: "List issues",
 	Long: `List issues from Jira with preset filtering.
-	By default it filters tickets assigned to the current user and it tries to gess the current project from the current branch name.`,
+	By default it filters tickets assigned to the current user and it tries to gess the current project from the current branch name.
+	Given an argument it will filter tickets from that project. Otherwise it will try to derive the project name from the branch name.
+	If all is given then project filtering is not applied
+	`,
+	Args: cobra.MaximumNArgs(1),
+	Example: "list DP --search ",
 	Run: func(cmd *cobra.Command, args []string) {
 		nResults, _ := cmd.Flags().GetInt("number-results")
 		reporter, _ := cmd.Flags().GetBool("reporter")
 		all, _ := cmd.Flags().GetBool("all")
 		search, _ := cmd.Flags().GetString("search")
 		statuses, _ := cmd.Flags().GetStringArray("status")
-		project, _ := cmd.Flags().GetString("project")
 		priority, _ := cmd.Flags().GetBool("priority")
 		showUsers, _ := cmd.Flags().GetBool("users")
 		showTime, _ := cmd.Flags().GetBool("time")
 
-		if !cmd.Flags().Changed("project") {
+		project := ""
+		if len(args) == 0 {
 			branch, err := util.GetCurrentBranch()
 			if err == nil {
 				re := regexp.MustCompile(api.JiraIssueKeyRegex)
@@ -35,9 +40,11 @@ var ListCmd = &cobra.Command{
 					project = strings.Split(key, "-")[0]
 				}
 			}
-		}
-		if project == "all" {
-			project = ""
+		} else {
+			project = args[0]
+			if project == "all" {
+				project = ""
+			}
 		}
 
 		// convert status based on current settings
@@ -75,8 +82,6 @@ var ListCmd = &cobra.Command{
 
 func init() {
 	// filter
-	ListCmd.Flags().StringP("project", "p", "", `filter issues by project key.
-	If "all" is given it shows all projects (when a project is detected on current branch and you still want to show all projects)`)
 	ListCmd.Flags().BoolP("all", "a", false, "filter all issues. (Not assigned or reporting to current user)")
 	ListCmd.Flags().BoolP("reporter", "r", false, "filter issues reporting to current user")
 	ListCmd.Flags().StringArrayP("status", "s", []string{}, `filter status type.
@@ -97,7 +102,7 @@ func init() {
 func statusCompletion(comd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 	statusMap := viper.GetStringMapStringSlice("jira_status")
 	status := make([]string, 0, len(statusMap))
-	for k:=range statusMap {
+	for k := range statusMap {
 		status = append(status, k)
 	}
 	return status, cobra.ShellCompDirectiveDefault
