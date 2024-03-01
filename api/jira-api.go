@@ -99,7 +99,7 @@ func GetIssue(key string) <-chan JiraIssue {
 	return channel
 }
 
-func GetIssueList(nResults int, all bool, reporter bool, project string, statuses []string, searchTerm string, prioritySort bool) <-chan JiraIssue {
+func GetIssueList(nResults int, all bool, reporter bool, project string, statuses []string, types []string, searchTerm string, prioritySort bool) <-chan JiraIssue {
 	channel := make(chan JiraIssue)
 	go func() {
 		defer close(channel)
@@ -130,10 +130,23 @@ func GetIssueList(nResults int, all bool, reporter bool, project string, statuse
 			query += "("
 			for i, s := range statuses {
 				if i == 0 {
-					// TODO improve this and use a configurable viper settings to map status
 					query += fmt.Sprintf("status=\"%s\"", url.QueryEscape(s))
 				} else {
 					query += fmt.Sprintf("+OR+status=\"%s\"", url.QueryEscape(s))
+				}
+			}
+			query += ")"
+		}
+		if len(types) > 0 {
+			if query != "" {
+				query += "+AND+"
+			}
+			query += "("
+			for i, s := range types {
+				if i == 0 {
+					query += fmt.Sprintf("type=\"%s\"", url.QueryEscape(s))
+				} else {
+					query += fmt.Sprintf("+OR+type=\"%s\"", url.QueryEscape(s))
 				}
 			}
 			query += ")"

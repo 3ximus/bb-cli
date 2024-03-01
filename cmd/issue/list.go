@@ -18,7 +18,7 @@ var ListCmd = &cobra.Command{
 	Given an argument it will filter tickets from that project. Otherwise it will try to derive the project name from the branch name.
 	If all is given then project filtering is not applied
 	`,
-	Args: cobra.MaximumNArgs(1),
+	Args:    cobra.MaximumNArgs(1),
 	Example: "list DP --search ",
 	Run: func(cmd *cobra.Command, args []string) {
 		nResults, _ := cmd.Flags().GetInt("number-results")
@@ -26,6 +26,7 @@ var ListCmd = &cobra.Command{
 		all, _ := cmd.Flags().GetBool("all")
 		search, _ := cmd.Flags().GetString("search")
 		statuses, _ := cmd.Flags().GetStringArray("status")
+		iTypes, _ := cmd.Flags().GetStringArray("type")
 		priority, _ := cmd.Flags().GetBool("priority")
 		showUsers, _ := cmd.Flags().GetBool("users")
 		showTime, _ := cmd.Flags().GetBool("time")
@@ -58,7 +59,18 @@ var ListCmd = &cobra.Command{
 			}
 		}
 
-		for issue := range api.GetIssueList(nResults, all, reporter, project, statusConversion, search, priority) {
+		// convert type based on current settings
+		var typeConversion = []string{}
+		for _, s := range iTypes {
+			typesMap, err := util.GetConfig("jira_type", s)
+			if err == nil {
+				typeConversion = append(typeConversion, typesMap.Values...)
+			} else {
+				typeConversion = append(typeConversion, s)
+			}
+		}
+
+		for issue := range api.GetIssueList(nResults, all, reporter, project, statusConversion, typeConversion, search, priority) {
 			timeSpent := "-"
 			if issue.Fields.TimeTracking.TimeSpent != " " {
 				timeSpent = issue.Fields.TimeTracking.TimeSpent
@@ -87,9 +99,10 @@ func init() {
 	ListCmd.Flags().StringArrayP("status", "s", []string{}, `filter status type.
 	this option will provide completion for the mappings defined in "jira_status" of your config file`)
 	ListCmd.RegisterFlagCompletionFunc("status", statusCompletion)
+	ListCmd.Flags().StringArray("type", []string{}, `filter issue type.
+	this option will provide completion for the mappings defined in "jira_type" of your config file`)
+	ListCmd.RegisterFlagCompletionFunc("type", typeCompletion)
 	ListCmd.Flags().String("search", "", "filter issues by keyword")
-
-	// TODO add way to sort by recent or the ones the user has participated on
 
 	// display
 	ListCmd.Flags().BoolP("users", "u", false, "show users")
@@ -106,4 +119,13 @@ func statusCompletion(comd *cobra.Command, args []string, toComplete string) ([]
 		status = append(status, k)
 	}
 	return status, cobra.ShellCompDirectiveDefault
+}
+
+func typeCompletion(comd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	issueTypeMap := viper.GetStringMapStringSlice("jira_type")
+	issueType := make([]string, 0, len(issueTypeMap))
+	for k := range issueTypeMap {
+		issueType = append(issueType, k)
+	}
+	return issueType, cobra.ShellCompDirectiveDefault
 }

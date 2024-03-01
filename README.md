@@ -79,5 +79,7 @@ bb help [COMMAND]
 
 ## TODO
 
+- issue list - add way to sort by recent or the ones the user has participated on
+- issue log - is broken, and doesn't use current branch as issue key
 - View/Edit issue checklist
 
