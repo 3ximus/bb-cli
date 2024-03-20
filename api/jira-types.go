@@ -30,6 +30,18 @@ type JiraIssue struct {
 			Id   string
 		}
 		Parent struct {
+			Key    string `json:"key"`
+			Fields struct {
+				Summary string
+				Type    struct {
+					Name    string
+					Subtask bool
+				} `json:"issuetype"`
+				Priority struct {
+					Name string
+					Id   string
+				}
+			}
 		}
 		Project struct {
 			Name string
@@ -59,8 +71,8 @@ type JiraIssue struct {
 type UpdateIssueRequestBody struct {
 	Fields struct {
 		// This on might be enough when set on project
-		TimeTracking         *TimeTracking `json:"timetracking,omitempty"`
-		Summary              string        `json:"summary,omitempty"`
+		TimeTracking *TimeTracking `json:"timetracking,omitempty"`
+		Summary      string        `json:"summary,omitempty"`
 	} `json:"fields,omitempty"`
 	Update struct {
 		TimeTracking []UpdateType[TimeTracking] `json:"timetracking,omitempty"`

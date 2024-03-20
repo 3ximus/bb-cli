@@ -17,8 +17,9 @@ var cfgFile string
 
 var RootCmd = &cobra.Command{
 	Use:   "bb",
-	Short: "bb is a bitbucket cli",
-	Long:  `Bitbucket cli to interact with bitbucket.org`,
+	Short: "CLI utility to manage Bitbucket repositories and Jira organizations",
+	Long:  `This utility is focused on allowing simple operations on bitbucket and jira through the command line.
+	It provides commands to operate on Bitbucket and Jira.`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

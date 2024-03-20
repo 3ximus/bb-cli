@@ -30,6 +30,7 @@ var ListCmd = &cobra.Command{
 		priority, _ := cmd.Flags().GetBool("priority")
 		showUsers, _ := cmd.Flags().GetBool("users")
 		showTime, _ := cmd.Flags().GetBool("time")
+		showParents, _ := cmd.Flags().GetBool("parent")
 
 		project := ""
 		if len(args) == 0 {
@@ -76,13 +77,20 @@ var ListCmd = &cobra.Command{
 				timeSpent = issue.Fields.TimeTracking.TimeSpent
 			}
 			util.Printf("%s \033[1;32m%s\033[m %s %s %s\n", util.FormatIssueStatus(issue.Fields.Status.Name), issue.Key, util.FormatIssueType(issue.Fields.Type.Name), issue.Fields.Summary, util.FormatIssuePriority(issue.Fields.Priority.Id, issue.Fields.Priority.Name))
+			if showParents {
+				if issue.Fields.Parent.Fields.Summary != "" {
+					util.Printf("    \033[37mParent:\033[m %s %s (\033[37m%s\033[m)\n", util.FormatIssueType(issue.Fields.Parent.Fields.Type.Name), issue.Fields.Parent.Fields.Summary, issue.Fields.Parent.Key)
+				} else {
+					util.Printf("    \033[37mParent: ---\n")
+				}
+			}
 			if showUsers {
 				if all {
-					util.Printf("    \033[37mAssigned: \033[1m%s\033[0;37m -> Reporter: \033[1;36m%s\033[m \033[37m(%d comments)\033[m\n", issue.Fields.Assignee.DisplayName, issue.Fields.Reporter.DisplayName, issue.Fields.Comment.Total)
+					util.Printf("    \033[37mAssigned: \033[1m%s\033[0;37m -> Reporter: \033[1;36m%s\033[m \033[m\033[37m(%d comments)\033[m\n", issue.Fields.Assignee.DisplayName, issue.Fields.Reporter.DisplayName, issue.Fields.Comment.Total)
 				} else if reporter {
-					util.Printf("    \033[37mAssigned: \033[1m%s \033[37m(%d comments)\033[m\n", issue.Fields.Assignee.DisplayName, issue.Fields.Comment.Total)
+					util.Printf("    \033[37mAssigned: \033[1m%s \033[m\033[37m(%d comments)\033[m\n", issue.Fields.Assignee.DisplayName, issue.Fields.Comment.Total)
 				} else {
-					util.Printf("    \033[37mReporter: \033[1m%s \033[37m(%d comments)\033[m\n", issue.Fields.Reporter.DisplayName, issue.Fields.Comment.Total)
+					util.Printf("    \033[37mReporter: \033[1m%s \033[m\033[37m(%d comments)\033[m\n", issue.Fields.Reporter.DisplayName, issue.Fields.Comment.Total)
 				}
 			}
 			if showTime {
@@ -107,6 +115,7 @@ func init() {
 	// display
 	ListCmd.Flags().BoolP("users", "u", false, "show users")
 	ListCmd.Flags().BoolP("time", "t", false, "show time information")
+	ListCmd.Flags().BoolP("parent", "p", true, "show parent tickets")
 	ListCmd.Flags().IntP("number-results", "n", 10, "max number of results retrieve")
 	// sort
 	ListCmd.Flags().BoolP("priority", "P", false, "sort by priority")
