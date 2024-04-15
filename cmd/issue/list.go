@@ -115,8 +115,8 @@ func init() {
 	// display
 	ListCmd.Flags().BoolP("users", "u", false, "show users")
 	ListCmd.Flags().BoolP("time", "t", false, "show time information")
-	ListCmd.Flags().BoolP("parent", "p", true, "show parent tickets")
-	ListCmd.Flags().IntP("number-results", "n", 10, "max number of results retrieve")
+	ListCmd.Flags().BoolP("parent", "p", false, "show parent tickets")
+	ListCmd.Flags().IntP("number-results", "n", 99, "max number of results retrieve")
 	// sort
 	ListCmd.Flags().BoolP("priority", "P", false, "sort by priority")
 }

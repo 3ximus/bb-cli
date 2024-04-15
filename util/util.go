@@ -103,8 +103,10 @@ func FormatIssuePriority(id string, name string) string {
 		priorityString = fmt.Sprintf("\033[1;33m %s\033[m", name)
 	case "4":
 		priorityString = fmt.Sprintf("\033[1;34m %s\033[m", name)
+	case "5":
+		priorityString = fmt.Sprintf("\033[1;38;5;8m %s\033[m", name)
 	default:
-		priorityString = fmt.Sprintf("\033[1;37m%s\033[m", name)
+		priorityString = fmt.Sprintf("\033[1;m%s\033[m", name)
 	}
 	return priorityString
 }
