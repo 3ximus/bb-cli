@@ -17,6 +17,7 @@ var ReportCmd = &cobra.Command{
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		repo := viper.GetString("repo")
+		showShort, _ := cmd.Flags().GetBool("short")
 
 		var id int
 		var err error
@@ -56,7 +57,11 @@ var ReportCmd = &cobra.Command{
 			cobra.CheckErr("Step not found")
 		}
 
-		fullReportChannel := api.GetPipelineReportCases(repo, fmt.Sprintf("%d", id), selected.UUID)
+		var fullReportChannel <-chan api.PipelineReportCase
+		if !showShort {
+			fullReportChannel = api.GetPipelineReportCases(repo, fmt.Sprintf("%d", id), selected.UUID)
+		}
+
 		report := <-api.GetPipelineReport(repo, fmt.Sprintf("%d", id), selected.UUID)
 		fmt.Println("Test report:")
 		fmt.Printf("\033[1;32mPassed:  %3d\033[m\n", report.Success)
@@ -65,8 +70,7 @@ var ReportCmd = &cobra.Command{
 		fmt.Printf("Error:   %3d\n", report.Error)
 		fmt.Printf("Total:   %3d\n", report.Total)
 
-		showFull, _ := cmd.Flags().GetBool("full")
-		if showFull {
+		if !showShort {
 			for reportCase := range fullReportChannel {
 				fmt.Printf("%s \033[34m%s\033[m %s \033[37m%s\033[m\n", util.FormatPipelineStatus(reportCase.Status), reportCase.PackageName, reportCase.Name, strings.Replace(reportCase.Duration, "PT", "", 1))
 			}
@@ -76,5 +80,5 @@ var ReportCmd = &cobra.Command{
 
 func init() {
 	ReportCmd.Flags().StringP("step", "s", "", "select step. Without this option the step is prompet interactively")
-	ReportCmd.Flags().BoolP("full", "f", false, "show the full report")
+	ReportCmd.Flags().Bool("short", false, "show the only short report")
 }

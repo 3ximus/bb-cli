@@ -23,6 +23,9 @@ var IssueCmd = &cobra.Command{
 			cobra.CheckErr("jira domain is not defined")
 		}
 	},
+	Run: func(cmd *cobra.Command, args []string) {
+		TUI()
+	},
 }
 
 func init() {

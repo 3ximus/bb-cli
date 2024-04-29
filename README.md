@@ -83,5 +83,6 @@ bb help [COMMAND]
 - issue log - is broken, and doesn't use current branch as issue key
 - issue edit - edit issue title and maybe some tags
 - View/Edit issue checklist
-- pr list - add timings information with a flag
+- pr list - add timings/dates information with a flag
+- pr create - like pr edit using Editor for title and description
 
