@@ -76,7 +76,7 @@ var ListCmd = &cobra.Command{
 			if issue.Fields.TimeTracking.TimeSpent != " " {
 				timeSpent = issue.Fields.TimeTracking.TimeSpent
 			}
-			util.Printf("%s \033[1;32m%s\033[m %s %s %s\n", util.FormatIssueStatus(issue.Fields.Status.Name), issue.Key, util.FormatIssueType(issue.Fields.Type.Name), issue.Fields.Summary, util.FormatIssuePriority(issue.Fields.Priority.Id, issue.Fields.Priority.Name))
+			util.Printf("%s \033[1;32m%s\033[m %s %s %s\n", util.FormatIssueStatus(issue.Fields.Status.Name), issue.Key, util.FormatIssueType(issue.Fields.Type.Name), issue.Fields.Summary, util.FormatIssuePriority(issue.Fields.Priority.Id))
 			if showParents {
 				if issue.Fields.Parent.Fields.Summary != "" {
 					util.Printf("    \033[37mParent:\033[m %s %s (\033[37m%s\033[m)\n", util.FormatIssueType(issue.Fields.Parent.Fields.Type.Name), issue.Fields.Parent.Fields.Summary, issue.Fields.Parent.Key)

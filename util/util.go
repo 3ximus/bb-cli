@@ -92,23 +92,12 @@ func FormatIssueStatus(status string) string {
 	return FormatSwitchConfig(status, jiraStatusMap)
 }
 
-func FormatIssuePriority(id string, name string) string {
-	priorityString := ""
-	switch id {
-	case "1":
-		priorityString = fmt.Sprintf("\033[1;31m %s\033[m", name)
-	case "2":
-		priorityString = fmt.Sprintf("\033[1;35m %s\033[m", name)
-	case "3":
-		priorityString = fmt.Sprintf("\033[1;33m %s\033[m", name)
-	case "4":
-		priorityString = fmt.Sprintf("\033[1;34m %s\033[m", name)
-	case "5":
-		priorityString = fmt.Sprintf("\033[1;38;5;8m %s\033[m", name)
-	default:
-		priorityString = fmt.Sprintf("\033[1;m%s\033[m", name)
+func FormatIssuePriority(id string) string {
+	jiraPriorityMap := make(map[string]ResultSwitchConfig)
+	if err := viper.UnmarshalKey("jira_priority", &jiraPriorityMap); err != nil {
+		cobra.CheckErr(err)
 	}
-	return priorityString
+	return FormatSwitchConfig(id, jiraPriorityMap)
 }
 
 func TimeAgo(updatedOn time.Time) string {

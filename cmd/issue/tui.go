@@ -38,7 +38,7 @@ func (d itemDelegate) Render(w io.Writer, m list.Model, index int, listItem list
 		i.Key,
 		util.FormatIssueType(i.Fields.Type.Name),
 		i.Fields.Summary,
-		util.FormatIssuePriority(i.Fields.Priority.Id, i.Fields.Priority.Name))
+		util.FormatIssuePriority(i.Fields.Priority.Id))
 }
 
 // ====================================================
@@ -121,8 +121,6 @@ func TUI() {
 	l.InfiniteScrolling = true
 	l.Styles.Title = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.ANSIColor(4))
 	l.SetShowStatusBar(false)
-	// TODO
-	// l.Styles.Spinner = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.ANSIColor(1))
 	l.Styles.HelpStyle = list.DefaultStyles().HelpStyle.PaddingLeft(2).PaddingTop(0)
 
 	m := model{list: l}
