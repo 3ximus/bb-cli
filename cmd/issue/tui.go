@@ -5,11 +5,15 @@ import (
 	"bb/util"
 	"fmt"
 	"io"
+	"math"
 	"os"
+	"os/exec"
 
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/spf13/viper"
 )
 
 // ====================================================
@@ -42,10 +46,47 @@ func (d itemDelegate) Render(w io.Writer, m list.Model, index int, listItem list
 }
 
 // ====================================================
+//                  KEYBINDINGS
+// ====================================================
+
+type listKeyMap struct {
+	quit          key.Binding
+	toggleSpinner key.Binding
+	openWeb       key.Binding
+	transition    key.Binding
+	refresh       key.Binding
+}
+
+func newListKeyMap() *listKeyMap {
+	return &listKeyMap{
+		quit: key.NewBinding(
+			key.WithKeys("q", "ctrl+c"),
+			key.WithHelp("q", "quit"),
+		),
+		toggleSpinner: key.NewBinding(
+			key.WithKeys("s"),
+			key.WithHelp("s", "toggle spinner"),
+		),
+		openWeb: key.NewBinding(
+			key.WithKeys("w"),
+			key.WithHelp("w", "open in browser"),
+		),
+		transition: key.NewBinding(
+			key.WithKeys("t"),
+			key.WithHelp("t", "transition issue"),
+		),
+		refresh: key.NewBinding(
+			key.WithKeys("r"),
+			key.WithHelp("r", "refresh list"),
+		),
+	}
+}
+
+// ====================================================
 //                     MESSAGES
 // ====================================================
 
-type started bool
+type triggerSpinner bool
 type issueList struct {
 	data []list.Item
 }
@@ -59,9 +100,16 @@ func getIssueList() tea.Msg {
 }
 
 // Function that will just trigger the startup update
-// turning on the spinner
 func startup() tea.Msg {
-	return started(true)
+	return triggerSpinner(true)
+}
+
+// ====================================================
+//                     COMMANDS
+// ====================================================
+
+func loadIssues() tea.Cmd {
+	return tea.Batch(startup, getIssueList)
 }
 
 // ====================================================
@@ -71,36 +119,50 @@ func startup() tea.Msg {
 // The main TUI model
 type model struct {
 	list list.Model
+	keys *listKeyMap
 }
 
 func (m model) Init() tea.Cmd {
-	return tea.Batch(startup, getIssueList)
+	return loadIssues()
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-	case started:
-		return m, m.list.StartSpinner()
 	case tea.WindowSizeMsg:
 		m.list.SetWidth(msg.Width)
+		m.list.SetHeight(int(math.Min(float64(msg.Height), 20)))
 		return m, nil
+	case triggerSpinner:
+		return m, m.list.StartSpinner()
 	case issueList:
 		return m, tea.Batch(
 			m.list.SetItems(msg.data),
 			m.list.ToggleSpinner(),
 		)
 	case tea.KeyMsg:
-		switch keypress := msg.String(); keypress {
-		case "q", "ctrl+c":
+		switch {
+		case key.Matches(msg, m.keys.quit):
 			return m, tea.Quit
-		case "s":
+		case key.Matches(msg, m.keys.toggleSpinner):
 			return m, m.list.ToggleSpinner()
-		case "enter":
+		case key.Matches(msg, m.keys.refresh):
+			return m, loadIssues()
+		case key.Matches(msg, m.keys.openWeb):
 			i, ok := m.list.SelectedItem().(item)
 			if ok {
-				return m, tea.Batch(
-					tea.Printf("ENTER ON %s", i.Key),
-				)
+				util.OpenInBrowser(api.JiraBrowse(viper.GetString("jira_domain"), i.Key))
+				return m, nil
+			}
+		case key.Matches(msg, m.keys.transition):
+			i, ok := m.list.SelectedItem().(item)
+			if ok {
+				ex, err := os.Executable()
+				if err != nil {
+					panic(err)
+				}
+				return m, tea.Sequence(
+					tea.ExecProcess(exec.Command(ex, "issue", "transition", i.Key), nil),
+					loadIssues())
 			}
 		}
 	}
@@ -116,14 +178,26 @@ func (m model) View() string {
 
 // Main Function
 func TUI() {
-	l := list.New([]list.Item{}, itemDelegate{}, 0, 13)
+	l := list.New([]list.Item{}, itemDelegate{}, 0, 10)
 	l.Title = "Jira issue list:"
 	l.InfiniteScrolling = true
 	l.Styles.Title = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.ANSIColor(4))
 	l.SetShowStatusBar(false)
 	l.Styles.HelpStyle = list.DefaultStyles().HelpStyle.PaddingLeft(2).PaddingTop(0)
 
-	m := model{list: l}
+	listKeys := newListKeyMap()
+	l.AdditionalFullHelpKeys =
+		func() []key.Binding {
+			return []key.Binding{
+				listKeys.quit,
+				listKeys.toggleSpinner,
+				listKeys.transition,
+				listKeys.openWeb,
+				listKeys.refresh,
+			}
+		}
+
+	m := model{list: l, keys: listKeys}
 
 	p := tea.NewProgram(m)
 
