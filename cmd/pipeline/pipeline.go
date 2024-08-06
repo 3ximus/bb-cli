@@ -21,6 +21,9 @@ var PipelineCmd = &cobra.Command{
 			cobra.CheckErr("repo is not defined")
 		}
 	},
+	Run: func(cmd *cobra.Command, args []string) {
+		TUI()
+	},
 }
 
 func init() {
