@@ -7,18 +7,17 @@ import (
 	"bb/cmd/issue"
 	"bb/cmd/pipeline"
 	"bb/cmd/pr"
+	"bb/store"
 	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-var cfgFile string
-
 var RootCmd = &cobra.Command{
 	Use:   "bb",
 	Short: "CLI utility to manage Bitbucket repositories and Jira organizations",
-	Long:  `This utility is focused on allowing simple operations on bitbucket and jira through the command line.
+	Long: `This utility is focused on allowing simple operations on bitbucket and jira through the command line.
 	It provides commands to operate on Bitbucket and Jira.`,
 }
 
@@ -35,7 +34,8 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	// globally set config path
-	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.config/bb.yaml)")
+	RootCmd.PersistentFlags().StringVar(&store.CfgFile, "config", "", "config file (default is $HOME/.config/bb.yaml)")
+	RootCmd.PersistentFlags().BoolVar(&store.UseColor, "color", false, "use color even if stdout is piped")
 
 	RootCmd.AddCommand(auth.AuthCmd)
 	RootCmd.AddCommand(pr.PrCmd)
@@ -46,9 +46,9 @@ func init() {
 }
 
 func initConfig() {
-	if cfgFile != "" {
+	if store.CfgFile != "" {
 		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
+		viper.SetConfigFile(store.CfgFile)
 	} else {
 		configDir, err := os.UserConfigDir()
 		cobra.CheckErr(err)

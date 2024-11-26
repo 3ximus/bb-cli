@@ -2,6 +2,8 @@
 
 package util
 
+import "bb/store"
+
 import (
 	"bb/api"
 	"errors"
@@ -239,7 +241,7 @@ func UseExternalFZF[T any](list []T, prompt string, toString func(int) string) [
 
 /* fmt.Printf wrapper to remove ANSI colors if stdout is not a terminal */
 func Printf(format string, a ...any) {
-	if term.IsTerminal(int(os.Stdout.Fd())) {
+	if store.UseColor || term.IsTerminal(int(os.Stdout.Fd())) {
 		fmt.Printf(format, a...)
 	} else {
 		ansiColorRegex := regexp.MustCompile(`\x1b\[[0-9;]*m`)

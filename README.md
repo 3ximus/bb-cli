@@ -79,6 +79,7 @@ bb help [COMMAND]
 
 ## TODO
 
+- remove all tui crap. Implement fzf integration instead
 - issue list - add way to sort by recent or the ones the user has participated on
 - issue log - is broken, and doesn't use current branch as issue key
 - issue edit - edit issue title and maybe some tags

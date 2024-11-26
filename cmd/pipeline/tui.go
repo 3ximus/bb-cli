@@ -105,7 +105,7 @@ type updatedList struct {
 
 func getPipelineList() tea.Msg {
 	items := []list.Item{}
-	for pipeline := range api.GetPipelineList(viper.GetString("repo"), 20, "") {
+	for pipeline := range api.GetPipelineList(viper.GetString("repo"), 10, "") {
 		items = append(items, item(pipeline))
 	}
 	return updatedList{items}
@@ -142,7 +142,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.list.SetWidth(msg.Width)
-		m.list.SetHeight(int(math.Min(float64(msg.Height), 20)))
+		m.list.SetHeight(int(math.Min(float64(msg.Height), 10)))
 		return m, nil
 	case triggerSpinner:
 		return m, m.list.StartSpinner()
