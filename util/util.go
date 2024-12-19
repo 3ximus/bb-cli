@@ -198,9 +198,7 @@ func SelectFZF[T any](list []T, prompt string, toString func(int) string) []int 
 
 	var indexes []int
 
-	// check if fzf is installed
-	_, existsErr := exec.LookPath("fzf")
-	if existsErr == nil {
+	if CommandExists("fzf") {
 		indexes = UseExternalFZF(list, prompt, toString)
 	} else {
 		var err error
@@ -235,6 +233,29 @@ func UseExternalFZF[T any](list []T, prompt string, toString func(int) string) [
 		result = append(result, idx)
 	}
 	return result
+}
+
+func CommandExists(cmd string) bool {
+	_, err := exec.LookPath(cmd)
+	return err == nil
+}
+
+func ReplaceListWithFzf(fzfargs string) {
+	var filteredArgs []string
+	for _, arg := range os.Args {
+		if arg == "--fzf" {
+			filteredArgs = append(filteredArgs, "--fzf-internal")
+		} else {
+			filteredArgs = append(filteredArgs, arg)
+		}
+	}
+	filteredArgs = append(filteredArgs, "--color")
+	command := strings.Join(filteredArgs, " ")
+	fmt.Sprintf("%s|fzf %s --bind 'ctrl-r:reload(%s)'", command, fzfargs, command)
+	cmd := exec.Command("sh", "-c", command+"| fzf "+fzfargs+" --bind 'ctrl-r:reload("+command+")'")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Run()
 }
 
 // LOG FUNCTIONS

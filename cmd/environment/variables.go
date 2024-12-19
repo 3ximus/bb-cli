@@ -10,7 +10,7 @@ import (
 )
 
 var VariablesCmd = &cobra.Command{
-	Use:     "variables",
+	Use:     "variables [environment]",
 	Short:   "List variables for specific environment",
 	Long:    "List variables for specific environment. If variable is secured only *** is displayed",
 	Aliases: []string{"var"},

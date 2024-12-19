@@ -3,6 +3,7 @@ package issue
 import (
 	"bb/api"
 	"bb/util"
+	"os"
 	"regexp"
 	"strings"
 
@@ -31,6 +32,13 @@ var ListCmd = &cobra.Command{
 		showUsers, _ := cmd.Flags().GetBool("users")
 		showTime, _ := cmd.Flags().GetBool("time")
 		showParents, _ := cmd.Flags().GetBool("parent")
+
+		useFZF, _ := cmd.Flags().GetBool("fzf")
+		useFZFInternal, _ := cmd.Flags().GetBool("fzf-internal")
+		if useFZF {
+			util.ReplaceListWithFzf("--ansi --reverse --height 40% --read0 --prompt 'View > ' --info-command 'echo -e $FZF_POS/$FZF_INFO' --info inline --bind 'enter:become(" + os.Args[0] + " issue view {2})' --bind 'ctrl-w:become(" + os.Args[0] + " issue view --web {2})'")
+			return
+		}
 
 		project := ""
 		if len(args) == 0 {
@@ -76,26 +84,32 @@ var ListCmd = &cobra.Command{
 			if issue.Fields.TimeTracking.TimeSpent != " " {
 				timeSpent = issue.Fields.TimeTracking.TimeSpent
 			}
-			util.Printf("%s \033[1;32m%s\033[m %s %s %s\n", util.FormatIssueStatus(issue.Fields.Status.Name), issue.Key, util.FormatIssueType(issue.Fields.Type.Name), issue.Fields.Summary, util.FormatIssuePriority(issue.Fields.Priority.Id))
+			util.Printf("%s \033[1;32m%s\033[m %s %s %s", util.FormatIssueStatus(issue.Fields.Status.Name), issue.Key, util.FormatIssueType(issue.Fields.Type.Name), issue.Fields.Summary, util.FormatIssuePriority(issue.Fields.Priority.Id))
 			if showParents {
 				if issue.Fields.Parent.Fields.Summary != "" {
-					util.Printf("    \033[37mParent:\033[m %s %s (\033[37m%s\033[m)\n", util.FormatIssueType(issue.Fields.Parent.Fields.Type.Name), issue.Fields.Parent.Fields.Summary, issue.Fields.Parent.Key)
+					util.Printf("\n    \033[37mParent:\033[m %s %s (\033[37m%s\033[m)", util.FormatIssueType(issue.Fields.Parent.Fields.Type.Name), issue.Fields.Parent.Fields.Summary, issue.Fields.Parent.Key)
 				} else {
-					util.Printf("    \033[37mParent: ---\n")
+					util.Printf("\n    \033[37mParent: ---")
 				}
 			}
 			if showUsers {
 				if all {
-					util.Printf("    \033[37mAssigned: \033[1m%s\033[0;37m -> Reporter: \033[1;36m%s\033[m \033[m\033[37m(%d comments)\033[m\n", issue.Fields.Assignee.DisplayName, issue.Fields.Reporter.DisplayName, issue.Fields.Comment.Total)
+					util.Printf("\n    \033[37mAssigned: \033[1m%s\033[0;37m -> Reporter: \033[1;36m%s\033[m \033[m\033[37m(%d comments)\033[m", issue.Fields.Assignee.DisplayName, issue.Fields.Reporter.DisplayName, issue.Fields.Comment.Total)
 				} else if reporter {
-					util.Printf("    \033[37mAssigned: \033[1m%s \033[m\033[37m(%d comments)\033[m\n", issue.Fields.Assignee.DisplayName, issue.Fields.Comment.Total)
+					util.Printf("\n    \033[37mAssigned: \033[1m%s \033[m\033[37m(%d comments)\033[m", issue.Fields.Assignee.DisplayName, issue.Fields.Comment.Total)
 				} else {
-					util.Printf("    \033[37mReporter: \033[1m%s \033[m\033[37m(%d comments)\033[m\n", issue.Fields.Reporter.DisplayName, issue.Fields.Comment.Total)
+					util.Printf("\n    \033[37mReporter: \033[1m%s \033[m\033[37m(%d comments)\033[m", issue.Fields.Reporter.DisplayName, issue.Fields.Comment.Total)
 				}
 			}
 			if showTime {
-				util.Printf("    \033[37mTime spent: \033[1;34m%s\033[m [ %s/%s ]\n", timeSpent, issue.Fields.TimeTracking.RemainingEstimate, issue.Fields.TimeTracking.OriginalEstimate)
+				util.Printf("\n    \033[37mTime spent: \033[1;34m%s\033[m [ %s/%s ]", timeSpent, issue.Fields.TimeTracking.RemainingEstimate, issue.Fields.TimeTracking.OriginalEstimate)
 			}
+
+			endChar := "\n"
+			if useFZFInternal {
+				endChar = "\x00"
+			}
+			util.Printf(endChar)
 		}
 	},
 }
@@ -119,6 +133,12 @@ func init() {
 	ListCmd.Flags().IntP("number-results", "n", 99, "max number of results retrieve")
 	// sort
 	ListCmd.Flags().BoolP("priority", "P", false, "sort by priority")
+
+	if util.CommandExists("fzf") {
+		ListCmd.Flags().Bool("fzf", false, "use fzf interface on results")
+		ListCmd.Flags().Bool("fzf-internal", false, "use fzf interface on results")
+		ListCmd.Flags().MarkHidden("fzf-internal")
+	}
 }
 
 func statusCompletion(comd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {

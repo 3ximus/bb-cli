@@ -5,6 +5,7 @@ import (
 	"bb/util"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -34,7 +35,7 @@ var ViewCmd = &cobra.Command{
 			}
 			id = pipeline.BuildNumber
 		} else {
-			id, err = strconv.Atoi(args[0])
+			id, err = strconv.Atoi(strings.Trim(args[0], "#"))
 			cobra.CheckErr(err)
 		}
 
