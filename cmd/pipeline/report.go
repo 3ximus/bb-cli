@@ -65,9 +65,15 @@ var ReportCmd = &cobra.Command{
 		report := <-api.GetPipelineReport(repo, fmt.Sprintf("%d", id), selected.UUID)
 		fmt.Println("Test report:")
 		fmt.Printf("\033[1;32mPassed:  %3d\033[m\n", report.Success)
-		fmt.Printf("\033[1;31mFailed:  %3d\033[m\n", report.Failed)
-		fmt.Printf("\033[1;33mSkipped: %3d\033[m\n", report.Skipped)
-		fmt.Printf("Error:   %3d\n", report.Error)
+		if report.Failed != 0 {
+			fmt.Printf("\033[1;31mFailed:  %3d\033[m\n", report.Failed)
+		}
+		if report.Skipped != 0 {
+			fmt.Printf("\033[1;33mSkipped: %3d\033[m\n", report.Skipped)
+		}
+		if report.Error != 0 {
+			fmt.Printf("Error:   %3d\n", report.Error)
+		}
 		fmt.Printf("Total:   %3d\n", report.Total)
 
 		if !showShort {
