@@ -22,7 +22,13 @@ var ListCmd = &cobra.Command{
 		useFZF, _ := cmd.Flags().GetBool("fzf")
 		useFZFInternal, _ := cmd.Flags().GetBool("fzf-internal")
 		if useFZF {
-			util.ReplaceListWithFzf("--ansi --reverse --height 40% --read0 --prompt 'View > ' --info-command 'echo -e $FZF_POS/$FZF_INFO' --info inline --bind 'enter:become(" + os.Args[0] + " pipeline view -R "+viper.GetString("repo")+" {2})' --bind 'ctrl-w:become(" + os.Args[0] + " pipeline view -R "+viper.GetString("repo")+" --web {2})'")
+			util.ReplaceListWithFzf("--read0 --prompt 'View > '" +
+				" --header='\033[1;33mctrl-w\033[m: web view | \033[1;33mctrl-e\033[m: view report | \033[1;33mctrl-l\033[m: view logs'" +
+				" --preview '" + os.Args[0] + " pipeline -R " + viper.GetString("repo") + " view {2} --color' --preview-window=hidden" + // start with hidden preview
+				" --bind 'enter:become(" + os.Args[0] + " pipeline -R " + viper.GetString("repo") + " view {2})'" +
+				" --bind 'ctrl-w:execute(" + os.Args[0] + " pipeline -R " + viper.GetString("repo") + " view --web {2})'" +
+				" --bind 'ctrl-e:execute(" + os.Args[0] + " pipeline -R " + viper.GetString("repo") + " report {2} --color | less -MRix4)'" +
+				" --bind 'ctrl-l:execute(" + os.Args[0] + " pipeline -R " + viper.GetString("repo") + " logs {2} --color | less -MRix4)'")
 			return
 		}
 
@@ -32,7 +38,7 @@ var ListCmd = &cobra.Command{
 			} else {
 				util.Printf("%s", util.FormatPipelineStatus(pipeline.State.Result.Name))
 			}
-			util.Printf(" \033[1;32m#%d\033[m ", pipeline.BuildNumber)
+			util.Printf(" \033[1;32m%d\033[m ", pipeline.BuildNumber)
 			if pipeline.Target.Source != "" {
 				util.Printf("%s \033[1;34m[ %s → %s ]\033[m", pipeline.Target.PullRequest.Title, pipeline.Target.Source, pipeline.Target.Destination)
 			} else {

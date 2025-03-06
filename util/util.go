@@ -251,8 +251,8 @@ func ReplaceListWithFzf(fzfargs string) {
 	}
 	filteredArgs = append(filteredArgs, "--color")
 	command := strings.Join(filteredArgs, " ")
-	fmt.Sprintf("%s|fzf %s --bind 'ctrl-r:reload(%s)'", command, fzfargs, command)
-	cmd := exec.Command("sh", "-c", command+"| fzf "+fzfargs+" --bind 'ctrl-r:reload("+command+")'")
+	defaultParams := "--ansi --reverse --height 40% --info-command 'echo -e $FZF_POS/$FZF_INFO' --info inline --bind='ctrl-/:toggle-preview' "
+	cmd := exec.Command("sh", "-c", command+"| fzf "+defaultParams+fzfargs+" --bind 'ctrl-r:reload("+command+")'")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Run()
