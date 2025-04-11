@@ -10,9 +10,10 @@ import (
 )
 
 var ListCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List environments from a repository",
-	Args:  cobra.NoArgs,
+	Use:     "list",
+	Short:   "List environments from a repository",
+	Aliases: []string{"ls"},
+	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		status, _ := cmd.Flags().GetBool("status")
 		for environment := range api.GetEnvironmentList(viper.GetString("repo"), status) {

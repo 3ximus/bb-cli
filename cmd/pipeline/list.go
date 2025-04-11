@@ -11,9 +11,10 @@ import (
 )
 
 var ListCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List pipelines from a repository",
-	Args:  cobra.NoArgs,
+	Use:     "list",
+	Short:   "List pipelines from a repository",
+	Aliases: []string{"ls"},
+	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		nResults, _ := cmd.Flags().GetInt("number-results")
 		showAuthor, _ := cmd.Flags().GetBool("author")

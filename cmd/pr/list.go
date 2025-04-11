@@ -11,9 +11,10 @@ import (
 )
 
 var ListCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List pull requests from a repository",
-	Args:  cobra.NoArgs,
+	Use:     "list",
+	Short:   "List pull requests from a repository",
+	Aliases: []string{"ls"},
+	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		author, _ := cmd.Flags().GetString("author")
 		search, _ := cmd.Flags().GetString("search")
@@ -74,4 +75,3 @@ func init() {
 func stateCompletion(comd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 	return []string{"open", "merged", "declined", "superseded"}, cobra.ShellCompDirectiveDefault
 }
-

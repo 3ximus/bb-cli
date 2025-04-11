@@ -12,8 +12,9 @@ import (
 )
 
 var ListCmd = &cobra.Command{
-	Use:   "list [ PROJECT-KEY | all ]",
-	Short: "List issues",
+	Use:     "list [ PROJECT-KEY ]",
+	Short:   "List issues",
+	Aliases: []string{"ls"},
 	Long: `List issues from Jira with preset filtering.
 	By default it filters tickets assigned to the current user and it tries to gess the current project from the current branch name.
 	Given an argument it will filter tickets from that project. Otherwise it will try to derive the project name from the branch name.
