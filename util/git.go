@@ -17,7 +17,7 @@ func GetCurrentRepo() string {
 		return ""
 	}
 	// remotePattern, err := regexp.Compile(`git@github.com:([^\.]*/[^\.]*).git`)
-	remotePattern, err := regexp.Compile(`git@bitbucket.org:([^\.]*/[^\.]*).git`)
+	remotePattern, err := regexp.Compile(`git@bitbucket.org:([^\.]*/[^\.]*)(.git)?`)
 	if err != nil {
 		return ""
 	}
