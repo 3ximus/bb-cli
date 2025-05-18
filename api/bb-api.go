@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -48,7 +49,7 @@ func bbApiRangedGet(endpoint string, dataRange string) []byte {
 	resp, err := client.Do(req)
 	cobra.CheckErr(err)
 
-	if resp.StatusCode == 404 {
+	if resp.StatusCode == http.StatusNotFound {
 		var errResponse ErrorResponse
 		body, err := io.ReadAll(resp.Body)
 		cobra.CheckErr(err)
@@ -67,6 +68,31 @@ func bbApiRangedGet(endpoint string, dataRange string) []byte {
 	cobra.CheckErr(err)
 
 	return body
+}
+
+func bbApiDownloadFile(endpoint string, filepath string) error {
+	url := fmt.Sprintf("%s/%s", viper.GetString("bb_api"), endpoint)
+
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", url, nil)
+	cobra.CheckErr(err)
+	req.SetBasicAuth(viper.GetString("username"), viper.GetString("bb_token"))
+
+	resp, err := client.Do(req)
+	cobra.CheckErr(err)
+	defer resp.Body.Close()
+
+	out, err := os.Create(filepath)
+	cobra.CheckErr(err)
+	defer out.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("File not found")
+	}
+
+	_, err = io.Copy(out, resp.Body)
+	cobra.CheckErr(err)
+	return nil
 }
 
 func _bbApiPostPut(method string, endpoint string, body io.Reader) []byte {
@@ -555,4 +581,30 @@ func GetEnvironmentVariables(repository string, envName string) <-chan Environme
 		}
 	}()
 	return channel
+}
+
+func GetDownloadsList(repository string) <-chan DowloadItem {
+	channel := make(chan DowloadItem)
+	go func() {
+		defer close(channel)
+		var downloadListResponse BBPaginatedResponse[DowloadItem]
+		response := bbApiGet(fmt.Sprintf("repositories/%s/downloads", repository))
+		err := json.Unmarshal(response, &downloadListResponse)
+		cobra.CheckErr(err)
+		for _, downloadItem := range downloadListResponse.Values {
+			channel <- downloadItem
+		}
+	}()
+	return channel
+}
+
+func GetDownloadItem(repository string, item string, filepath string) (string, error) {
+	if filepath == "" {
+		filepath = item
+	}
+	return filepath, bbApiDownloadFile(fmt.Sprintf("repositories/%s/downloads/%s", repository, item), filepath)
+}
+
+func DeleteDownloadItem(repository string, item string) {
+	bbApiDelete(fmt.Sprintf("repositories/%s/downloads/%s", repository, item))
 }

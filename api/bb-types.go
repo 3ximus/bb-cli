@@ -222,6 +222,13 @@ type EnvironmentVariable struct {
 	Secured bool   `json:"secured"`
 }
 
+type DowloadItem struct {
+	Name      string
+	Size      int
+	Downloads int
+	CreatedOn time.Time `json:"created_on"`
+}
+
 // DEFAULT ACTIONS OVERRIDES
 
 // String is used both by fmt.Print and by Cobra in help text

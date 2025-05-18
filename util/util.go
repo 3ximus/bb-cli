@@ -159,6 +159,16 @@ func ConvertToSeconds(timeStrings []string) (int, error) {
 	return seconds, nil
 }
 
+func FormatBytes(bytes int) string {
+	b := float64(bytes)
+	if b >= 1024*1024 {
+		return fmt.Sprintf("%.2fM", b/(1024*1024))
+	} else if b >= 1024 {
+		return fmt.Sprintf("%.2fK", b/1024)
+	}
+	return fmt.Sprintf("%dB", bytes) // less than 1KB, show in bytes
+}
+
 // EXTERNAL OPTIONS
 
 func OpenInBrowser(url string) {

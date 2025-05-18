@@ -7,6 +7,7 @@ import (
 	"bb/cmd/issue"
 	"bb/cmd/pipeline"
 	"bb/cmd/pr"
+	"bb/cmd/downloads"
 	"bb/store"
 	"os"
 
@@ -42,6 +43,7 @@ func init() {
 	RootCmd.AddCommand(environment.EnvironmentCmd)
 	RootCmd.AddCommand(issue.IssueCmd)
 	RootCmd.AddCommand(pipeline.PipelineCmd)
+	RootCmd.AddCommand(downloads.DownloadsCmd)
 	RootCmd.AddCommand(doc.DocCmd)
 }
 
