@@ -22,7 +22,7 @@ var ListCmd = &cobra.Command{
 				" --header='\033[1;33mctrl-g\033[m: get file | \033[1;33mctrl-d\033[m: delete file'" +
 				" --bind 'enter:become(" + os.Args[0] + " downloads -R " + viper.GetString("repo") + " get {2})'" +
 				" --bind 'ctrl-g:execute(" + os.Args[0] + " downloads -R " + viper.GetString("repo") + " get {2})'" +
-				" --bind 'ctrl-e:execute(" + os.Args[0] + " downloads -R " + viper.GetString("repo") + " delete {2}")
+				" --bind 'ctrl-e:execute(" + os.Args[0] + " downloads -R " + viper.GetString("repo") + " delete {2})'")
 			return
 		}
 
