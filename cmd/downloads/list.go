@@ -28,7 +28,7 @@ var ListCmd = &cobra.Command{
 
 		count := 0
 		for downloadItem := range api.GetDownloadsList(viper.GetString("repo")) {
-			util.Printf("\033[1;33m%s\033[m  %s  \033[37m(%s)\033[m", util.FormatBytes(downloadItem.Size), downloadItem.Name, util.TimeAgo(downloadItem.CreatedOn))
+			util.Printf("\033[1;33m%s\033[m  %s  \033[37m(downloaded %d times, uploaded %s)\033[m", util.FormatBytes(downloadItem.Size), downloadItem.Name, downloadItem.Downloads, util.TimeAgo(downloadItem.CreatedOn))
 
 			endChar := "\n"
 			if useFZFInternal {
