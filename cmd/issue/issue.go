@@ -32,6 +32,7 @@ func init() {
 	IssueCmd.AddCommand(AssignCmd)
 	IssueCmd.AddCommand(LogCmd)
 	IssueCmd.AddCommand(EstimateCmd)
+	IssueCmd.AddCommand(PriorityCmd)
 	IssueCmd.PersistentFlags().StringP("repo", "R", "", "selected repository")
 	IssueCmd.PersistentFlags().StringP("domain", "D", "", "your jira domain ( XXXX in https://XXXX.atlassian.net)")
 }

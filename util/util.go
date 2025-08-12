@@ -224,7 +224,7 @@ func UseExternalFZF[T any](list []T, prompt string, toString func(int) string) [
 	for i := range list {
 		input += fmt.Sprintf("%d %s\n", i, toString(i))
 	}
-	cmd := exec.Command("fzf", "-m", "--height", "20%", "--reverse", "--with-nth", "2..", "--prompt", prompt)
+	cmd := exec.Command("fzf", "-m", "--height", "20%", "--ansi", "--reverse", "--with-nth", "2..", "--prompt", prompt)
 	var selectionBuffer strings.Builder
 	cmd.Stdin = strings.NewReader(input)
 	cmd.Stdout = &selectionBuffer

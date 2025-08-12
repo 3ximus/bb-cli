@@ -218,7 +218,7 @@ func GetPrList(
 			if i == 0 {
 				response = bbApiGet(fmt.Sprintf("repositories/%s/pullrequests?sort=-id%s&q=%s", repository, participantsExpansion, url.QueryEscape(stateQuery+authorQuery+searchQuery+sourceQuery+destinationQuery)))
 			} else {
-				newUrl := strings.Replace(prevResponse.Next, "https://api.bitbucket.org/2.0/", "", 1)
+				newUrl := strings.Replace(prevResponse.Next, viper.GetString("bb_api")+"/", "", 1)
 				if newUrl == "" {
 					break // there's no next page
 				}

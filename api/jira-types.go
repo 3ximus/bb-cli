@@ -73,6 +73,9 @@ type UpdateIssueRequestBody struct {
 		// This on might be enough when set on project
 		TimeTracking *TimeTracking `json:"timetracking,omitempty"`
 		Summary      string        `json:"summary,omitempty"`
+		Priority     struct {
+			Id string `json:"id,omitempty"`
+		} `json:"priority,omitempty"`
 	} `json:"fields,omitempty"`
 	Update struct {
 		TimeTracking []UpdateType[TimeTracking] `json:"timetracking,omitempty"`

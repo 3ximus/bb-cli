@@ -209,7 +209,7 @@ func PostWorklog(key string, seconds int) {
 func UpdateIssue(key string, data UpdateIssueRequestBody) JiraIssue {
 	content, err := json.Marshal(data)
 	cobra.CheckErr(err)
-	fmt.Println(string(content))
+	// fmt.Println(string(content))
 	response := jiraApiPut(fmt.Sprintf("/issue/%s?returnIssue=true", key), bytes.NewReader(content))
 	var issue JiraIssue
 	err = json.Unmarshal(response, &issue)
