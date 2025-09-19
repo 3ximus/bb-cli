@@ -30,6 +30,7 @@ var ListCmd = &cobra.Command{
 		statuses, _ := cmd.Flags().GetStringArray("status")
 		iTypes, _ := cmd.Flags().GetStringArray("type")
 		priority, _ := cmd.Flags().GetBool("priority")
+		lastWorked, _ := cmd.Flags().GetBool("last")
 		showUsers, _ := cmd.Flags().GetBool("users")
 		showTime, _ := cmd.Flags().GetBool("time")
 		showParents, _ := cmd.Flags().GetBool("parent")
@@ -86,7 +87,7 @@ var ListCmd = &cobra.Command{
 			}
 		}
 
-		for issue := range api.GetIssueList(nResults, all, reporter, project, statusConversion, typeConversion, search, priority) {
+		for issue := range api.GetIssueList(nResults, all, reporter, project, statusConversion, typeConversion, search, priority, lastWorked) {
 			timeSpent := "-"
 			if issue.Fields.TimeTracking.TimeSpent != " " {
 				timeSpent = issue.Fields.TimeTracking.TimeSpent
@@ -138,6 +139,7 @@ func init() {
 	ListCmd.Flags().BoolP("time", "t", false, "show time information")
 	ListCmd.Flags().BoolP("parent", "p", false, "show parent tickets")
 	ListCmd.Flags().IntP("number-results", "n", 99, "max number of results retrieve")
+	ListCmd.Flags().BoolP("last", "l", false, "display tickets where status was changed by current user. sorted by last updated")
 	// sort
 	ListCmd.Flags().BoolP("priority", "P", false, "sort by priority")
 

@@ -99,7 +99,7 @@ func GetIssue(key string) <-chan JiraIssue {
 	return channel
 }
 
-func GetIssueList(nResults int, all bool, reporter bool, project string, statuses []string, types []string, searchTerm string, prioritySort bool) <-chan JiraIssue {
+func GetIssueList(nResults int, all bool, reporter bool, project string, statuses []string, types []string, searchTerm string, prioritySort bool, lastWorked bool) <-chan JiraIssue {
 	channel := make(chan JiraIssue)
 	go func() {
 		defer close(channel)
@@ -151,8 +151,16 @@ func GetIssueList(nResults int, all bool, reporter bool, project string, statuse
 			}
 			query += ")"
 		}
+		if lastWorked {
+			if query != "" {
+				query += "+AND+"
+			}
+			query += "status+changed+by+currentuser()"
+		}
 		if prioritySort {
 			query += "+order+by+priority+desc,status+asc"
+		} else if lastWorked {
+			query += "+order+by+updated+desc"
 		} else {
 			query += "+order+by+status+asc,priority+desc"
 		}
