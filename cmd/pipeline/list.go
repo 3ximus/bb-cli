@@ -47,7 +47,7 @@ var ListCmd = &cobra.Command{
 				util.Printf("\033[1;34m[ %s ]\033[m", pipeline.Target.RefName)
 			}
 
-			util.Printf(" \033[37m%s (%s)\033[m", util.TimeDuration(time.Duration(pipeline.DurationInSeconds*1000000000)), util.TimeAgo(pipeline.CreatedOn))
+			util.Printf(" \033[37m%s (%s)\033[m", util.TimeDuration(time.Duration(pipeline.DurationInSeconds*1e9)), util.TimeAgo(pipeline.CreatedOn))
 
 			if showAuthor {
 				util.Printf("\n        \033[33m%s\033[m \033[37mTrigger: %s\033[m", pipeline.Author.DisplayName, pipeline.Trigger.Name) //  \033[37mComments: %d\033[m",

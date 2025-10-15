@@ -75,7 +75,7 @@ var LogCmd = &cobra.Command{
 		newWorklog := api.PostWorklog(user, issueId, seconds, timeStartWorklog)
 		newStartTime, err := time.Parse(time.RFC3339, newWorklog.StartDateTimeUtc)
 		cobra.CheckErr(err)
-		fmt.Printf("Logged time for %s  |  \033[1;34m%s\033[m +\033[1;32m%ds\033[m\n", key, newStartTime.Local().Format("15:04"), newWorklog.TimeSpentSeconds)
+		fmt.Printf("Logged time for %s  |  \033[1;34m%s\033[m +\033[1;32m%s\033[m\n", key, newStartTime.Local().Format("15:04"), util.TimeDuration(time.Duration(newWorklog.TimeSpentSeconds*1e9)))
 
 		if transition {
 			// select new state

@@ -1,7 +1,6 @@
 package api
 
 type Worklog struct {
-	JiraWorklogID  int `json:"jiraWorklogId"`
 	TempoWorklogID int `json:"tempoWorklogId"`
 	Issue          struct {
 		// Key string `json:"key"`

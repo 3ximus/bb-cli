@@ -3,11 +3,12 @@ package cmd
 import (
 	"bb/cmd/auth"
 	"bb/cmd/doc"
+	"bb/cmd/downloads"
 	"bb/cmd/environment"
 	"bb/cmd/issue"
 	"bb/cmd/pipeline"
 	"bb/cmd/pr"
-	"bb/cmd/downloads"
+	"bb/cmd/tempo"
 	"bb/store"
 	"os"
 
@@ -42,6 +43,7 @@ func init() {
 	RootCmd.AddCommand(pr.PrCmd)
 	RootCmd.AddCommand(environment.EnvironmentCmd)
 	RootCmd.AddCommand(issue.IssueCmd)
+	RootCmd.AddCommand(tempo.TempoCmd)
 	RootCmd.AddCommand(pipeline.PipelineCmd)
 	RootCmd.AddCommand(downloads.DownloadsCmd)
 	RootCmd.AddCommand(doc.DocCmd)
