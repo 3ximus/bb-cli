@@ -39,11 +39,12 @@ var ListCmd = &cobra.Command{
 		useFZFInternal, _ := cmd.Flags().GetBool("fzf-internal")
 		if useFZF {
 			util.ReplaceListWithFzf("--read0 --prompt 'View > '" +
-				" --header='\033[1;33mctrl-w\033[m: web view | \033[1;33mctrl-t\033[m: transition issue | \033[1;33mctrl-p\033[m: set priority'" +
+				" --header='\033[1;33mctrl-w\033[m: web view | \033[1;33mctrl-t\033[m: transition issue | \033[1;33mctrl-p\033[m: set priority | \033[1;33mctrl-l\033[m: log time'" +
 				" --preview '" + os.Args[0] + " issue view {2} --color' --preview-window=hidden" + // start with hidden preview
 				" --bind 'enter:become(" + os.Args[0] + " issue view {2})'" +
 				" --bind 'ctrl-w:execute(" + os.Args[0] + " issue view --web {2})'" +
 				" --bind 'ctrl-t:execute(" + os.Args[0] + " issue transition {2})'" +
+				" --bind 'ctrl-l:execute(" + os.Args[0] + " issue log {2})'" +
 				" --bind 'ctrl-p:execute(" + os.Args[0] + " issue priority {2})'")
 			return
 		}
