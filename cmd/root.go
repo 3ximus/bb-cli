@@ -68,4 +68,5 @@ func initConfig() {
 	cobra.CheckErr(err)
 
 	viper.SetDefault("bb_api", "https://api.bitbucket.org/2.0")
+	viper.SetDefault("tempo_api", "https://api.tempo.io/4")
 }

@@ -2,7 +2,14 @@ package api
 
 const JiraIssueKeyRegex = "[A-Z][A-Z0-9_]*-\\d+"
 
+type Myself struct {
+	AccountID   string `json:"accountId"`
+	DisplayName string `json:"displayName"`
+	Email       string `json:"emailAddress"`
+}
+
 type JiraIssue struct {
+	ID     string
 	Key    string `json:"key"`
 	Fields struct {
 		Summary string

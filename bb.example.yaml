@@ -5,6 +5,10 @@ include_branch_name: true
 jira_domain: xxxxxxxxx
 email: xxxxxxxxxxxxxxxxxxxxxxxxxxx
 jira_token: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+max_hours_per_day: 8
+day_start_hour: 9 # 24h format
+
+tempo_token: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 pr_status:
   open:

@@ -60,11 +60,11 @@ var ViewCmd = &cobra.Command{
 		fmt.Println()
 		for _, step := range <-stepsChannel {
 			if step.State.Result.Name != "" {
-				fmt.Printf("%s %s \033[37m%s\033[m", step.Name, util.FormatPipelineStatus(step.State.Result.Name), util.TimeDuration(time.Duration(step.DurationInSeconds*1000000000)))
+				fmt.Printf("%s %s \033[37m%s\033[m", step.Name, util.FormatPipelineStatus(step.State.Result.Name), util.TimeDuration(time.Duration(step.DurationInSeconds*1e9)))
 			} else if step.State.Stage.Name != "" {
-				fmt.Printf("%s %s \033[37m%s\033[m", step.Name, util.FormatPipelineStatus(step.State.Stage.Name), util.TimeDuration(time.Duration(step.DurationInSeconds*1000000000)))
+				fmt.Printf("%s %s \033[37m%s\033[m", step.Name, util.FormatPipelineStatus(step.State.Stage.Name), util.TimeDuration(time.Duration(step.DurationInSeconds*1e9)))
 			} else {
-				fmt.Printf("%s %s \033[37m%s\033[m", step.Name, util.FormatPipelineStatus(step.State.Name), util.TimeDuration(time.Duration(step.DurationInSeconds*1000000000)))
+				fmt.Printf("%s %s \033[37m%s\033[m", step.Name, util.FormatPipelineStatus(step.State.Name), util.TimeDuration(time.Duration(step.DurationInSeconds*1e9)))
 			}
 			fmt.Println()
 			if showCommands {

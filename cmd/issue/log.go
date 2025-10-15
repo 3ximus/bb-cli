@@ -3,10 +3,16 @@ package issue
 import (
 	"bb/api"
 	"bb/util"
+	"bufio"
 	"fmt"
+	"os"
 	"regexp"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var LogCmd = &cobra.Command{
@@ -35,11 +41,41 @@ var LogCmd = &cobra.Command{
 			key = args[0]
 		}
 
-		seconds, err := util.ConvertToSeconds(args[1:])
+		var seconds int
+		var err error
+		if len(args) == 2 {
+			seconds, err = util.ConvertToSeconds(args[1:])
+		} else {
+			fmt.Print("? \033[1;35mLog time \033[m")
+			scanner := bufio.NewScanner(os.Stdin)
+			scanner.Scan()
+			seconds, err = util.ConvertToSeconds(strings.Split(scanner.Text(), " "))
+		}
 		cobra.CheckErr(err)
 
-		api.PostWorklog(key, seconds)
-		fmt.Printf("Logged time for %s +\033[1;32m%d\033[m\n", key, seconds)
+		user := api.GetMyself()
+		issueChan := api.GetIssue(key)
+
+		// list today's worklogs
+		now := time.Now().UTC()
+		start := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+		end := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 999000000, time.UTC)
+
+		timeStartWorklog := time.Date(now.Year(), now.Month(), now.Day(), viper.GetInt("day_start_hour"), 0, 0, 0, time.Local)
+		for _, w := range api.ListWorklogs(user, start, end) {
+			startTime, err := time.Parse(time.RFC3339, w.StartDateTimeUtc)
+			cobra.CheckErr(err)
+			lastWorklog := startTime.Local().Add(time.Duration(w.TimeSpentSeconds * 1e9))
+			if lastWorklog.After(timeStartWorklog) {
+				timeStartWorklog = lastWorklog
+			}
+		}
+		issueId, err := strconv.Atoi((<-issueChan).ID)
+		cobra.CheckErr(err)
+		newWorklog := api.PostWorklog(user, issueId, seconds, timeStartWorklog)
+		newStartTime, err := time.Parse(time.RFC3339, newWorklog.StartDateTimeUtc)
+		cobra.CheckErr(err)
+		fmt.Printf("Logged time for %s  |  \033[1;34m%s\033[m +\033[1;32m%ds\033[m\n", key, newStartTime.Local().Format("15:04"), newWorklog.TimeSpentSeconds)
 
 		if transition {
 			// select new state

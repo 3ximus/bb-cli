@@ -9,7 +9,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -85,6 +84,14 @@ func jiraApiPut(endpoint string, body io.Reader) []byte {
 }
 
 // HIGH LEVEL METHODS
+
+func GetMyself() Myself {
+	body := jiraApiGet("/myself")
+	var user Myself
+	err := json.Unmarshal(body, &user)
+	cobra.CheckErr(err)
+	return user
+}
 
 func GetIssue(key string) <-chan JiraIssue {
 	channel := make(chan JiraIssue)
@@ -198,20 +205,6 @@ func PostTransitions(key string, transition string) {
 	content, err := json.Marshal(transitionDTO)
 	cobra.CheckErr(err)
 	jiraApiPost(fmt.Sprintf("/issue/%s/transitions", key), bytes.NewReader(content))
-}
-
-// Post worklog in seconds and set start time to seconds before current time
-func PostWorklog(key string, seconds int) {
-	var worklogDTO = struct {
-		// TODO add a Started field that's the current time - seconds
-		TimeSpent int    `json:"timeSpentSeconds"`
-		Started   string `json:"started"`
-	}{}
-	worklogDTO.TimeSpent = seconds
-	worklogDTO.Started = time.Now().Add(time.Duration(-seconds) * time.Second).Format(time.RFC3339)
-	content, err := json.Marshal(worklogDTO)
-	cobra.CheckErr(err)
-	jiraApiPost(fmt.Sprintf("/issue/%s/worklog", key), bytes.NewReader(content))
 }
 
 func UpdateIssue(key string, data UpdateIssueRequestBody) JiraIssue {
