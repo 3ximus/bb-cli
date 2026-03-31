@@ -3,7 +3,9 @@ package pipeline
 import (
 	"bb/api"
 	"bb/util"
+	"bufio"
 	"fmt"
+	"os"
 	"regexp"
 
 	"github.com/spf13/cobra"
@@ -40,9 +42,9 @@ var VariablesCmd = &cobra.Command{
 		if len(setVars) == 0 && len(deleteVars) == 0 && len(setSecureVars) == 0 {
 			for _, variable := range variables {
 				if variable.Secured {
-					util.Printf("%s = \033[37m***\033[m", variable.Key)
+					util.Printf("%s=\033[37m***\033[m", variable.Key)
 				} else {
-					util.Printf("%s = \033[37m%s\033[m", variable.Key, variable.Value)
+					util.Printf("%s=\033[37m%s\033[m", variable.Key, variable.Value)
 				}
 				fmt.Println()
 			}
@@ -52,32 +54,47 @@ var VariablesCmd = &cobra.Command{
 
 func init() {
 	VariablesCmd.Flags().StringArrayP("set", "s", []string{}, `set one or multiple variables. If the variable doesn't exist one is created.
-	Variables must be in the format KEY=VALUE`)
+	Variables must be in the format KEY=VALUE. If '-' is provided, variables are read from stdin.`)
 	VariablesCmd.Flags().StringArrayP("set-secure", "S", []string{}, `set one or multiple secure variables. If the variable doesn't exist one is created.
-	Variables must be in the format KEY=VALUE`)
+	Variables must be in the format KEY=VALUE. If '-' is provided, variables are read from stdin.`)
 	VariablesCmd.Flags().StringArrayP("delete", "d", []string{}, "delete one or multiple variables")
 }
 
 func upsertVariables(repo string, setVars []string, variables []api.EnvironmentVariable, secure bool) {
 	varRegex := regexp.MustCompile(`([^=]+)=(.*)`)
-	if len(setVars) > 0 {
-		for _, v := range setVars {
-			keyVal := varRegex.FindStringSubmatch(v)
-			if len(keyVal) != 3 {
-				cobra.CheckErr(fmt.Sprintf("Variable \"%s\" must be in the format \"KEY=VALUE\"", v))
+
+	process := func(v string) {
+		keyVal := varRegex.FindStringSubmatch(v)
+		if len(keyVal) != 3 {
+			cobra.CheckErr(fmt.Sprintf("Variable \"%s\" must be in the format \"KEY=VALUE\"", v))
+		}
+		updated := false
+		for _, ev := range variables {
+			if ev.Key == keyVal[1] {
+				updatedVar := <-api.UpdatePipelineVariable(repo, ev.UUID, keyVal[1], keyVal[2], secure)
+				util.Printf("\033[1;34mUpdated\033[m \"%s=%s\"\n", updatedVar.Key, updatedVar.Value)
+				updated = true
+				break
 			}
-			updated := false
-			for _, ev := range variables {
-				if ev.Key == keyVal[1] {
-					updatedVar := <-api.UpdatePipelineVariable(repo, ev.UUID, keyVal[1], keyVal[2], secure)
-					util.Printf("\033[1;34mUpdated\033[m \"%s=%s\"\n", updatedVar.Key, updatedVar.Value)
-					updated = true
-					break
+		}
+		if !updated {
+			createdVar := <-api.CreatePipelineVariable(repo, keyVal[1], keyVal[2], secure)
+			util.Printf("\033[1;32mCreated\033[m \"%s=%s\"\n", createdVar.Key, createdVar.Value)
+		}
+	}
+
+	if len(setVars) > 0 {
+		if len(setVars) == 1 && setVars[0] == "-" {
+			scanner := bufio.NewScanner(os.Stdin)
+			for scanner.Scan() {
+				line := scanner.Text()
+				if line != "" {
+					process(line)
 				}
 			}
-			if !updated {
-				createdVar := <-api.CreatePipelineVariable(repo, keyVal[1], keyVal[2], secure)
-				util.Printf("\033[1;32mCreated\033[m \"%s=%s\"\n", createdVar.Key, createdVar.Value)
+		} else {
+			for _, v := range setVars {
+				process(v)
 			}
 		}
 	}

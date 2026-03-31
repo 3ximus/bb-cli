@@ -583,6 +583,59 @@ func GetEnvironmentVariables(repository string, envName string) <-chan Environme
 	return channel
 }
 
+func CreateEnvironmentVariable(repository string, envUUID string, key string, value string, secure bool) <-chan EnvironmentVariable {
+	channel := make(chan EnvironmentVariable)
+	go func() {
+		defer close(channel)
+		body := EnvironmentVariable{
+			Key:     key,
+			Value:   value,
+			Secured: secure,
+		}
+		content, err := json.Marshal(body)
+		cobra.CheckErr(err)
+		response := bbApiPost(fmt.Sprintf("repositories/%s/deployments_config/environments/%s/variables", repository, envUUID), bytes.NewReader(content))
+		var newVar EnvironmentVariable
+		err = json.Unmarshal(response, &newVar)
+		cobra.CheckErr(err)
+		channel <- newVar
+	}()
+	return channel
+}
+
+func UpdateEnvironmentVariable(repository string, envUUID string, varUUID string, key string, value string, secure bool) <-chan EnvironmentVariable {
+	channel := make(chan EnvironmentVariable)
+	go func() {
+		defer close(channel)
+		body := EnvironmentVariable{
+			Key:     key,
+			Value:   value,
+			Secured: secure,
+		}
+		content, err := json.Marshal(body)
+		cobra.CheckErr(err)
+		response := bbApiPut(fmt.Sprintf("repositories/%s/deployments_config/environments/%s/variables/%s", repository, envUUID, varUUID), bytes.NewReader(content))
+		var newVar EnvironmentVariable
+		err = json.Unmarshal(response, &newVar)
+		cobra.CheckErr(err)
+		channel <- newVar
+	}()
+	return channel
+}
+
+func DeleteEnvironmentVariable(repository string, envUUID string, varUUID string) {
+	bbApiDelete(fmt.Sprintf("repositories/%s/deployments_config/environments/%s/variables/%s", repository, envUUID, varUUID))
+}
+
+func GetEnvironment(repository string, name string) *Environment {
+	for env := range GetEnvironmentList(repository, false) {
+		if env.Name == name {
+			return &env
+		}
+	}
+	return nil
+}
+
 func GetDownloadsList(repository string) <-chan DowloadItem {
 	channel := make(chan DowloadItem)
 	go func() {
